@@ -1,4 +1,4 @@
-# AgendTurnos — Glow Dental Protect
+# Agendamiento de turnos — Glow Dental Protect
 
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect** (Asunción, Paraguay).
 
