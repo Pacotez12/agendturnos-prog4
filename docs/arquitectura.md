@@ -39,6 +39,9 @@ Historia clínica, facturación y contabilidad, inventario, gestión de varias s
 | Framework | Laravel 13 (PHP 8.4) | ✅ |
 | Base de datos | PostgreSQL 16 | ✅ |
 | Sesiones, caché y colas | Redis 7 (`phpredis`) | ✅ |
+| Vistas | Blade + Blade Components | 🚧 |
+| Estilos | Tailwind CSS 4 (compilado con Vite) | 🚧 |
+| Interactividad | Alpine.js | ⏳ |
 | Servidor web, arquitectura A | Nginx + PHP-FPM | ✅ |
 | Servidor web, arquitectura B | Apache + mod_php | ⏳ |
 | Balanceador | HAProxy (stats en puerto 8404) | ⏳ |
@@ -196,6 +199,7 @@ stateDiagram-v2
 | FK compuesta hacia `profesional_servicio` | La base impide reservar un servicio que el profesional no ofrece. |
 | Monolito MVC en capas, sin repositorios | Un solo proyecto, menos piezas que mantener. La lógica de negocio vive en servicios; Eloquent es la capa de datos. |
 | Envío de correos por cola | Mandar un correo no debe demorar la respuesta al usuario. |
+| Blade + Tailwind + Alpine.js, sin SPA | El frontend lo genera Laravel en el servidor (la "V" del MVC). Alpine.js agrega interacción (menús, modales, selección de horarios) escribiendo atributos dentro del mismo HTML, sin un proyecto ni una API aparte. |
 | Mailpit en desarrollo | Permite probar correos sin enviar nada real. |
 
 ## 8. Despliegue
@@ -262,4 +266,5 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 | 2026-10-02 | Diseño del modelo de datos corregido (SCRUM-25). |
 | 2026-10-09 | Creación de este documento. |
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
+| 2026-10-13 | Stack de frontend definido: Blade + Tailwind CSS 4 + Alpine.js (Vite). |
 | 2026-10-13 | Reparto de tickets por bloques (configuración del sistema / ciclo del turno); nuevas tareas SCRUM-38 (layout) y SCRUM-39 (especialidades). Convención de ramas `feat/SCRUM-<n>-...`. |
