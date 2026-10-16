@@ -14,12 +14,13 @@ return new class extends Migration
             $table->foreignId('especialidad_id')->constrained('especialidades')->restrictOnDelete();
             $table->string('nombre', 100);
             $table->smallInteger('duracion_min');
-            $table->decimal('precio', 10, 2)->nullable();
+            $table->unsignedInteger('precio')->nullable();
             $table->boolean('activo')->default(true);
             $table->timestamps();
         });
 
         DB::statement('ALTER TABLE servicios ADD CONSTRAINT servicios_duracion_check CHECK (duracion_min > 0)');
+        DB::statement('ALTER TABLE servicios ADD CONSTRAINT servicios_precio_check CHECK (precio IS NULL OR precio >= 0)');
     }
 
     public function down(): void
@@ -27,4 +28,3 @@ return new class extends Migration
         Schema::dropIfExists('servicios');
     }
 };
-
