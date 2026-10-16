@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('turno_id')->constrained('turnos')->restrictOnDelete();
             $table->string('estado_anterior', 20)->nullable();
             $table->string('estado_nuevo', 20);
-            $table->foreignId('usuario_id')->constrained('users')->restrictOnDelete();
+            $table->foreignId('usuario_id')->nullable()->constrained('users')->restrictOnDelete();
             $table->timestampTz('created_at')->useCurrent();
         });
 
