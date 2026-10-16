@@ -13,10 +13,15 @@ class TurnoIntegridadTest extends TestCase
     use RefreshDatabase;
 
     private int $profesionalAnaId;
+
     private int $profesionalLuciaId;
+
     private int $pacienteId;
+
     private int $servicioConsultaId;
+
     private int $servicioLimpiezaId;
+
     private int $consultorioId;
 
     protected function setUp(): void
@@ -116,5 +121,34 @@ class TurnoIntegridadTest extends TestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+    }
+
+    public function test_historial_sin_usuario_pasa(): void
+    {
+        // Cambios automáticos (p. ej. el scheduler marcando ausente) no tienen usuario
+        $this->crearTurno('2026-10-22 10:00:00-03', '2026-10-22 10:30:00-03');
+
+        DB::table('historial_turnos')->insert([
+            'turno_id' => DB::table('turnos')->value('id'),
+            'estado_anterior' => 'confirmado',
+            'estado_nuevo' => 'ausente',
+            'usuario_id' => null,
+        ]);
+
+        $this->assertSame(1, DB::table('historial_turnos')->whereNull('usuario_id')->count());
+    }
+
+    public function test_precio_en_guaranies_se_guarda_como_entero(): void
+    {
+        DB::table('servicios')->where('id', $this->servicioConsultaId)->update(['precio' => 150000]);
+
+        $this->assertSame(150000, DB::table('servicios')->where('id', $this->servicioConsultaId)->value('precio'));
+    }
+
+    public function test_precio_negativo_falla(): void
+    {
+        $this->expectException(QueryException::class);
+
+        DB::table('servicios')->where('id', $this->servicioConsultaId)->update(['precio' => -1]);
     }
 }
