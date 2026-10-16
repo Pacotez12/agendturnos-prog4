@@ -3,7 +3,7 @@
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect**, Asunción, Paraguay.
 
 > Documento vivo: se actualiza a medida que avanza el desarrollo. Cada sección indica su estado: ✅ hecho · 🚧 en curso · ⏳ pendiente.
-> Última actualización: 2026-10-13.
+> Última actualización: 2026-10-16.
 
 ---
 
@@ -110,9 +110,9 @@ flowchart LR
 - **Failover:** si un nodo no responde en `/up`, HAProxy lo marca DOWN y manda todo el tráfico al otro. Cuando el nodo vuelve, pasa a UP solo.
 - **Benchmarking:** se mide RPS y latencia (p50, p95 y p99) de A, de B y del conjunto balanceado.
 
-## 5. Modelo de datos 🚧
+## 5. Modelo de datos ✅
 
-Al terminar las migraciones se publica el detalle en `docs/der.md`, `docs/diccionario-datos.md` y `docs/normalizacion.md`.
+Migraciones, seeders y tests de integridad implementados (SCRUM-25). Pendiente: modelos Eloquent con relaciones, Enums y factories, y el detalle en `docs/der.md`, `docs/diccionario-datos.md` y `docs/normalizacion.md`.
 
 ```mermaid
 erDiagram
@@ -141,13 +141,13 @@ erDiagram
 | `pacientes` | `nombre`, `apellido`, `tipo_documento`, `documento`, `telefono`, `fecha_nacimiento`, `user_id` (nullable), `responsable_id` (nullable) | Único `(tipo_documento, documento)`; `user_id` único |
 | `profesionales` | `nombre`, `apellido`, `matricula`, `user_id` | `user_id` único |
 | `especialidades` | `nombre`, `activa` | `nombre` único |
-| `servicios` | `nombre`, `duracion_min`, `precio`, `activo`, `especialidad_id` | `duracion_min > 0` |
+| `servicios` | `nombre`, `duracion_min`, `precio` (entero, guaraníes), `activo`, `especialidad_id` | `duracion_min > 0`; `precio >= 0` |
 | `profesional_servicio` | Qué servicios ofrece cada profesional | Clave compuesta `(profesional_id, servicio_id)` |
 | `consultorios` | `nombre`, `direccion`, `telefono`, `activo` | Una fila hoy; escalable a sucursales |
 | `disponibilidad` | Franjas semanales: `dia_semana`, `hora_inicio`, `hora_fin`, profesional y consultorio | `dia_semana` 1–7 (ISO, 1 = lunes); `hora_fin > hora_inicio` |
 | `bloqueos` | Ausencias puntuales: `inicio`, `fin`, `motivo`, profesional, consultorio opcional | `fin > inicio`; sin consultorio = no atiende en ningún lugar |
 | `turnos` | `inicio`, `fin` (`timestamptz`), `estado`, `observaciones`, `motivo_cancelacion`, paciente, profesional, servicio, consultorio | Ver reglas abajo |
-| `historial_turnos` | `estado_anterior`, `estado_nuevo`, usuario que hizo el cambio, fecha | — |
+| `historial_turnos` | `estado_anterior`, `estado_nuevo`, usuario que hizo el cambio (nulo en cambios automáticos), fecha | — |
 | `notificaciones` | `tipo`, `canal`, `estado`, `enviado_at`, destinatario, turno opcional | Ver reglas abajo |
 
 **Pacientes y cuentas.** Un paciente puede no tener cuenta propia: un menor se asocia a un responsable (`responsable_id`), y recepción puede registrar a quien pide turno por teléfono. Por eso los turnos referencian a `pacientes` y no a `users`.
@@ -266,5 +266,6 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 | 2026-10-02 | Diseño del modelo de datos corregido (SCRUM-25). |
 | 2026-10-09 | Creación de este documento. |
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
+| 2026-10-16 | Modelo de datos implementado: 15 migraciones con sus restricciones, seeders y 11 tests de integridad en PostgreSQL (SCRUM-25, `77a3a45`). |
 | 2026-10-13 | Stack de frontend definido: Blade + Tailwind CSS 4 + Alpine.js (Vite). |
 | 2026-10-13 | Reparto de tickets por bloques (configuración del sistema / ciclo del turno); nuevas tareas SCRUM-38 (layout) y SCRUM-39 (especialidades). Convención de ramas `feat/SCRUM-<n>-...`. |
