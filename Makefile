@@ -1,4 +1,4 @@
-.PHONY: up down build sh artisan migrate fresh logs
+.PHONY: up down build sh artisan migrate fresh logs portainer-build
 
 up:
 	docker compose up -d
@@ -23,3 +23,8 @@ fresh:
 
 logs:
 	docker compose logs -f
+
+# Imagenes con tag fijo para el stack de Portainer (docker-compose.portainer.yml)
+portainer-build:
+	docker build -t agendturnos-app:latest -f docker/php-fpm/Dockerfile .
+	docker build -t agendturnos-web:latest -f docker/nginx/Dockerfile .

@@ -1,0 +1,77 @@
+# Stack para Portainer CE: usa imagenes preconstruidas (make portainer-build)
+# y ruta absoluta del host, porque Portainer CE no admite build ni bind mounts relativos.
+name: agendturnos
+
+services:
+  # ---------------------------------------------------------------------------
+  # Arquitectura A: PHP-FPM 8.4 + Nginx
+  # (Estructura preparada para sumar Arquitectura B: Apache + mod_php y HAProxy)
+  # ---------------------------------------------------------------------------
+  app:
+    image: agendturnos-app:latest
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ${PROJECT_PATH:-/run/desktop/mnt/host/c/Users/julit/agendturnos-prog4}:/var/www/html:z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    image: agendturnos-web:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ${PROJECT_PATH:-/run/desktop/mnt/host/c/Users/julit/agendturnos-prog4}:/var/www/html:ro,z
+    depends_on:
+      - app
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-agendturnos}
+      POSTGRES_USER: ${DB_USERNAME:-agendturnos}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-agendturnos}
+    ports:
+      - "${DB_PORT_FORWARD:-5436}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-agendturnos} -d ${DB_DATABASE:-agendturnos}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT_FORWARD:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8025/api/v1/info || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
