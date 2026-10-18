@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Paciente;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -12,7 +12,7 @@ class RegistroPacienteTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_usuario_puede_registrarse_exitosamente()
+    public function test_usuario_puede_registrarse_exitosamente(): void
     {
         $response = $this->post('/registro', [
             'nombre' => 'Juan',
@@ -45,7 +45,7 @@ class RegistroPacienteTest extends TestCase
         ]);
     }
 
-    public function test_correo_electronico_ya_registrado_falla()
+    public function test_correo_electronico_ya_registrado_falla(): void
     {
         User::factory()->create([
             'email' => 'existente@example.com',
@@ -65,7 +65,7 @@ class RegistroPacienteTest extends TestCase
         $response->assertSessionHasErrors('email');
     }
 
-    public function test_documento_repetido_falla_y_no_crea_usuario()
+    public function test_documento_repetido_falla_y_no_crea_usuario(): void
     {
         $userExistente = User::factory()->create();
         Paciente::create([
@@ -94,7 +94,7 @@ class RegistroPacienteTest extends TestCase
         ]);
     }
 
-    public function test_contrasena_queda_hasheada()
+    public function test_contrasena_queda_hasheada(): void
     {
         $this->post('/registro', [
             'nombre' => 'Ana',
@@ -108,13 +108,13 @@ class RegistroPacienteTest extends TestCase
         ]);
 
         $user = User::where('email', 'ana@example.com')->first();
-        
+
         $this->assertNotNull($user);
         $this->assertFalse($user->password === 'secreta123');
         $this->assertTrue(Hash::check('secreta123', $user->password));
     }
 
-    public function test_confirmacion_contrasena_no_coincide_falla()
+    public function test_confirmacion_contrasena_no_coincide_falla(): void
     {
         $response = $this->post('/registro', [
             'nombre' => 'Laura',
@@ -130,7 +130,7 @@ class RegistroPacienteTest extends TestCase
         $response->assertSessionHasErrors('password');
     }
 
-    public function test_fecha_nacimiento_futura_falla()
+    public function test_fecha_nacimiento_futura_falla(): void
     {
         $response = $this->post('/registro', [
             'nombre' => 'Bebé',
@@ -146,7 +146,7 @@ class RegistroPacienteTest extends TestCase
         $response->assertSessionHasErrors('fecha_nacimiento');
     }
 
-    public function test_usuario_logueado_es_redirigido_si_entra_a_registro()
+    public function test_usuario_logueado_es_redirigido_si_entra_a_registro(): void
     {
         $user = User::factory()->create();
 
