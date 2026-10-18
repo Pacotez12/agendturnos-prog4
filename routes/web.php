@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\RegistroController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
