@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\RolUsuario;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -25,7 +26,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'rol' => 'paciente',
+            'rol' => RolUsuario::Paciente,
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
@@ -40,6 +41,27 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function paciente(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => RolUsuario::Paciente,
+        ]);
+    }
+
+    public function profesional(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => RolUsuario::Profesional,
+        ]);
+    }
+
+    public function funcionario(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => RolUsuario::Funcionario,
         ]);
     }
 }
