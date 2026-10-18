@@ -3,7 +3,7 @@
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect**, Asunción, Paraguay.
 
 > Documento vivo: se actualiza a medida que avanza el desarrollo. Cada sección indica su estado: ✅ hecho · 🚧 en curso · ⏳ pendiente.
-> Última actualización: 2026-10-16.
+> Última actualización: 2026-10-18.
 
 ---
 
@@ -64,7 +64,7 @@ Flujo de una petición: ruta → FormRequest → Controller → Service → Mode
 
 ### 4.1 Entorno de desarrollo actual ✅
 
-Cinco contenedores en la red interna `agendturnos_default`. Entre ellos se comunican por el nombre del servicio.
+Seis contenedores en la red interna `agendturnos_default`. Entre ellos se comunican por el nombre del servicio.
 
 ```mermaid
 flowchart LR
@@ -74,6 +74,7 @@ flowchart LR
     A -- "redis:6379" --> R[(redis<br/>Redis 7)]
     A -- "SMTP mailpit:1025" --> M[mailpit]
     B -- "localhost:8025" --> M
+    N[node<br/>Vite] -- "public/build" --> W
 ```
 
 | Servicio | Imagen | Puerto interno | Puerto en el host | Función |
@@ -83,6 +84,7 @@ flowchart LR
 | `db` | `postgres:16-alpine` | 5432 | **5436** | Base `agendturnos` |
 | `redis` | `redis:7-alpine` | 6379 | **6379** | Sesiones, caché y colas |
 | `mailpit` | `axllent/mailpit` | 1025 / 8025 | **8025** | Atrapa los correos de desarrollo |
+| `node` | `node:24-alpine` | — | — | Compila Tailwind y Alpine.js con Vite (`npm run build -- --watch`) hacia `public/build` |
 
 **Recorrido de una petición:** el navegador llama a `web:80`. Nginx sirve el archivo si existe en `public/`; si no, deriva a `index.php`, que va a `app:9000` por FastCGI. Laravel consulta `db` y lee o escribe la sesión en `redis`.
 
@@ -266,6 +268,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 | 2026-10-02 | Diseño del modelo de datos corregido (SCRUM-25). |
 | 2026-10-09 | Creación de este documento. |
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
+| 2026-10-18 | Registro de pacientes (SCRUM-11). Contenedor `node` que compila los assets con Vite, sin Node en la máquina. |
 | 2026-10-16 | Modelo de datos implementado: 15 migraciones con sus restricciones, seeders y 11 tests de integridad en PostgreSQL (SCRUM-25, `77a3a45`). |
 | 2026-10-13 | Stack de frontend definido: Blade + Tailwind CSS 4 + Alpine.js (Vite). |
 | 2026-10-13 | Reparto de tickets por bloques (configuración del sistema / ciclo del turno); nuevas tareas SCRUM-38 (layout) y SCRUM-39 (especialidades). Convención de ramas `feat/SCRUM-<n>-...`. |
