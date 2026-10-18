@@ -34,6 +34,19 @@ services:
     depends_on:
       - app
 
+  # Compila los assets del frontend (Tailwind + Alpine via Vite) y los
+  # recompila al guardar. Nadie necesita Node instalado en su maquina.
+  node:
+    image: node:24-alpine
+    restart: unless-stopped
+    user: "1000:1000"
+    working_dir: /var/www/html
+    environment:
+      npm_config_cache: /tmp/.npm
+    command: sh -c "npm install && npm run build -- --watch"
+    volumes:
+      - .:/var/www/html:z
+
   db:
     image: postgres:16-alpine
     restart: unless-stopped

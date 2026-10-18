@@ -18,6 +18,8 @@ Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect*
 4. Correr migraciones: `make migrate`
 5. Acceder en `http://localhost:8080` (Mailpit: `http://localhost:8025`).
 
+Los estilos y el JavaScript (Tailwind y Alpine.js, compilados con Vite) los compila el contenedor `node` al levantar el entorno, y los vuelve a compilar cada vez que se guarda un archivo. No hace falta tener Node instalado. Si una vista muestra `Vite manifest not found`, esperar a que termine la primera compilación (`docker compose logs -f node`) o correr `make assets`.
+
 ## Despliegue en Portainer
 
 Portainer CE no soporta `build:` ni bind mounts relativos, por eso el Stack usa `docker-compose.portainer.yml`: imágenes preconstruidas y la ruta absoluta del proyecto.
