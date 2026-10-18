@@ -15,7 +15,6 @@ class RegistroController extends Controller
 
     public function __construct(RegistroPacienteService $registroService)
     {
-        $this->middleware('guest');
         $this->registroService = $registroService;
     }
 
