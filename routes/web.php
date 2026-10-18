@@ -15,4 +15,4 @@ Route::middleware('guest')->group(function () {
 // Ruta temporal para evitar errores en la redirección post-registro si aún no existe la vista de inicio del paciente
 Route::get('/inicio', function () {
     return 'Bienvenido al panel del paciente';
-})->name('paciente.inicio');
+})->middleware('auth')->name('paciente.inicio');
