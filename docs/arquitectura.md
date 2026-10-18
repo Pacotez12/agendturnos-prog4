@@ -114,7 +114,7 @@ flowchart LR
 
 ## 5. Modelo de datos ✅
 
-Migraciones, seeders y tests de integridad implementados (SCRUM-25). Pendiente: modelos Eloquent con relaciones, Enums y factories, y el detalle en `docs/der.md`, `docs/diccionario-datos.md` y `docs/normalizacion.md`.
+Migraciones, seeders y tests de integridad (SCRUM-25); modelos Eloquent con relaciones, Enums (`RolUsuario`, `EstadoTurno`, `EstadoNotificacion`) y factories (SCRUM-40). Pendiente: el detalle en `docs/der.md`, `docs/diccionario-datos.md` y `docs/normalizacion.md`.
 
 ```mermaid
 erDiagram
@@ -268,6 +268,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 | 2026-10-02 | Diseño del modelo de datos corregido (SCRUM-25). |
 | 2026-10-09 | Creación de este documento. |
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
+| 2026-10-18 | Modelos Eloquent, Enums y factories para todas las tablas (SCRUM-40). |
 | 2026-10-18 | Registro de pacientes (SCRUM-11). Contenedor `node` que compila los assets con Vite, sin Node en la máquina. |
 | 2026-10-16 | Modelo de datos implementado: 15 migraciones con sus restricciones, seeders y 11 tests de integridad en PostgreSQL (SCRUM-25, `77a3a45`). |
 | 2026-10-13 | Stack de frontend definido: Blade + Tailwind CSS 4 + Alpine.js (Vite). |
