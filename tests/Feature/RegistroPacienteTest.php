@@ -34,7 +34,10 @@ class RegistroPacienteTest extends TestCase
             'rol' => 'paciente',
         ]);
 
+        $user = User::where('email', 'juan.perez@example.com')->first();
+
         $this->assertDatabaseHas('pacientes', [
+            'user_id' => $user->id,
             'nombre' => 'Juan',
             'apellido' => 'Pérez',
             'tipo_documento' => 'CI',
