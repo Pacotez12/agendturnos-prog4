@@ -20,7 +20,7 @@ class ProfesionalSeeder extends Seeder
                 'email' => 'profesional1@glowdental.test',
                 'nombre' => 'Ana',
                 'apellido' => 'González',
-                'matricula' => 'PY-1001',
+                'matricula' => '1234',
                 'servicios' => [
                     'Consulta general',
                     'Limpieza dental',
@@ -34,7 +34,7 @@ class ProfesionalSeeder extends Seeder
                 'email' => 'profesional2@glowdental.test',
                 'nombre' => 'Gloria',
                 'apellido' => 'Godoy',
-                'matricula' => 'PY-1002',
+                'matricula' => '1824',
                 'servicios' => [
                     'Consulta general',
                     'Blanqueamiento',

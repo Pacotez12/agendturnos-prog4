@@ -24,7 +24,7 @@ class ServiciosPorProfesionalTest extends TestCase
         $profesional = Profesional::factory()->create([
             'nombre' => 'Ana',
             'apellido' => 'González',
-            'matricula' => 'PY-1001',
+            'matricula' => '1234',
         ]);
         $esp = Especialidad::factory()->create(['activa' => true]);
         $servicios = Servicio::factory()->count(2)->create(['especialidad_id' => $esp->id, 'activo' => true]);
@@ -34,7 +34,7 @@ class ServiciosPorProfesionalTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Ana González');
-        $response->assertSee('PY-1001');
+        $response->assertSee('1234');
         $response->assertSee('2'); // cantidad de servicios
         $response->assertSee('Servicios que ofrece');
         $response->assertSee(route('panel.profesionales.servicios', $profesional));

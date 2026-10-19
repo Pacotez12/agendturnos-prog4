@@ -108,6 +108,7 @@ Blade Components en `resources/views/components/`. Ninguna vista repite estilos 
 | `<x-modal>` | Confirmaciones destructivas (cancelar turno); se cierra con Escape y devuelve el foco |
 | `<x-slot-picker>` | Grilla de horarios libres y ocupados (Alpine.js); usada por paciente y operador |
 | `<x-whatsapp-button>` | Botón flotante del lado del paciente |
+| Íconos | Phosphor (`codeat3/blade-phosphor-icons`), `<x-phosphor-nombre class="size-4" aria-hidden="true" />`, nunca emojis |
 | Layouts | `layouts.paciente`, `layouts.panel`, `layouts.invitado` (login, registro, catálogo público) |
 
 ## 6. Interacción y contenido

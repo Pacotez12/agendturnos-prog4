@@ -19,6 +19,14 @@ class ComponentesInteractivosTest extends TestCase
         $viewConNumero->assertSee('¿Dudas? Escribinos');
     }
 
+    public function test_whatsapp_renderiza_svg_dentro_del_enlace(): void
+    {
+        config(['services.whatsapp.numero' => '595971131182']);
+        $html = (string) $this->blade('<x-whatsapp-button />');
+
+        $this->assertMatchesRegularExpression('/<a[^>]*wa\.me[^>]*>\s*<svg/s', $html);
+    }
+
     public function test_slot_picker(): void
     {
         $horarios = [

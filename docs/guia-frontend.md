@@ -89,6 +89,7 @@ return redirect()->route('paciente.turnos')->with('success', 'Tu turno fue solic
 | Lista vacía | `<x-empty-state titulo="…" texto="…">` + botón en el slot |
 | Elegir horario | `<x-slot-picker name="hora" :horarios="[['hora' => '09:00', 'libre' => true], …]" />` |
 | Confirmar algo destructivo | `<x-modal name="cancelar-turno" titulo="¿Cancelar el turno?">…</x-modal>` y para abrirlo: `x-on:click="$dispatch('abrir-modal', 'cancelar-turno')"` |
+| Íconos | `<x-phosphor-nombre class="size-4" aria-hidden="true" />` · [Phosphor Icons](https://phosphoricons.com) |
 
 Si un componente no alcanza, se mejora el componente (con su test en `tests/Feature/ComponentesTest.php`), no se copia el estilo en la vista.
 
@@ -107,7 +108,7 @@ Si un componente no alcanza, se mejora el componente (con su test en `tests/Feat
 - ❌ Tailwind por CDN (`cdn.tailwindcss.com`) ni librerías de UI externas.
 - ❌ Clases armadas con variables: `"bg-{$color}-100"`. Tailwind no las detecta y no se generan. Usá un arreglo con las clases completas (ver `estado-turno.blade.php`).
 - ❌ HTML de formulario a mano cuando existe `<x-input>`, `<x-select>` o `<x-date>`.
-- ❌ Íconos con emojis: usá SVG con `aria-hidden="true"`.
+- ❌ Íconos solo de Phosphor; nunca emojis.
 
 ## 6. Antes de abrir el PR
 
