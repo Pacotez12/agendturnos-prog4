@@ -4,6 +4,70 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --color-brand-700: #7A3F22;
+    --color-brand-600: #995432;
+    --color-brand-300: #D8B78A;
+    --color-brand-100: #F3E6D3;
+    --color-cream-50: #FBF7F2;
+    --color-ink-900: #1F1A17;
+    --color-ink-500: #6B635D;
+    --color-line: #E5E2DE;
+    --color-surface: #F7F6F4;
+    --color-danger-700: #B91C1C;
+
+    --color-estado-solicitado-bg: #FEF3C7;
+    --color-estado-solicitado-fg: #92400E;
+    --color-estado-confirmado-bg: #DBEAFE;
+    --color-estado-confirmado-fg: #1E3A8A;
+    --color-estado-atendido-bg: #DCFCE7;
+    --color-estado-atendido-fg: #166534;
+    --color-estado-cancelado-bg: #FEE2E2;
+    --color-estado-cancelado-fg: #991B1B;
+    --color-estado-ausente-bg: #E5E7EB;
+    --color-estado-ausente-fg: #374151;
+
+    --font-sans: 'Open Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Quicksand', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@utility estado-solicitado-bg {
+    background-color: var(--color-estado-solicitado-bg);
+}
+
+@utility estado-solicitado-fg {
+    color: var(--color-estado-solicitado-fg);
+}
+
+@utility estado-confirmado-bg {
+    background-color: var(--color-estado-confirmado-bg);
+}
+
+@utility estado-confirmado-fg {
+    color: var(--color-estado-confirmado-fg);
+}
+
+@utility estado-atendido-bg {
+    background-color: var(--color-estado-atendido-bg);
+}
+
+@utility estado-atendido-fg {
+    color: var(--color-estado-atendido-fg);
+}
+
+@utility estado-cancelado-bg {
+    background-color: var(--color-estado-cancelado-bg);
+}
+
+@utility estado-cancelado-fg {
+    color: var(--color-estado-cancelado-fg);
+}
+
+@utility estado-ausente-bg {
+    background-color: var(--color-estado-ausente-bg);
+}
+
+@utility estado-ausente-fg {
+    color: var(--color-estado-ausente-fg);
 }
