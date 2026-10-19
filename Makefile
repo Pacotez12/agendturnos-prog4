@@ -1,7 +1,12 @@
-.PHONY: up down build sh artisan migrate fresh logs assets portainer portainer-build
+.PHONY: up scale down build sh artisan migrate fresh logs assets portainer portainer-build
 
 up:
 	docker compose up -d
+
+# Dos nodos app; nginx se reinicia para resolver ambas IPs de "app" y balancear entre ellas
+scale:
+	docker compose up -d --build --scale app=2
+	docker compose restart web
 
 down:
 	docker compose down
