@@ -111,7 +111,7 @@
             </div>
 
             <div class="text-center pt-2">
-                <a href="{{ url('/login') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
+                <a href="{{ route('login') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
                     ¿Ya tenés cuenta? Iniciá sesión
                 </a>
             </div>

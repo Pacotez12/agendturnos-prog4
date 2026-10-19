@@ -28,18 +28,28 @@ class NavegacionTest extends TestCase
 
     public function test_funcionario_incluye_servicios_y_profesional_no(): void
     {
+        Route::get('/panel', fn () => '')->name('panel.inicio');
         Route::get('/agenda', fn () => '')->name('panel.agenda');
         Route::get('/servicios', fn () => '')->name('panel.servicios');
         Route::getRoutes()->refreshNameLookups();
 
         $itemsFuncionario = Navegacion::para(RolUsuario::Funcionario);
         $etiquetasFuncionario = array_column($itemsFuncionario, 'etiqueta');
+        $this->assertContains('Inicio', $etiquetasFuncionario);
         $this->assertContains('Servicios', $etiquetasFuncionario);
         $this->assertContains('Agenda', $etiquetasFuncionario);
 
         $itemsProfesional = Navegacion::para(RolUsuario::Profesional);
         $etiquetasProfesional = array_column($itemsProfesional, 'etiqueta');
+        $this->assertContains('Inicio', $etiquetasProfesional);
         $this->assertNotContains('Servicios', $etiquetasProfesional);
         $this->assertContains('Agenda', $etiquetasProfesional);
+    }
+
+    public function test_inicio_para_devuelve_ruta_segun_rol(): void
+    {
+        $this->assertSame('paciente.inicio', Navegacion::inicioPara(RolUsuario::Paciente));
+        $this->assertSame('panel.inicio', Navegacion::inicioPara(RolUsuario::Profesional));
+        $this->assertSame('panel.inicio', Navegacion::inicioPara(RolUsuario::Funcionario));
     }
 }
