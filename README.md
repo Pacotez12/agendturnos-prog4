@@ -1,5 +1,7 @@
 # Agendamiento de turnos — Glow Dental Protect
 
+![CI](https://github.com/Pacotez12/agendturnos-prog4/actions/workflows/ci.yml/badge.svg)
+
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect** (Asunción, Paraguay).
 
 ## Stack

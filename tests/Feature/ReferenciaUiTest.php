@@ -11,9 +11,18 @@ class ReferenciaUiTest extends TestCase
         putenv('APP_ENV=local');
         $_ENV['APP_ENV'] = 'local';
         $_SERVER['APP_ENV'] = 'local';
-        $this->refreshApplication();
 
-        $response = $this->get('/ui');
+        try {
+            $this->refreshApplication();
+            // La aplicación nueva no hereda el withoutVite() de setUp().
+            $this->withoutVite();
+
+            $response = $this->get('/ui');
+        } finally {
+            putenv('APP_ENV=testing');
+            $_ENV['APP_ENV'] = 'testing';
+            $_SERVER['APP_ENV'] = 'testing';
+        }
 
         $response->assertOk();
         $response->assertSee('Solicitado');
