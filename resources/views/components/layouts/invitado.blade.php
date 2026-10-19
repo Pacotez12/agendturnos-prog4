@@ -8,6 +8,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $titulo ? "{$titulo} · " : '' }}Glow Dental Protect</title>
+    @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-cream-50 font-sans text-ink-900 antialiased flex flex-col">
@@ -16,11 +17,18 @@
             <a href="/" class="inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
                 <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto">
             </a>
-            @if (Route::has('login') && ! auth()->check())
-                <a href="{{ route('login') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg px-3 py-2 min-h-11 inline-flex items-center">
-                    Iniciar sesión
-                </a>
-            @endif
+            <div class="flex items-center gap-2">
+                @if (Route::has('servicios.catalogo'))
+                    <a href="{{ route('servicios.catalogo') }}" class="text-sm font-semibold text-ink-900 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg px-3 py-2 min-h-11 inline-flex items-center">
+                        Servicios
+                    </a>
+                @endif
+                @if (Route::has('login') && ! auth()->check())
+                    <a href="{{ route('login') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg px-3 py-2 min-h-11 inline-flex items-center">
+                        Iniciar sesión
+                    </a>
+                @endif
+            </div>
         </div>
     </header>
 

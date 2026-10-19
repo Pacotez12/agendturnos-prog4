@@ -9,7 +9,7 @@ git pull
 docker compose up -d        # levanta todo, incluido el contenedor node
 ```
 
-- Los estilos se recompilan solos al guardar (contenedor `node`). Si ves `Vite manifest not found`, esperá la primera compilación: `docker compose logs -f node`.
+- Los estilos se recompilan solos al guardar (contenedor `node`). Si cambiás `vite.config.js` o `package.json`, reiniciá el contenedor: `docker compose restart node`. Si ves `Vite manifest not found`, esperá la primera compilación: `docker compose logs -f node`.
 - **Catálogo de componentes en vivo:** http://localhost:8080/ui (solo en local). Mirá ahí cómo se ve cada componente antes de usarlo.
 
 ## 2. Cómo se ve
