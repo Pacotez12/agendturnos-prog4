@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureRol;
+use App\Support\Navegacion;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'rol' => EnsureRol::class,
+        ]);
+
+        $middleware->redirectUsersTo(fn ($request) => route(Navegacion::inicioPara($request->user()->rol)));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

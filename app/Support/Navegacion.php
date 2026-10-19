@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Route;
 
 class Navegacion
 {
+    public static function inicioPara(RolUsuario $rol): string
+    {
+        return match ($rol) {
+            RolUsuario::Paciente => 'paciente.inicio',
+            RolUsuario::Profesional, RolUsuario::Funcionario => 'panel.inicio',
+        };
+    }
+
     /**
      * @return array<int, array{etiqueta: string, ruta: string}>
      */
@@ -21,6 +29,7 @@ class Navegacion
                 ['etiqueta' => 'Mi perfil', 'ruta' => 'paciente.perfil'],
             ],
             RolUsuario::Profesional => [
+                ['etiqueta' => 'Inicio', 'ruta' => 'panel.inicio'],
                 ['etiqueta' => 'Agenda', 'ruta' => 'panel.agenda'],
                 ['etiqueta' => 'Solicitudes', 'ruta' => 'panel.solicitudes'],
                 ['etiqueta' => 'Nuevo turno', 'ruta' => 'panel.turnos.crear'],
@@ -28,6 +37,7 @@ class Navegacion
                 ['etiqueta' => 'Disponibilidad', 'ruta' => 'panel.disponibilidad'],
             ],
             RolUsuario::Funcionario => [
+                ['etiqueta' => 'Inicio', 'ruta' => 'panel.inicio'],
                 ['etiqueta' => 'Agenda', 'ruta' => 'panel.agenda'],
                 ['etiqueta' => 'Solicitudes', 'ruta' => 'panel.solicitudes'],
                 ['etiqueta' => 'Nuevo turno', 'ruta' => 'panel.turnos.crear'],
