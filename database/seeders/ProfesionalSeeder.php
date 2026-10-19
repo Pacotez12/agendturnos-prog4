@@ -19,16 +19,30 @@ class ProfesionalSeeder extends Seeder
             [
                 'email' => 'profesional1@glowdental.test',
                 'nombre' => 'Ana',
-                'apellido' => 'Benítez',
+                'apellido' => 'González',
                 'matricula' => 'PY-1001',
-                'servicios' => ['Consulta general', 'Limpieza dental', 'Empaste', 'Extracción', 'Blanqueamiento'],
+                'servicios' => [
+                    'Consulta general',
+                    'Limpieza dental',
+                    'Empaste',
+                    'Extracción',
+                    'Control infantil',
+                    'Sellantes',
+                ],
             ],
             [
                 'email' => 'profesional2@glowdental.test',
-                'nombre' => 'Lucía',
-                'apellido' => 'Villalba',
+                'nombre' => 'Gloria',
+                'apellido' => 'Godoy',
                 'matricula' => 'PY-1002',
-                'servicios' => ['Tratamiento de conducto', 'Consulta de ortodoncia'],
+                'servicios' => [
+                    'Consulta general',
+                    'Blanqueamiento',
+                    'Tratamiento de conducto',
+                    'Consulta de ortodoncia',
+                    'Prótesis',
+                    'Implantes',
+                ],
             ],
         ];
 
