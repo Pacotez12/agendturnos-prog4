@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\Panel\DisponibilidadController;
 use App\Http\Controllers\Panel\ServicioController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,11 @@ Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
     Route::get('/panel', function () {
         return view('panel.inicio');
     })->name('panel.inicio');
+
+    Route::get('/panel/disponibilidad', [DisponibilidadController::class, 'index'])->name('panel.disponibilidad');
+    Route::put('/panel/disponibilidad/horario', [DisponibilidadController::class, 'guardarHorario'])->name('panel.disponibilidad.horario');
+    Route::post('/panel/disponibilidad/bloqueos', [DisponibilidadController::class, 'guardarBloqueo'])->name('panel.disponibilidad.bloqueos.store');
+    Route::delete('/panel/disponibilidad/bloqueos/{bloqueo}', [DisponibilidadController::class, 'eliminarBloqueo'])->name('panel.disponibilidad.bloqueos.destroy');
 });
 
 if (app()->environment('local')) {

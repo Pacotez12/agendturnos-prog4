@@ -173,7 +173,7 @@ erDiagram
 | Autenticación y usuarios | HU-01, HU-02 | `/registro`, `/login`, `/logout`, `/inicio` (paciente), `/panel` | ✅ |
 | Servicios y especialidades | HU-03 ✅, SCRUM-39 ⏳ | `/servicios` (catálogo público) · `/admin/servicios`, `/admin/especialidades`, `/admin/profesionales/{id}/servicios` | ⏳ |
 | Agendamiento | HU-04, HU-05 | `/turnos/nuevo` y la consulta de horarios libres | ⏳ |
-| Agenda de la profesional | HU-06, HU-07, HU-11, HU-12 | `/agenda`, `/agenda/turnos/{id}`, `/disponibilidad` | ⏳ |
+| Agenda de la profesional | HU-06, HU-07, HU-11 ✅, HU-12 | `/agenda`, `/agenda/turnos/{id}`, `/panel/disponibilidad` | 🚧 |
 | Seguimiento | HU-08 | `/mis-turnos` | ⏳ |
 | Notificaciones | HU-09, HU-10 | — (colas y scheduler) | ⏳ |
 | Salud | — | `/up` (incluida en Laravel; health check de HAProxy) | ✅ |
@@ -203,6 +203,8 @@ stateDiagram-v2
 | Monolito MVC en capas, sin repositorios | Un solo proyecto, menos piezas que mantener. La lógica de negocio vive en servicios; Eloquent es la capa de datos. |
 | Envío de correos por cola | Mandar un correo no debe demorar la respuesta al usuario. |
 | Blade + Tailwind + Alpine.js, sin SPA | El frontend lo genera Laravel en el servidor (la "V" del MVC). Alpine.js agrega interacción (menús, modales, selección de horarios) escribiendo atributos dentro del mismo HTML, sin un proyecto ni una API aparte. |
+| Horarios libres calculados en `DisponibilidadService` | Una sola lógica para el paciente, el operador y la vista previa: inicios cada 15 minutos (configurable), el servicio entra entero en la franja, sin chocar con turnos no cancelados ni bloqueos, y nunca en el pasado. |
+| Conexión a PostgreSQL en `America/Asuncion` | Las fechas sin zona que envía Laravel se interpretan en hora de Asunción, no en UTC del contenedor. |
 | Mailpit en desarrollo | Permite probar correos sin enviar nada real. |
 
 ## 8. Despliegue
@@ -271,6 +273,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
 | 2026-10-18 | Estándar de diseño de interfaz aprobado (`docs/diseno-ui.md`): marca de la clínica, estilo cálido para el paciente y clínico para el panel, agenda por profesional, agendamiento por operador (HU-13) y familiares a cargo. |
 | 2026-10-18 | Modelos Eloquent, Enums y factories para todas las tablas (SCRUM-40). |
+| 2026-10-18 | Disponibilidad horaria (SCRUM-18): horario semanal por profesional, bloqueos con aviso de turnos afectados y vista previa. `DisponibilidadService` (`franjasLibres`, `estaLibre`, `consultorioPara`) con inicios cada `AGENDA_INTERVALO_MINUTOS` (15). La conexión a PostgreSQL usa la zona `America/Asuncion`. |
 | 2026-10-18 | Catálogo público de servicios y administración para recepción (SCRUM-13); columna `descripcion` en `servicios`; datos de ejemplo con las dos profesionales reales y sus especialidades. Corrección: las fuentes de la marca se cargan con `@fonts` en los layouts. |
 | 2026-10-18 | Inicio de sesión y acceso por rol (SCRUM-12): login con límite de 5 intentos por minuto, redirección según el rol, middleware `rol:` y páginas de inicio del paciente y del panel. |
 | 2026-10-18 | Guía para hacer pantallas (`docs/guia-frontend.md`) con capturas, plantilla de PR con checklist de UI y `AGENTS.md` con las reglas del proyecto para asistentes de código. |
