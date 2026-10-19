@@ -1,129 +1,120 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Glow Dental Protect</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-slate-50 text-slate-800 antialiased flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg border border-slate-100">
-        <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-slate-900">
-                Glow Dental Protect
-            </h2>
-            <p class="mt-2 text-center text-sm text-slate-600">
-                Crea tu cuenta de paciente para solicitar turnos
+<x-layouts.invitado titulo="Registro">
+    <div class="max-w-md mx-auto bg-white p-8 rounded-2xl border border-line shadow-xs">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold font-display text-ink-900">
+                Creá tu cuenta de paciente
+            </h1>
+            <p class="mt-1 text-sm text-ink-500">
+                Registrate para solicitar y gestionar tus turnos
             </p>
         </div>
 
-        <form class="mt-8 space-y-4" action="{{ url('/registro') }}" method="POST">
+        <form action="{{ url('/registro') }}" method="POST" class="space-y-4">
             @csrf
 
             <!-- Nombre -->
-            <div>
-                <label for="nombre" class="block text-sm font-medium text-slate-700">Nombre</label>
-                <input id="nombre" name="nombre" type="text" required value="{{ old('nombre') }}"
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                @error('nombre')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-input
+                id="nombre"
+                name="nombre"
+                label="Nombre"
+                type="text"
+                required
+                :value="old('nombre')"
+            />
 
             <!-- Apellido -->
-            <div>
-                <label for="apellido" class="block text-sm font-medium text-slate-700">Apellido</label>
-                <input id="apellido" name="apellido" type="text" required value="{{ old('apellido') }}"
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                @error('apellido')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-input
+                id="apellido"
+                name="apellido"
+                label="Apellido"
+                type="text"
+                required
+                :value="old('apellido')"
+            />
 
             <!-- Tipo de Documento -->
-            <div>
-                <label for="tipo_documento" class="block text-sm font-medium text-slate-700">Tipo de Documento</label>
-                <select id="tipo_documento" name="tipo_documento" required
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white">
-                    <option value="CI" {{ old('tipo_documento') == 'CI' ? 'selected' : '' }}>CI</option>
-                    <option value="pasaporte" {{ old('tipo_documento') == 'pasaporte' ? 'selected' : '' }}>Pasaporte</option>
-                </select>
-                @error('tipo_documento')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-select
+                id="tipo_documento"
+                name="tipo_documento"
+                label="Tipo de Documento"
+                required
+                :options="['CI' => 'CI', 'pasaporte' => 'Pasaporte']"
+                :value="old('tipo_documento')"
+            />
 
             <!-- Número de Documento -->
-            <div>
-                <label for="documento" class="block text-sm font-medium text-slate-700">Número de Documento</label>
-                <input id="documento" name="documento" type="text" required value="{{ old('documento') }}"
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                @error('documento')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-input
+                id="documento"
+                name="documento"
+                label="Número de Documento"
+                type="text"
+                required
+                :value="old('documento')"
+            />
 
             <!-- Fecha de Nacimiento -->
-            <div>
-                <label for="fecha_nacimiento" class="block text-sm font-medium text-slate-700">Fecha de Nacimiento</label>
-                <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" required value="{{ old('fecha_nacimiento') }}"
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                @error('fecha_nacimiento')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-date
+                id="fecha_nacimiento"
+                name="fecha_nacimiento"
+                label="Fecha de Nacimiento"
+                required
+                :value="old('fecha_nacimiento')"
+            />
 
             <!-- Teléfono -->
-            <div>
-                <label for="telefono" class="block text-sm font-medium text-slate-700">Teléfono (Opcional)</label>
-                <input id="telefono" name="telefono" type="text" value="{{ old('telefono') }}"
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                @error('telefono')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-input
+                id="telefono"
+                name="telefono"
+                label="Teléfono (Opcional)"
+                type="text"
+                :value="old('telefono')"
+            />
 
             <!-- Correo Electrónico -->
-            <div>
-                <label for="email" class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
-                <input id="email" name="email" type="email" required value="{{ old('email') }}"
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                @error('email')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-input
+                id="email"
+                name="email"
+                label="Correo Electrónico"
+                type="email"
+                required
+                :value="old('email')"
+            />
 
             <!-- Contraseña -->
-            <div>
-                <label for="password" class="block text-sm font-medium text-slate-700">Contraseña</label>
-                <input id="password" name="password" type="password" required
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                @error('password')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-input
+                id="password"
+                name="password"
+                label="Contraseña"
+                type="password"
+                required
+            />
 
             <!-- Confirmar Contraseña -->
-            <div>
-                <label for="password_confirmation" class="block text-sm font-medium text-slate-700">Confirmar Contraseña</label>
-                <input id="password_confirmation" name="password_confirmation" type="password" required
-                    class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            </div>
+            <x-input
+                id="password_confirmation"
+                name="password_confirmation"
+                label="Confirmar Contraseña"
+                type="password"
+                required
+            />
 
             <!-- Botón de Envío -->
-            <div>
-                <button type="submit"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <div class="pt-2">
+                <x-button
+                    type="submit"
+                    variant="primary"
+                    :pill="true"
+                    class="w-full"
+                >
                     Registrarse
-                </button>
+                </x-button>
             </div>
 
-            <div class="text-center mt-4">
-                <a href="{{ url('/login') }}" class="text-sm text-indigo-600 hover:text-indigo-500">
+            <div class="text-center pt-2">
+                <a href="{{ url('/login') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
                     ¿Ya tenés cuenta? Iniciá sesión
                 </a>
             </div>
         </form>
     </div>
-</body>
-</html>
+</x-layouts.invitado>

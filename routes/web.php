@@ -16,3 +16,9 @@ Route::middleware('guest')->group(function () {
 Route::get('/inicio', function () {
     return 'Bienvenido al panel del paciente';
 })->middleware('auth')->name('paciente.inicio');
+
+if (app()->environment('local')) {
+    Route::get('/ui', function () {
+        return view('ui.componentes');
+    })->name('ui.componentes');
+}
