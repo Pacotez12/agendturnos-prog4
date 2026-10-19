@@ -44,6 +44,19 @@ services:
       redis:
         condition: service_healthy
 
+  # ---------------------------------------------------------------------------
+  # HAProxy: balancea entre A (web) y B (apache). Stats en :8404
+  # ---------------------------------------------------------------------------
+  haproxy:
+    image: agendturnos-haproxy:latest
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+      - "8404:8404"
+    depends_on:
+      - web
+      - apache
+
   db:
     image: postgres:16-alpine
     restart: unless-stopped
