@@ -47,7 +47,7 @@
             <nav class="hidden lg:flex items-center gap-1">
                 @foreach ($navItems as $item)
                     @php
-                        $isActive = request()->routeIs($item['ruta']);
+                        $isActive = request()->routeIs($item['ruta'], $item['ruta'].'.*');
                     @endphp
                     <a
                         href="{{ route($item['ruta']) }}"
@@ -141,7 +141,7 @@
                 <nav class="mt-6 flex flex-col gap-2">
                     @foreach ($navItems as $item)
                         @php
-                            $isActive = request()->routeIs($item['ruta']);
+                            $isActive = request()->routeIs($item['ruta'], $item['ruta'].'.*');
                         @endphp
                         <a
                             href="{{ route($item['ruta']) }}"
