@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegistroController;
+use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\Panel\ServicioController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,6 +24,16 @@ Route::middleware(['auth', 'rol:paciente'])->group(function () {
     Route::get('/inicio', function () {
         return view('paciente.inicio');
     })->name('paciente.inicio');
+});
+
+Route::get('/servicios', [CatalogoController::class, 'index'])->name('servicios.catalogo');
+
+Route::middleware(['auth', 'rol:funcionario'])->prefix('panel/servicios')->group(function () {
+    Route::get('/', [ServicioController::class, 'index'])->name('panel.servicios');
+    Route::get('/crear', [ServicioController::class, 'create'])->name('panel.servicios.create');
+    Route::post('/', [ServicioController::class, 'store'])->name('panel.servicios.store');
+    Route::get('/{servicio}/editar', [ServicioController::class, 'edit'])->name('panel.servicios.edit');
+    Route::put('/{servicio}', [ServicioController::class, 'update'])->name('panel.servicios.update');
 });
 
 Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {

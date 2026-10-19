@@ -18,6 +18,7 @@ class ServicioFactory extends Factory
         return [
             'especialidad_id' => Especialidad::factory(),
             'nombre' => fake()->words(2, true),
+            'descripcion' => fake()->sentence(),
             'duracion_min' => 30,
             'precio' => fake()->numberBetween(50000, 300000),
             'activo' => true,

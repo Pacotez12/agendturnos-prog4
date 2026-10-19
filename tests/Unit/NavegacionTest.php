@@ -19,11 +19,12 @@ class NavegacionTest extends TestCase
 
         $this->assertSame([
             ['etiqueta' => 'Inicio', 'ruta' => 'paciente.inicio'],
+            ['etiqueta' => 'Servicios', 'ruta' => 'servicios.catalogo'],
             ['etiqueta' => 'Mis turnos', 'ruta' => 'paciente.turnos'],
         ], $items);
 
         $etiquetas = array_column($items, 'etiqueta');
-        $this->assertSame(['Inicio', 'Mis turnos'], $etiquetas);
+        $this->assertSame(['Inicio', 'Servicios', 'Mis turnos'], $etiquetas);
     }
 
     public function test_funcionario_incluye_servicios_y_profesional_no(): void

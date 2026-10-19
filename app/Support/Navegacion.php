@@ -23,6 +23,7 @@ class Navegacion
         $definicion = match ($rol) {
             RolUsuario::Paciente => [
                 ['etiqueta' => 'Inicio', 'ruta' => 'paciente.inicio'],
+                ['etiqueta' => 'Servicios', 'ruta' => 'servicios.catalogo'],
                 ['etiqueta' => 'Reservar turno', 'ruta' => 'paciente.reservar'],
                 ['etiqueta' => 'Mis turnos', 'ruta' => 'paciente.turnos'],
                 ['etiqueta' => 'Mi familia', 'ruta' => 'paciente.familia'],

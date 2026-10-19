@@ -17,6 +17,7 @@ class Servicio extends Model
     protected $fillable = [
         'especialidad_id',
         'nombre',
+        'descripcion',
         'duracion_min',
         'precio',
         'activo',
