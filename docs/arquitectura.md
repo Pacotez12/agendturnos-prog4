@@ -3,7 +3,7 @@
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect**, Asunción, Paraguay.
 
 > Documento vivo: se actualiza a medida que avanza el desarrollo. Cada sección indica su estado: ✅ hecho · 🚧 en curso · ⏳ pendiente.
-> Última actualización: 2026-10-18.
+> Última actualización: 2026-10-19.
 > Diseño de interfaz (colores, layouts y componentes): [`docs/diseno-ui.md`](diseno-ui.md).
 
 ---
@@ -171,7 +171,7 @@ erDiagram
 | Módulo | Historias | Rutas previstas | Estado |
 |---|---|---|---|
 | Autenticación y usuarios | HU-01, HU-02 | `/registro`, `/login`, `/logout`, `/inicio` (paciente), `/panel` | ✅ |
-| Servicios y especialidades | HU-03 ✅, SCRUM-39 ⏳ | `/servicios` (catálogo público) · `/admin/servicios`, `/admin/especialidades`, `/admin/profesionales/{id}/servicios` | ⏳ |
+| Servicios y especialidades | HU-03, SCRUM-39 | `/servicios` (catálogo público) · `/panel/servicios`, `/panel/especialidades`, `/panel/profesionales/{id}/servicios` | ✅ |
 | Agendamiento | HU-04, HU-05 | `/turnos/nuevo` y la consulta de horarios libres | ⏳ |
 | Agenda de la profesional | HU-06, HU-07, HU-11 ✅, HU-12 | `/agenda`, `/agenda/turnos/{id}`, `/panel/disponibilidad` | 🚧 |
 | Seguimiento | HU-08 | `/mis-turnos` | ⏳ |
@@ -273,6 +273,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
 | 2026-10-18 | Estándar de diseño de interfaz aprobado (`docs/diseno-ui.md`): marca de la clínica, estilo cálido para el paciente y clínico para el panel, agenda por profesional, agendamiento por operador (HU-13) y familiares a cargo. |
 | 2026-10-18 | Modelos Eloquent, Enums y factories para todas las tablas (SCRUM-40). |
+| 2026-10-19 | Especialidades y servicios por profesional (SCRUM-39): alta, edición y desactivación de especialidades; asignación de servicios a cada profesional, conservando los que tienen turnos y los inactivos. |
 | 2026-10-18 | Disponibilidad horaria (SCRUM-18): horario semanal por profesional, bloqueos con aviso de turnos afectados y vista previa. `DisponibilidadService` (`franjasLibres`, `estaLibre`, `consultorioPara`) con inicios cada `AGENDA_INTERVALO_MINUTOS` (15). La conexión a PostgreSQL usa la zona `America/Asuncion`. |
 | 2026-10-18 | Catálogo público de servicios y administración para recepción (SCRUM-13); columna `descripcion` en `servicios`; datos de ejemplo con las dos profesionales reales y sus especialidades. Corrección: las fuentes de la marca se cargan con `@fonts` en los layouts. |
 | 2026-10-18 | Inicio de sesión y acceso por rol (SCRUM-12): login con límite de 5 intentos por minuto, redirección según el rol, middleware `rol:` y páginas de inicio del paciente y del panel. |

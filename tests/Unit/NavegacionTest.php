@@ -27,23 +27,29 @@ class NavegacionTest extends TestCase
         $this->assertSame(['Inicio', 'Servicios', 'Mis turnos'], $etiquetas);
     }
 
-    public function test_funcionario_incluye_servicios_y_profesional_no(): void
+    public function test_funcionario_incluye_servicios_especialidades_y_profesionales(): void
     {
         Route::get('/panel', fn () => '')->name('panel.inicio');
         Route::get('/agenda', fn () => '')->name('panel.agenda');
         Route::get('/servicios', fn () => '')->name('panel.servicios');
+        Route::get('/especialidades', fn () => '')->name('panel.especialidades');
+        Route::get('/profesionales', fn () => '')->name('panel.profesionales');
         Route::getRoutes()->refreshNameLookups();
 
         $itemsFuncionario = Navegacion::para(RolUsuario::Funcionario);
         $etiquetasFuncionario = array_column($itemsFuncionario, 'etiqueta');
         $this->assertContains('Inicio', $etiquetasFuncionario);
         $this->assertContains('Servicios', $etiquetasFuncionario);
+        $this->assertContains('Especialidades', $etiquetasFuncionario);
+        $this->assertContains('Profesionales', $etiquetasFuncionario);
         $this->assertContains('Agenda', $etiquetasFuncionario);
 
         $itemsProfesional = Navegacion::para(RolUsuario::Profesional);
         $etiquetasProfesional = array_column($itemsProfesional, 'etiqueta');
         $this->assertContains('Inicio', $etiquetasProfesional);
         $this->assertNotContains('Servicios', $etiquetasProfesional);
+        $this->assertNotContains('Especialidades', $etiquetasProfesional);
+        $this->assertNotContains('Profesionales', $etiquetasProfesional);
         $this->assertContains('Agenda', $etiquetasProfesional);
     }
 

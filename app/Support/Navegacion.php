@@ -45,6 +45,8 @@ class Navegacion
                 ['etiqueta' => 'Pacientes', 'ruta' => 'panel.pacientes'],
                 ['etiqueta' => 'Disponibilidad', 'ruta' => 'panel.disponibilidad'],
                 ['etiqueta' => 'Servicios', 'ruta' => 'panel.servicios'],
+                ['etiqueta' => 'Especialidades', 'ruta' => 'panel.especialidades'],
+                ['etiqueta' => 'Profesionales', 'ruta' => 'panel.profesionales'],
             ],
         };
 

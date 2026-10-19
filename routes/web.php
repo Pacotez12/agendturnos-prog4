@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\Panel\DisponibilidadController;
+use App\Http\Controllers\Panel\EspecialidadController;
+use App\Http\Controllers\Panel\ProfesionalController;
 use App\Http\Controllers\Panel\ServicioController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,12 +31,28 @@ Route::middleware(['auth', 'rol:paciente'])->group(function () {
 
 Route::get('/servicios', [CatalogoController::class, 'index'])->name('servicios.catalogo');
 
-Route::middleware(['auth', 'rol:funcionario'])->prefix('panel/servicios')->group(function () {
-    Route::get('/', [ServicioController::class, 'index'])->name('panel.servicios');
-    Route::get('/crear', [ServicioController::class, 'create'])->name('panel.servicios.create');
-    Route::post('/', [ServicioController::class, 'store'])->name('panel.servicios.store');
-    Route::get('/{servicio}/editar', [ServicioController::class, 'edit'])->name('panel.servicios.edit');
-    Route::put('/{servicio}', [ServicioController::class, 'update'])->name('panel.servicios.update');
+Route::middleware(['auth', 'rol:funcionario'])->group(function () {
+    Route::prefix('panel/servicios')->group(function () {
+        Route::get('/', [ServicioController::class, 'index'])->name('panel.servicios');
+        Route::get('/crear', [ServicioController::class, 'create'])->name('panel.servicios.create');
+        Route::post('/', [ServicioController::class, 'store'])->name('panel.servicios.store');
+        Route::get('/{servicio}/editar', [ServicioController::class, 'edit'])->name('panel.servicios.edit');
+        Route::put('/{servicio}', [ServicioController::class, 'update'])->name('panel.servicios.update');
+    });
+
+    Route::prefix('panel/especialidades')->group(function () {
+        Route::get('/', [EspecialidadController::class, 'index'])->name('panel.especialidades');
+        Route::get('/crear', [EspecialidadController::class, 'create'])->name('panel.especialidades.create');
+        Route::post('/', [EspecialidadController::class, 'store'])->name('panel.especialidades.store');
+        Route::get('/{especialidad}/editar', [EspecialidadController::class, 'edit'])->name('panel.especialidades.edit');
+        Route::put('/{especialidad}', [EspecialidadController::class, 'update'])->name('panel.especialidades.update');
+    });
+
+    Route::prefix('panel/profesionales')->group(function () {
+        Route::get('/', [ProfesionalController::class, 'index'])->name('panel.profesionales');
+        Route::get('/{profesional}/servicios', [ProfesionalController::class, 'servicios'])->name('panel.profesionales.servicios');
+        Route::put('/{profesional}/servicios', [ProfesionalController::class, 'updateServicios'])->name('panel.profesionales.servicios.update');
+    });
 });
 
 Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
