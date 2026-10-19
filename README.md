@@ -20,6 +20,13 @@ Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect*
 
 Los estilos y el JavaScript (Tailwind y Alpine.js, compilados con Vite) los compila el contenedor `node` al levantar el entorno, y los vuelve a compilar cada vez que se guarda un archivo. No hace falta tener Node instalado. Si una vista muestra `Vite manifest not found`, esperar a que termine la primera compilación (`docker compose logs -f node`) o correr `make assets`.
 
+## Frontend
+
+- **Estándar de diseño:** [`docs/diseno-ui.md`](docs/diseno-ui.md) (colores de la marca, layouts, componentes).
+- **Cómo hacer una pantalla:** [`docs/guia-frontend.md`](docs/guia-frontend.md), con ejemplos y checklist.
+- **Catálogo en vivo:** http://localhost:8080/ui (solo en entorno local).
+- **Asistentes de código:** las reglas del proyecto están en [`AGENTS.md`](AGENTS.md); `CLAUDE.md` y `GEMINI.md` lo importan.
+
 ## Despliegue en Portainer
 
 Portainer CE no soporta `build:` ni bind mounts relativos, por eso el Stack usa `docker-compose.portainer.yml`: imágenes preconstruidas y la ruta absoluta del proyecto.
