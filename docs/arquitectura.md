@@ -117,7 +117,8 @@ flowchart LR
 - Como la sesión vive en Redis, el usuario no pierde la sesión cuando HAProxy lo cambia de nodo.
 - **Entrada:** http://localhost:8000 (HAProxy). Las arquitecturas siguen accesibles directo en 8080 (A) y 8081 (B) para compararlas. Stats en http://localhost:8404. La cabecera `X-Servidor` de cada respuesta dice qué nodo la atendió (`a_nginx` o `b_apache`).
 - **Algoritmo `roundrobin`:** las peticiones son cortas y parecidas y la sesión vive en Redis, así que no hace falta fijar al usuario a un nodo. `leastconn` conviene con conexiones largas (websockets, descargas), que esta app no tiene.
-- **Health check:** `GET /health` cada 3 s con 5 s de timeout (en Windows, con el código montado, Laravel tarda ~2 s). `/health` responde 200 solo si el nodo llega a PostgreSQL y a Redis. 3 fallos seguidos → DOWN; 2 aciertos → UP.
+- **Health check:** `GET /health` cada 3 s. `/health` responde 200 solo si el nodo llega a PostgreSQL y a Redis. 3 fallos seguidos → DOWN (~10 s con el nodo detenido); 2 aciertos → UP. `timeout check 10s` porque un nodo recién arrancado compila en frío y, con el código montado desde Windows, tarda hasta ~5 s; un nodo detenido falla antes, por `timeout connect 1s`.
+- **OPcache:** `opcache.revalidate_freq = 2` (antes 0). Con 0, PHP revisaba la fecha de cada archivo en cada petición, lo que sobre el montaje de Windows llevaba `/health` a ~1,8 s; con 2 baja a ~0,2 s. En desarrollo, un cambio en el código se ve a los 2 s como máximo.
 - **Failover:** si un nodo deja de responder, HAProxy lo marca DOWN y manda todo el tráfico al otro. Cuando el nodo vuelve, pasa a UP solo. Mientras detecta la caída, `option redispatch` reintenta en el otro nodo las conexiones fallidas, así que el usuario no ve errores. HAProxy re-resuelve los nombres con el DNS de Docker: si el contenedor vuelve con otra IP, la toma.
 - **Benchmarking:** se mide RPS y latencia (p50, p95 y p99) de A, de B y del conjunto balanceado.
 
@@ -275,7 +276,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
-| 2026-10-19 | HAProxy (SCRUM-30): balanceo `roundrobin` entre A y B en el puerto 8000, health check contra `/health` (antes `/up`; ahora verifica PostgreSQL y Redis), `option redispatch`, Stats en el 8404 y cabecera `X-Servidor`. Incluido en el Stack de Portainer. |
+| 2026-10-19 | HAProxy (SCRUM-30): balanceo `roundrobin` entre A y B en el puerto 8000, health check contra `/health` (antes `/up`; ahora verifica PostgreSQL y Redis), `option redispatch`, Stats en el 8404 y cabecera `X-Servidor`. Incluido en el Stack de Portainer. `opcache.revalidate_freq` de 0 a 2 (`/health` de ~1,8 s a ~0,2 s). |
 | 2026-10-19 | Arquitectura B (SCRUM-29): servicio `apache` (Apache + mod_php, PHP 8.4 con las mismas extensiones y `php.ini` que A) en el puerto 8081. Comparte código, base y Redis con A, así que la sesión iniciada en un servidor sirve en el otro. También en el Stack de Portainer. |
 | 2026-10-02 | Repositorio creado. Entorno Docker base: Laravel 13, PostgreSQL 16, Redis 7, Nginx + PHP-FPM y Mailpit (`cefc8f7`). |
 | 2026-10-02 | Diseño del modelo de datos corregido (SCRUM-25). |
