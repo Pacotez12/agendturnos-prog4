@@ -4,6 +4,7 @@ Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect*
 
 > Documento vivo: se actualiza a medida que avanza el desarrollo. Cada sección indica su estado: ✅ hecho · 🚧 en curso · ⏳ pendiente.
 > Última actualización: 2026-10-18.
+> Diseño de interfaz (colores, layouts y componentes): [`docs/diseno-ui.md`](diseno-ui.md).
 
 ---
 
@@ -268,6 +269,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 | 2026-10-02 | Diseño del modelo de datos corregido (SCRUM-25). |
 | 2026-10-09 | Creación de este documento. |
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
+| 2026-10-18 | Estándar de diseño de interfaz aprobado (`docs/diseno-ui.md`): marca de la clínica, estilo cálido para el paciente y clínico para el panel, agenda por profesional, agendamiento por operador (HU-13) y familiares a cargo. |
 | 2026-10-18 | Modelos Eloquent, Enums y factories para todas las tablas (SCRUM-40). |
 | 2026-10-18 | Registro de pacientes (SCRUM-11). Contenedor `node` que compila los assets con Vite, sin Node en la máquina. |
 | 2026-10-16 | Modelo de datos implementado: 15 migraciones con sus restricciones, seeders y 11 tests de integridad en PostgreSQL (SCRUM-25, `77a3a45`). |
