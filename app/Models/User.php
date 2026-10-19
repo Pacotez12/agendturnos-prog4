@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\RolUsuario;
+use App\Notifications\RestablecerContrasena;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -47,5 +48,10 @@ class User extends Authenticatable
     public function dependientes(): HasMany
     {
         return $this->hasMany(Paciente::class, 'responsable_id');
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new RestablecerContrasena($token));
     }
 }

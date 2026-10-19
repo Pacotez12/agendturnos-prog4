@@ -39,8 +39,8 @@
                 required
             />
 
-            <!-- Recordarme -->
-            <div class="flex items-center">
+            <!-- Recordarme y Olvidé mi contraseña -->
+            <div class="flex items-center justify-between gap-2">
                 <label for="remember" class="flex items-center gap-2 cursor-pointer select-none text-sm text-ink-500">
                     <input
                         id="remember"
@@ -50,6 +50,10 @@
                     />
                     <span>Recordarme</span>
                 </label>
+
+                <a href="{{ route('password.request') }}" class="text-xs font-semibold text-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
+                    ¿Olvidaste tu contraseña?
+                </a>
             </div>
 
             <!-- Botón de Envío -->

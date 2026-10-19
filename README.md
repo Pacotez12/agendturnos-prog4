@@ -34,13 +34,7 @@ Portainer CE no soporta `build:` ni bind mounts relativos, por eso el Stack usa 
 1. Bajar el entorno de desarrollo para liberar puertos: `make down`
 2. Preparar el proyecto (si no se hizo): `.env` con `APP_KEY`, `composer install` y `npm install && npm run build`.
 3. Construir las imágenes: `make portainer-build`
-4. Levantar Portainer CE:
-   ```bash
-   docker volume create portainer_data
-   docker run -d -p 9443:9443 --name portainer --restart=always \
-     -v /var/run/docker.sock:/var/run/docker.sock \
-     -v portainer_data:/data portainer/portainer-ce:lts
-   ```
+4. Levantar Portainer CE: `make portainer` (la primera vez descarga la imagen; después solo lo arranca).
 5. Entrar a `https://localhost:9443` y crear el usuario admin (dentro de los 5 minutos de arrancar; el setup token sale en `docker logs portainer`). Elegir el entorno Docker local.
 6. Stacks → Add stack → nombre `agendturnos` → Web editor → pegar `docker-compose.portainer.yml`.
 7. En *Environment variables* definir:
