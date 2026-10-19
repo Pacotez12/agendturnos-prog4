@@ -43,3 +43,4 @@ portainer:
 portainer-build:
 	docker build -t agendturnos-app:latest -f docker/php-fpm/Dockerfile .
 	docker build -t agendturnos-web:latest -f docker/nginx/Dockerfile .
+	docker build -t agendturnos-apache:latest -f docker/apache/Dockerfile .

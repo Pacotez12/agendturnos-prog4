@@ -4,8 +4,7 @@ name: agendturnos
 
 services:
   # ---------------------------------------------------------------------------
-  # Arquitectura A: PHP-FPM 8.4 + Nginx
-  # (Estructura preparada para sumar Arquitectura B: Apache + mod_php y HAProxy)
+  # Arquitectura A: PHP-FPM 8.4 + Nginx (app + web)
   # ---------------------------------------------------------------------------
   app:
     image: agendturnos-app:latest
@@ -28,6 +27,22 @@ services:
       - ${PROJECT_PATH:-/run/desktop/mnt/host/c/Users/julit/agendturnos-prog4}:/var/www/html:ro,z
     depends_on:
       - app
+
+  # ---------------------------------------------------------------------------
+  # Arquitectura B: Apache + mod_php, mismo codigo, misma BD y mismo Redis que A
+  # ---------------------------------------------------------------------------
+  apache:
+    image: agendturnos-apache:latest
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ${PROJECT_PATH:-/run/desktop/mnt/host/c/Users/julit/agendturnos-prog4}:/var/www/html:z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine
