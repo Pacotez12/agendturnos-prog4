@@ -60,5 +60,9 @@ class LayoutsTest extends TestCase
         $view->assertSee('Acceso · Glow Dental Protect');
         $view->assertSee('images/glow-logo.svg');
         $view->assertDontSee('Cerrar sesión');
+        $view->assertSee('aria-expanded="false"', false);
+        $view->assertSee('aria-controls="menu-lateral-invitado"', false);
+        $view->assertSee('id="menu-lateral-invitado"', false);
+        $view->assertSee('@keydown.escape.window="cerrarMenu()"', false);
     }
 }

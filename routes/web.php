@@ -5,15 +5,14 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\InicioController;
 use App\Http\Controllers\Panel\DisponibilidadController;
 use App\Http\Controllers\Panel\EspecialidadController;
 use App\Http\Controllers\Panel\ProfesionalController;
 use App\Http\Controllers\Panel\ServicioController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', InicioController::class)->name('inicio');
 
 Route::middleware('guest')->group(function () {
     Route::get('/registro', [RegistroController::class, 'create'])->name('registro');

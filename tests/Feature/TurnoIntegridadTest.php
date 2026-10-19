@@ -30,8 +30,8 @@ class TurnoIntegridadTest extends TestCase
 
         $this->seed(DatabaseSeeder::class);
 
-        $this->profesionalAnaId = DB::table('profesionales')->where('matricula', 'PY-1001')->value('id');
-        $this->profesionalLuciaId = DB::table('profesionales')->where('matricula', 'PY-1002')->value('id');
+        $this->profesionalAnaId = DB::table('profesionales')->where('matricula', '1234')->value('id');
+        $this->profesionalLuciaId = DB::table('profesionales')->where('matricula', '1824')->value('id');
         $this->pacienteId = DB::table('pacientes')->where('nombre', 'Carlos')->value('id');
         $this->servicioConsultaId = DB::table('servicios')->where('nombre', 'Consulta general')->value('id');
         $this->servicioLimpiezaId = DB::table('servicios')->where('nombre', 'Limpieza dental')->value('id');

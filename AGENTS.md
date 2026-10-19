@@ -42,6 +42,7 @@ docker compose exec -T -u 1000 app php artisan migrate    # migraciones
 - Nunca armar clases de Tailwind con variables (`"bg-{$x}-100"`): usar clases completas y literales.
 - Rutas con nombre; los ítems de menú salen de `app/Support/Navegacion.php` y aparecen solo si la ruta existe.
 - Accesibilidad: etiquetas visibles, foco visible, objetivos de 44 px, contraste AA.
+- Íconos solo de Phosphor (codeat3/blade-phosphor-icons); nunca emojis ni símbolos unicode como íconos.
 - Textos para el usuario en español rioplatense neutro ("Reservá", "Elegí").
 
 ## Forma de trabajo

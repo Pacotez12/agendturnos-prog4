@@ -106,7 +106,7 @@
                                                     title="Quitar franja"
                                                     aria-label="Quitar franja"
                                                 >
-                                                    ✕
+                                                    <x-phosphor-x class="size-4" aria-hidden="true" />
                                                 </button>
                                             </div>
                                         </template>
@@ -237,7 +237,7 @@
 
                             @if($errors->has('confirmar'))
                                 <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3 text-xs space-y-2 mt-2">
-                                    <p class="font-medium">⚠ {{ $errors->first('confirmar') }}</p>
+                                    <p class="font-medium flex items-center gap-1.5"><x-phosphor-warning class="size-4 shrink-0 text-amber-700" aria-hidden="true" /><span>{{ $errors->first('confirmar') }}</span></p>
                                     <label class="flex items-center gap-2 cursor-pointer font-semibold pt-1">
                                         <input
                                             type="checkbox"
