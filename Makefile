@@ -1,4 +1,4 @@
-.PHONY: up down build sh artisan migrate fresh logs assets portainer-build
+.PHONY: up down build sh artisan migrate fresh logs assets portainer portainer-build
 
 up:
 	docker compose up -d
@@ -27,6 +27,12 @@ logs:
 # Compilacion unica de los assets (sin quedar mirando cambios)
 assets:
 	docker compose run --rm node sh -c "npm install && npm run build"
+
+# Portainer CE (se instala una vez por maquina, fuera del stack de la aplicacion).
+# Si el contenedor ya existe solo lo arranca. Panel: https://localhost:9443
+portainer:
+	docker start portainer 2>/dev/null || docker run -d -p 9443:9443 --name portainer --restart=always \
+		-v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:lts
 
 # Imagenes con tag fijo para el stack de Portainer (docker-compose.portainer.yml)
 portainer-build:
