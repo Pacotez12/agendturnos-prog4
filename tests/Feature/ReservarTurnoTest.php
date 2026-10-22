@@ -6,6 +6,7 @@ use App\Enums\EstadoTurno;
 use App\Models\Bloqueo;
 use App\Models\Consultorio;
 use App\Models\Disponibilidad;
+use App\Models\Especialidad;
 use App\Models\Paciente;
 use App\Models\Profesional;
 use App\Models\Servicio;
@@ -84,6 +85,14 @@ class ReservarTurnoTest extends TestCase
         $inactivo = Servicio::factory()->create(['nombre' => 'Blanqueamiento', 'activo' => false]);
         $this->profesional->servicios()->attach($inactivo->id);
 
+        $especialidadInactiva = Especialidad::factory()->create(['activa' => false]);
+        $servicioEspInactiva = Servicio::factory()->create([
+            'nombre' => 'Tratamiento pausado',
+            'especialidad_id' => $especialidadInactiva->id,
+            'activo' => true,
+        ]);
+        $this->profesional->servicios()->attach($servicioEspInactiva->id);
+
         $otra = Profesional::factory()->create();
         $deOtra = Servicio::factory()->create(['nombre' => 'Ortodoncia']);
         $otra->servicios()->attach($deOtra->id);
@@ -95,7 +104,25 @@ class ReservarTurnoTest extends TestCase
         $response->assertSee('Consulta general');
         $response->assertSee('Limpieza profunda');
         $response->assertDontSee('Blanqueamiento');
+        $response->assertDontSee('Tratamiento pausado');
         $response->assertDontSee('Ortodoncia');
+    }
+
+    public function test_servicio_con_especialidad_inactiva_falla_validacion(): void
+    {
+        $especialidadInactiva = Especialidad::factory()->create(['activa' => false]);
+        $servicio = Servicio::factory()->create([
+            'especialidad_id' => $especialidadInactiva->id,
+            'activo' => true,
+        ]);
+        $this->profesional->servicios()->attach($servicio->id);
+
+        $response = $this->actingAs($this->paciente)->get('/turnos/nuevo?'.http_build_query([
+            'profesional' => $this->profesional->id,
+            'servicio' => $servicio->id,
+        ]));
+
+        $response->assertSessionHasErrors('servicio');
     }
 
     public function test_servicio_que_la_profesional_no_ofrece_falla(): void

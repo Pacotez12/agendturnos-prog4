@@ -29,7 +29,11 @@ class ReservaService
         $profesional = $profesionalId ? $profesionales->firstWhere('id', $profesionalId) : null;
 
         $servicios = $profesional
-            ? $profesional->servicios()->where('activo', true)->orderBy('nombre')->get()
+            ? $profesional->servicios()
+                ->where('activo', true)
+                ->whereHas('especialidad', fn ($q) => $q->where('activa', true))
+                ->orderBy('nombre')
+                ->get()
             : new Collection;
         $servicio = $servicioId ? $servicios->firstWhere('id', $servicioId) : null;
 

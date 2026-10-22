@@ -3,7 +3,7 @@
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect**, Asunción, Paraguay.
 
 > Documento vivo: se actualiza a medida que avanza el desarrollo. Cada sección indica su estado: ✅ hecho · 🚧 en curso · ⏳ pendiente.
-> Última actualización: 2026-10-19.
+> Última actualización: 2026-10-22.
 > Diseño de interfaz (colores, layouts y componentes): [`docs/diseno-ui.md`](diseno-ui.md).
 
 ---
@@ -276,6 +276,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-22 | Ajustes de SCRUM-14: servicios de especialidades inactivas no se pueden consultar y tarjetas con el estilo del paciente (`:paciente="true"`). |
 | 2026-10-19 | Guion de la demo de failover en vivo (SCRUM-31, `docs/demo-failover.md`), ensayado con caída y recuperación de A y de B: 0 errores y la sesión se mantiene. |
 | 2026-10-19 | HAProxy (SCRUM-30): balanceo `roundrobin` entre A y B en el puerto 8000, health check contra `/health` (antes `/up`; ahora verifica PostgreSQL y Redis), `option redispatch`, Stats en el 8404 y cabecera `X-Servidor`. Incluido en el Stack de Portainer. `opcache.revalidate_freq` de 0 a 2 (`/health` de ~1,8 s a ~0,2 s). |
 | 2026-10-19 | Arquitectura B (SCRUM-29): servicio `apache` (Apache + mod_php, PHP 8.4 con las mismas extensiones y `php.ini` que A) en el puerto 8081. Comparte código, base y Redis con A, así que la sesión iniciada en un servidor sirve en el otro. También en el Stack de Portainer. |

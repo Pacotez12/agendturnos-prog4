@@ -22,7 +22,12 @@ class ConsultaHorariosRequest extends FormRequest
                 'required_with:fecha',
                 Rule::exists('profesional_servicio', 'servicio_id')
                     ->where('profesional_id', (int) $this->input('profesional')),
-                Rule::exists('servicios', 'id')->where('activo', true),
+                Rule::exists('servicios', 'id')
+                    ->where('activo', true)
+                    ->where(fn ($query) => $query->whereIn(
+                        'especialidad_id',
+                        fn ($sub) => $sub->select('id')->from('especialidades')->where('activa', true)
+                    )),
             ],
             'fecha' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
         ];
