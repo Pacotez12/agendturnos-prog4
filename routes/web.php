@@ -8,6 +8,7 @@ use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\Paciente\ReservaController;
 use App\Http\Controllers\Paciente\TurnoController;
+use App\Http\Controllers\Panel\AgendaController;
 use App\Http\Controllers\Panel\DisponibilidadController;
 use App\Http\Controllers\Panel\EspecialidadController;
 use App\Http\Controllers\Panel\PacienteController as PanelPacienteController;
@@ -76,6 +77,8 @@ Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
     Route::get('/panel', function () {
         return view('panel.inicio');
     })->name('panel.inicio');
+
+    Route::get('/panel/agenda', AgendaController::class)->name('panel.agenda');
 
     Route::get('/panel/disponibilidad', [DisponibilidadController::class, 'index'])->name('panel.disponibilidad');
     Route::put('/panel/disponibilidad/horario', [DisponibilidadController::class, 'guardarHorario'])->name('panel.disponibilidad.horario');

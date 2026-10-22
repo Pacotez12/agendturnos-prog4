@@ -184,7 +184,7 @@ erDiagram
 | Autenticación y usuarios | HU-01, HU-02 | `/registro`, `/login`, `/logout`, `/inicio` (paciente), `/panel` | ✅ |
 | Servicios y especialidades | HU-03, SCRUM-39 | `/servicios` (catálogo público) · `/panel/servicios`, `/panel/especialidades`, `/panel/profesionales/{id}/servicios` | ✅ |
 | Agendamiento | HU-04, HU-05 | `/turnos/nuevo` y la consulta de horarios libres | ⏳ |
-| Agenda de la profesional | HU-06, HU-07, HU-11 ✅, HU-12 | `/agenda`, `/agenda/turnos/{id}`, `/panel/disponibilidad` | 🚧 |
+| Agenda de la profesional | HU-06, HU-07, HU-11, HU-12 | `/panel/agenda`, `/panel/turnos/{id}`, `/panel/disponibilidad` | ✅ |
 | Seguimiento | HU-08 | `/mis-turnos` | ✅ |
 | Notificaciones | HU-09, HU-10 | — (colas y scheduler) | ✅ |
 | Salud | — | `/health` (de Laravel; verifica PostgreSQL y Redis; health check de HAProxy) | ✅ |
@@ -278,6 +278,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-22 | Agenda de la profesional (HU-06, SCRUM-16): pantalla `/panel/agenda` con vistas Día (columnas por profesional) y Semana (columnas por día con selector de profesional para funcionario), grilla horaria dinámica según disponibilidad, filtros por estado, navegación por fechas, posicionamiento vertical por duración y cola lateral "Por confirmar". |
 | 2026-10-22 | Mis turnos (HU-08, SCRUM-20): pantalla `/mis-turnos` con pestañas Próximos e Historial (con motivo de cancelación y paginación), visualización de turnos propios y de dependientes, cancelación por el paciente con antelación mínima configurable (`AGENDA_CANCELACION_HORAS`), enlace alternativo a WhatsApp y modal de confirmación. |
 | 2026-10-22 | Detalle del turno (HU-12, SCRUM-19): tarjeta de datos del paciente ampliada con correo (del paciente o su responsable con indicador) y nombre del responsable para menores/dependientes; relaciones cargadas con eager loading en `Panel\TurnoController::show`. |
 | 2026-10-22 | Agendar turno desde el panel (HU-13, SCRUM-41): pantalla única con búsqueda de paciente o alta de paciente sin cuenta (con validación de documento único y responsable con cuenta), selección de profesional (restringida si el usuario es profesional), servicio, día y horarios libres; turno nace confirmado con detalle en historial y notificación; item "Nuevo turno" en navegación del panel. |

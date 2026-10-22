@@ -6,13 +6,16 @@ use App\Enums\EstadoTurno;
 use App\Enums\RolUsuario;
 use App\Exceptions\HorarioNoDisponible;
 use App\Exceptions\TransicionInvalida;
+use App\Models\Disponibilidad;
 use App\Models\Notificacion;
+use App\Models\Profesional;
 use App\Models\Turno;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AgendaService
@@ -33,6 +36,183 @@ class AgendaService
         }
 
         return $query;
+    }
+
+    /**
+     * @return array{
+     *     profesionales: Collection<int, Profesional>,
+     *     turnosPorProfesional: Collection<int, Collection<int, Turno>>,
+     *     horaMin: string,
+     *     horaMax: string,
+     *     franjas: array<int, string>
+     * }
+     */
+    public function agendaDelDia(User $user, CarbonInterface $fecha, ?EstadoTurno $estado = null): array
+    {
+        $tz = config('app.timezone', 'America/Asuncion');
+        $fechaCarbon = Carbon::parse($fecha, $tz)->setTimezone($tz);
+        $inicioDia = $fechaCarbon->copy()->startOfDay();
+        $finDia = $fechaCarbon->copy()->endOfDay();
+
+        $profesionales = $user->rol === RolUsuario::Profesional && $user->profesional
+            ? collect([$user->profesional])
+            : Profesional::orderBy('nombre')->get();
+
+        $profesionalesIds = $profesionales->pluck('id')->all();
+
+        $query = Turno::query()
+            ->with(['servicio', 'paciente', 'profesional'])
+            ->whereIn('profesional_id', $profesionalesIds)
+            ->whereBetween('inicio', [$inicioDia, $finDia]);
+
+        if ($estado) {
+            $query->where('estado', $estado);
+        } else {
+            $query->where('estado', '!=', EstadoTurno::Cancelado);
+        }
+
+        $turnos = $query->orderBy('inicio', 'asc')->get();
+        $turnosPorProfesional = $turnos->groupBy('profesional_id');
+
+        $diaSemana = $fechaCarbon->dayOfWeekIso;
+        $disponibilidades = Disponibilidad::whereIn('profesional_id', $profesionalesIds)
+            ->where('dia_semana', $diaSemana)
+            ->get();
+
+        [$horaMin, $horaMax] = $this->calcularRangoHoras($disponibilidades, $turnos);
+        $franjas = $this->generarFranjasHorarias($fechaCarbon, $horaMin, $horaMax);
+
+        return [
+            'profesionales' => $profesionales,
+            'turnosPorProfesional' => $turnosPorProfesional,
+            'horaMin' => $horaMin,
+            'horaMax' => $horaMax,
+            'franjas' => $franjas,
+        ];
+    }
+
+    /**
+     * @return array{
+     *     profesional: Profesional,
+     *     todosProfesionales: Collection<int, Profesional>,
+     *     dias: array<int, Carbon>,
+     *     turnosPorDia: Collection<string, Collection<int, Turno>>,
+     *     horaMin: string,
+     *     horaMax: string,
+     *     franjas: array<int, string>
+     * }
+     */
+    public function agendaDeLaSemana(User $user, ?Profesional $profesional, CarbonInterface $fecha, ?EstadoTurno $estado = null): array
+    {
+        $tz = config('app.timezone', 'America/Asuncion');
+        $fechaCarbon = Carbon::parse($fecha, $tz)->setTimezone($tz);
+        $lunes = $fechaCarbon->copy()->startOfWeek(Carbon::MONDAY);
+
+        $profesionalSeleccionado = $user->rol === RolUsuario::Profesional && $user->profesional
+            ? $user->profesional
+            : ($profesional ?? Profesional::orderBy('nombre')->first());
+
+        $dias = [];
+        for ($i = 0; $i < 5; $i++) {
+            $dias[] = $lunes->copy()->addDays($i);
+        }
+        $finSemana = $dias[4]->copy()->endOfDay();
+
+        $query = Turno::query()
+            ->with(['servicio', 'paciente', 'profesional'])
+            ->where('profesional_id', $profesionalSeleccionado->id)
+            ->whereBetween('inicio', [$lunes->copy()->startOfDay(), $finSemana]);
+
+        if ($estado) {
+            $query->where('estado', $estado);
+        } else {
+            $query->where('estado', '!=', EstadoTurno::Cancelado);
+        }
+
+        $turnos = $query->orderBy('inicio', 'asc')->get();
+        $turnosPorDia = $turnos->groupBy(fn ($t) => $t->inicio->toDateString());
+
+        $disponibilidades = Disponibilidad::where('profesional_id', $profesionalSeleccionado->id)
+            ->whereIn('dia_semana', [1, 2, 3, 4, 5])
+            ->get();
+
+        [$horaMin, $horaMax] = $this->calcularRangoHoras($disponibilidades, $turnos);
+        $franjas = $this->generarFranjasHorarias($lunes, $horaMin, $horaMax);
+
+        $todosProfesionales = Profesional::orderBy('nombre')->get();
+
+        return [
+            'profesional' => $profesionalSeleccionado,
+            'todosProfesionales' => $todosProfesionales,
+            'dias' => $dias,
+            'turnosPorDia' => $turnosPorDia,
+            'horaMin' => $horaMin,
+            'horaMax' => $horaMax,
+            'franjas' => $franjas,
+        ];
+    }
+
+    /**
+     * @param  Collection<int, Disponibilidad>  $disponibilidades
+     * @param  Collection<int, Turno>  $turnos
+     * @return array{0: string, 1: string}
+     */
+    private function calcularRangoHoras($disponibilidades, $turnos): array
+    {
+        $horaMin = '08:00';
+        $horaMax = '18:00';
+
+        if ($disponibilidades->isNotEmpty()) {
+            $minDisp = substr((string) $disponibilidades->min('hora_inicio'), 0, 5);
+            $maxDisp = substr((string) $disponibilidades->max('hora_fin'), 0, 5);
+            if ($minDisp) {
+                $horaMin = $minDisp;
+            }
+            if ($maxDisp) {
+                $horaMax = $maxDisp;
+            }
+        }
+
+        if ($turnos->isNotEmpty()) {
+            $minTurno = $turnos->min('inicio')->format('H:i');
+            $maxTurno = $turnos->max('fin')->format('H:i');
+            if ($minTurno < $horaMin) {
+                $horaMin = $minTurno;
+            }
+            if ($maxTurno > $horaMax) {
+                $horaMax = $maxTurno;
+            }
+        }
+
+        $hMin = (int) substr($horaMin, 0, 2);
+        $horaMin = sprintf('%02d:00', $hMin);
+
+        $hMax = (int) substr($horaMax, 0, 2);
+        $mMax = (int) substr($horaMax, 3, 2);
+        if ($mMax > 0) {
+            $hMax++;
+        }
+        $horaMax = sprintf('%02d:00', min(24, max($hMax, $hMin + 1)));
+
+        return [$horaMin, $horaMax];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function generarFranjasHorarias(CarbonInterface $referencia, string $horaMin, string $horaMax): array
+    {
+        $tz = config('app.timezone', 'America/Asuncion');
+        $actual = Carbon::parse($referencia->toDateString().' '.$horaMin, $tz);
+        $limite = Carbon::parse($referencia->toDateString().' '.$horaMax, $tz);
+
+        $franjas = [];
+        while ($actual < $limite) {
+            $franjas[] = $actual->format('H:i');
+            $actual->addMinutes(30);
+        }
+
+        return $franjas;
     }
 
     public function turnosDelPaciente(User $user, bool $historial = false): Builder
