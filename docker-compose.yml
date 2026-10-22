@@ -21,6 +21,42 @@ services:
       redis:
         condition: service_healthy
 
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php-fpm/Dockerfile
+      args:
+        UID: 1000
+        GID: 1000
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan queue:work --tries=3
+    volumes:
+      - .:/var/www/html:z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php-fpm/Dockerfile
+      args:
+        UID: 1000
+        GID: 1000
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan schedule:work
+    volumes:
+      - .:/var/www/html:z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   web:
     build:
       context: .

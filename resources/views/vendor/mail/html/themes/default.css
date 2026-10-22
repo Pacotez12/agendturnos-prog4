@@ -268,12 +268,12 @@ img {
 /* Panels */
 
 .panel {
-    border-left: #18181b solid 4px;
+    border-left: #EADFD0 solid 4px;
     margin: 21px 0;
 }
 
 .panel-content {
-    background-color: #fafafa;
+    background-color: #FBF7F2;
     color: #52525b;
     padding: 16px;
 }

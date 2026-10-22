@@ -85,6 +85,8 @@ flowchart LR
 |---|---|---|---|---|
 | `web` | `nginx:alpine` | 80 | **8080** | Sirve los estáticos y pasa los `.php` a `app` |
 | `app` | `php:8.4-fpm-alpine` | 9000 | — | Ejecuta Laravel |
+| `queue` | `php:8.4-fpm-alpine` | — | — | Worker de colas (`php artisan queue:work --tries=3`) |
+| `scheduler` | `php:8.4-fpm-alpine` | — | — | Ejecución periódica de tareas (`php artisan schedule:work`) |
 | `haproxy` | `haproxy:3.0-alpine` | 80 / 8404 | **8000** (`HAPROXY_PORT_FORWARD`) / **8404** | Balancea entre `web` (A) y `apache` (B); Stats en el 8404 (ver 4.2) |
 | `apache` | `php:8.4-apache` | 80 | **8081** | Arquitectura B: Apache + mod_php con el mismo código, la misma base y el mismo Redis que A |
 | `db` | `postgres:16-alpine` | 5432 | **5436** | Base `agendturnos` |
@@ -184,7 +186,7 @@ erDiagram
 | Agendamiento | HU-04, HU-05 | `/turnos/nuevo` y la consulta de horarios libres | ⏳ |
 | Agenda de la profesional | HU-06, HU-07, HU-11 ✅, HU-12 | `/agenda`, `/agenda/turnos/{id}`, `/panel/disponibilidad` | 🚧 |
 | Seguimiento | HU-08 | `/mis-turnos` | ⏳ |
-| Notificaciones | HU-09, HU-10 | — (colas y scheduler) | ⏳ |
+| Notificaciones | HU-09, HU-10 | — (colas y scheduler) | ✅ |
 | Salud | — | `/health` (de Laravel; verifica PostgreSQL y Redis; health check de HAProxy) | ✅ |
 
 **Transiciones de estado de un turno:**
@@ -276,6 +278,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-22 | Notificaciones y recordatorios (HU-09, HU-10): correos transaccionales por cola (`AvisoTurno`, `EnviarNotificacion`) para confirmación, cancelación y reprogramación; comando de recordatorios `turnos:recordatorios` programado por hora; servicios `queue` y `scheduler` en Docker y Portainer. |
 | 2026-10-22 | Confirmar, reprogramar o cancelar turnos (SCRUM-17, HU-07): máquina de estados en `EstadoTurno::puedePasarA()`, columna `detalle` en `historial_turnos`, servicio `AgendaService` (confirmación, cancelación con motivo, asistencias y reprogramación con exclusión de franja propia), vistas del panel (`solicitudes`, `turnos.show`, `turnos.reprogramar`) y badge contador de solicitudes. |
 | 2026-10-22 | Solicitud de turnos (SCRUM-15, HU-05): creación de turnos en estado solicitado con registro en historial, validación de disponibilidad y concurrencia (PostgreSQL `23P01` -> `HorarioNoDisponible`), pantalla de confirmación (`/turnos/{turno}`) y selector de paciente. |
 | 2026-10-22 | Ajustes de SCRUM-14: servicios de especialidades inactivas no se pueden consultar y tarjetas con el estilo del paciente (`:paciente="true"`). |
