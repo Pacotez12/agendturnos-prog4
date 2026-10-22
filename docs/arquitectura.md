@@ -276,6 +276,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-22 | Solicitud de turnos (SCRUM-15, HU-05): creación de turnos en estado solicitado con registro en historial, validación de disponibilidad y concurrencia (PostgreSQL `23P01` -> `HorarioNoDisponible`), pantalla de confirmación (`/turnos/{turno}`) y selector de paciente. |
 | 2026-10-22 | Ajustes de SCRUM-14: servicios de especialidades inactivas no se pueden consultar y tarjetas con el estilo del paciente (`:paciente="true"`). |
 | 2026-10-19 | Guion de la demo de failover en vivo (SCRUM-31, `docs/demo-failover.md`), ensayado con caída y recuperación de A y de B: 0 errores y la sesión se mantiene. |
 | 2026-10-19 | HAProxy (SCRUM-30): balanceo `roundrobin` entre A y B en el puerto 8000, health check contra `/health` (antes `/up`; ahora verifica PostgreSQL y Redis), `option redispatch`, Stats en el 8404 y cabecera `X-Servidor`. Incluido en el Stack de Portainer. `opcache.revalidate_freq` de 0 a 2 (`/health` de ~1,8 s a ~0,2 s). |

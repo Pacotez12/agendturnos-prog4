@@ -49,20 +49,94 @@
         </x-card>
 
         @if ($fecha)
-            <x-card :paciente="true">
-                <h2 class="text-lg font-bold font-display text-ink-900 mb-4">
-                    Horarios del {{ $fecha->translatedFormat('l j \d\e F') }}
-                </h2>
+            @if (collect($horarios)->contains('libre', true))
+                @php
+                    $fechaFormateada = ucfirst(rtrim($fecha->translatedFormat('D'), '.')) . ' ' . $fecha->format('j') . ' ' . rtrim($fecha->translatedFormat('M'), '.');
+                    $pacienteActual = auth()->user()?->paciente;
+                @endphp
 
-                @if (collect($horarios)->contains('libre', true))
-                    <x-slot-picker name="hora" :horarios="$horarios" />
-                @else
+                <form
+                    method="POST"
+                    action="{{ route('paciente.turnos.store') }}"
+                    class="space-y-6"
+                    x-data="{ horaSeleccionada: '{{ old('hora', '') }}' }"
+                >
+                    @csrf
+                    <input type="hidden" name="profesional" value="{{ $profesional?->id }}">
+                    <input type="hidden" name="servicio" value="{{ $servicio?->id }}">
+                    <input type="hidden" name="fecha" value="{{ $fecha->toDateString() }}">
+
+                    <x-card :paciente="true">
+                        <h2 class="text-lg font-bold font-display text-ink-900 mb-4">
+                            Horarios del {{ $fecha->translatedFormat('l j \d\e F') }}
+                        </h2>
+
+                        <x-slot-picker
+                            name="hora"
+                            :horarios="$horarios"
+                            :value="old('hora')"
+                            x-on:change="horaSeleccionada = $event.target.value"
+                        />
+
+                        @error('hora')
+                            <p class="text-xs text-danger-700 mt-2">{{ $message }}</p>
+                        @enderror
+                    </x-card>
+
+                    @if ($pacienteActual)
+                        <x-card :paciente="true" class="space-y-3">
+                            <h2 class="text-lg font-bold font-display text-ink-900">
+                                ¿Para quién es el turno?
+                            </h2>
+
+                            <div>
+                                <label class="flex items-center gap-3 p-3 rounded-xl border border-line hover:bg-cream-50 cursor-pointer has-checked:border-brand-600 has-checked:bg-brand-100">
+                                    <input
+                                        type="radio"
+                                        name="paciente_id"
+                                        value="{{ $pacienteActual->id }}"
+                                        checked
+                                        class="size-4 text-brand-600 focus:ring-brand-600 border-line"
+                                    >
+                                    <div>
+                                        <span class="block text-sm font-semibold text-ink-900">Para mí</span>
+                                        <span class="block text-xs text-ink-500">{{ $pacienteActual->nombre }} {{ $pacienteActual->apellido }}</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            @error('paciente_id')
+                                <p class="text-xs text-danger-700 mt-1">{{ $message }}</p>
+                            @enderror
+                        </x-card>
+                    @endif
+
+                    <div x-show="horaSeleccionada" x-cloak style="display: none;">
+                        <x-button type="submit" :pill="true">
+                            <span x-text="'Solicitar turno · {{ $fechaFormateada }}, ' + horaSeleccionada">Solicitar turno</span>
+                        </x-button>
+                    </div>
+
+                    <noscript>
+                        <div>
+                            <x-button type="submit" :pill="true">
+                                Solicitar turno
+                            </x-button>
+                        </div>
+                    </noscript>
+                </form>
+            @else
+                <x-card :paciente="true">
+                    <h2 class="text-lg font-bold font-display text-ink-900 mb-4">
+                        Horarios del {{ $fecha->translatedFormat('l j \d\e F') }}
+                    </h2>
+
                     <x-empty-state
                         titulo="No hay horarios para este día"
                         texto="Probá con otra fecha."
                     />
-                @endif
-            </x-card>
+                </x-card>
+            @endif
         @endif
     </div>
 </x-layouts.paciente>
