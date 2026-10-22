@@ -6,9 +6,14 @@ use App\Enums\RolUsuario;
 use App\Exceptions\HorarioNoDisponible;
 use App\Exceptions\TransicionInvalida;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Panel\AgendarTurnoOperadorRequest;
+use App\Models\Paciente;
+use App\Models\Profesional;
+use App\Models\Servicio;
 use App\Models\Turno;
 use App\Services\AgendaService;
 use App\Services\DisponibilidadService;
+use App\Services\ReservaService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,6 +36,66 @@ class TurnoController extends Controller
             'solicitudes' => $solicitudes,
             'esFuncionario' => $user->rol === RolUsuario::Funcionario,
         ]);
+    }
+
+    public function crear(Request $request, ReservaService $reserva): View
+    {
+        $user = $request->user();
+        $q = trim((string) $request->input('q'));
+        $pacientes = collect();
+        if (mb_strlen($q) >= 3) {
+            $pacientes = Paciente::buscar($q)->with('responsable.paciente')->get();
+        }
+
+        $pacienteSeleccionado = null;
+        if ($request->filled('paciente')) {
+            $pacienteSeleccionado = Paciente::with(['responsable.paciente'])->find($request->input('paciente'));
+        }
+
+        $profesionalId = $user->rol === RolUsuario::Profesional
+            ? $user->profesional?->id
+            : ($request->filled('profesional') ? (int) $request->input('profesional') : null);
+
+        $servicioId = $request->filled('servicio') ? (int) $request->input('servicio') : null;
+        $fecha = $request->input('fecha');
+
+        $opciones = $reserva->opciones($profesionalId, $servicioId, $fecha);
+
+        return view('panel.turnos.crear', array_merge($opciones, [
+            'q' => $q,
+            'pacientes' => $pacientes,
+            'pacienteSeleccionado' => $pacienteSeleccionado,
+            'esFuncionario' => $user->rol === RolUsuario::Funcionario,
+            'nuevoPaciente' => $request->boolean('nuevo_paciente') || $request->session()->has('errors'),
+        ]));
+    }
+
+    public function store(AgendarTurnoOperadorRequest $request, ReservaService $reserva): RedirectResponse
+    {
+        $data = $request->validated();
+        $paciente = Paciente::findOrFail($data['paciente_id']);
+        $profesional = Profesional::findOrFail($data['profesional']);
+        $servicio = Servicio::findOrFail($data['servicio']);
+
+        $tz = config('app.timezone', 'America/Asuncion');
+        $inicio = Carbon::parse($data['fecha'].' '.$data['hora'], $tz);
+
+        try {
+            $turno = $reserva->agendar($profesional, $servicio, $paciente, $inicio, $request->user());
+
+            return redirect()
+                ->route('panel.turnos.show', $turno)
+                ->with('success', 'Turno agendado y confirmado.');
+        } catch (HorarioNoDisponible) {
+            return redirect()
+                ->route('panel.turnos.crear', [
+                    'paciente' => $paciente->id,
+                    'profesional' => $profesional->id,
+                    'servicio' => $servicio->id,
+                    'fecha' => $data['fecha'],
+                ])
+                ->with('error', 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
+        }
     }
 
     public function show(Turno $turno): View

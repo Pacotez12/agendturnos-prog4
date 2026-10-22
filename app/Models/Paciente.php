@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -44,5 +45,31 @@ class Paciente extends Model
     public function turnos(): HasMany
     {
         return $this->hasMany(Turno::class);
+    }
+
+    /**
+     * @param  Builder<Paciente>  $query
+     * @return Builder<Paciente>
+     */
+    public function scopeBuscar(Builder $query, string $texto): Builder
+    {
+        $escaped = addcslashes($texto, '%_\\');
+
+        $qNorm = str_replace(
+            ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ'],
+            ['a', 'e', 'i', 'o', 'u', 'u', 'n'],
+            mb_strtolower($escaped)
+        );
+        $normalize = fn (string $col): string => "translate(lower({$col}), 'áéíóúüñ', 'aeiouun')";
+
+        return $query
+            ->where(function (Builder $q) use ($escaped, $qNorm, $normalize) {
+                $q->whereRaw("{$normalize('nombre')} LIKE ?", ["%{$qNorm}%"])
+                    ->orWhereRaw("{$normalize('apellido')} LIKE ?", ["%{$qNorm}%"])
+                    ->orWhere('documento', 'ILIKE', "%{$escaped}%");
+            })
+            ->orderBy('apellido')
+            ->orderBy('nombre')
+            ->limit(10);
     }
 }
