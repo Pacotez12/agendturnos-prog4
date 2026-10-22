@@ -278,6 +278,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-22 | Detalle del turno (HU-12, SCRUM-19): tarjeta de datos del paciente ampliada con correo (del paciente o su responsable con indicador) y nombre del responsable para menores/dependientes; relaciones cargadas con eager loading en `Panel\TurnoController::show`. |
 | 2026-10-22 | Agendar turno desde el panel (HU-13, SCRUM-41): pantalla única con búsqueda de paciente o alta de paciente sin cuenta (con validación de documento único y responsable con cuenta), selección de profesional (restringida si el usuario es profesional), servicio, día y horarios libres; turno nace confirmado con detalle en historial y notificación; item "Nuevo turno" en navegación del panel. |
 | 2026-10-22 | Notificaciones y recordatorios (HU-09, HU-10): correos transaccionales por cola (`AvisoTurno`, `EnviarNotificacion`) para confirmación, cancelación y reprogramación; comando de recordatorios `turnos:recordatorios` programado por hora; servicios `queue` y `scheduler` en Docker y Portainer. |
 | 2026-10-22 | Confirmar, reprogramar o cancelar turnos (SCRUM-17, HU-07): máquina de estados en `EstadoTurno::puedePasarA()`, columna `detalle` en `historial_turnos`, servicio `AgendaService` (confirmación, cancelación con motivo, asistencias y reprogramación con exclusión de franja propia), vistas del panel (`solicitudes`, `turnos.show`, `turnos.reprogramar`) y badge contador de solicitudes. |
