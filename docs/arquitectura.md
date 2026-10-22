@@ -85,7 +85,7 @@ flowchart LR
 |---|---|---|---|---|
 | `web` | `nginx:alpine` | 80 | **8080** | Sirve los estáticos y pasa los `.php` a `app` |
 | `app` | `php:8.4-fpm-alpine` | 9000 | — | Ejecuta Laravel |
-| `haproxy` | `haproxy:3.0-alpine` | 80 / 8404 | **8000** / **8404** | Balancea entre `web` (A) y `apache` (B); Stats en el 8404 (ver 4.2) |
+| `haproxy` | `haproxy:3.0-alpine` | 80 / 8404 | **8000** (`HAPROXY_PORT_FORWARD`) / **8404** | Balancea entre `web` (A) y `apache` (B); Stats en el 8404 (ver 4.2) |
 | `apache` | `php:8.4-apache` | 80 | **8081** | Arquitectura B: Apache + mod_php con el mismo código, la misma base y el mismo Redis que A |
 | `db` | `postgres:16-alpine` | 5432 | **5436** | Base `agendturnos` |
 | `redis` | `redis:7-alpine` | 6379 | **6379** | Sesiones, caché y colas |

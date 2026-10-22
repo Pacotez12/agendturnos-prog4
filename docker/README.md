@@ -15,7 +15,7 @@ Este directorio contiene las configuraciones y Dockerfiles para los servicios we
 
 Verificación:
 
-Si el puerto 6379 del host está ocupado, cambiar `REDIS_PORT_FORWARD` en `.env`. Sin `make` (Windows): `docker compose up -d --build --scale app=2 && docker compose restart web`.
+Si el puerto 6379 o el 8000 del host están ocupados, cambiar `REDIS_PORT_FORWARD` o `HAPROXY_PORT_FORWARD` en `.env`. Sin `make` (Windows): `docker compose up -d --build --scale app=2 && docker compose restart web`.
 
 ```bash
 make scale   # levanta 2 contenedores app y reinicia nginx
