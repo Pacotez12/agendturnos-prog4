@@ -51,4 +51,3 @@ docker compose exec -T -u 1000 app php artisan migrate    # migraciones
 - Ramas `feat/SCRUM-<n>-<descripcion>` desde `main`; PR a `main`. Commits y título del PR con prefijo convencional y ticket: `feat(SCRUM-<n>): …`, `fix(SCRUM-<n>): …`, `docs: …`, `chore: …`.
 - No modificar migraciones ya mergeadas: crear una migración nueva.
 - No commitear `.env` ni credenciales.
-- Los mensajes de commit y las descripciones de PR no llevan atribuciones a herramientas ni links de sesiones.
