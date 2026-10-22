@@ -20,6 +20,7 @@ class HistorialTurno extends Model
         'estado_anterior',
         'estado_nuevo',
         'usuario_id',
+        'detalle',
     ];
 
     protected function casts(): array

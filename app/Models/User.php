@@ -54,4 +54,21 @@ class User extends Authenticatable
     {
         $this->notify(new RestablecerContrasena($token));
     }
+
+    public function nombreVisible(): string
+    {
+        if ($this->paciente) {
+            return trim("{$this->paciente->nombre} {$this->paciente->apellido}");
+        }
+
+        if ($this->profesional) {
+            return trim("{$this->profesional->nombre} {$this->profesional->apellido}");
+        }
+
+        if ($this->rol === RolUsuario::Funcionario) {
+            return 'Recepción';
+        }
+
+        return 'Sistema';
+    }
 }

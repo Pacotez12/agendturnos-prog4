@@ -80,9 +80,12 @@
                     @endphp
                     <a
                         href="{{ route($item['ruta']) }}"
-                        class="px-3 py-2 text-sm font-medium rounded-lg min-h-11 flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isActive ? 'bg-brand-100 text-brand-600 font-semibold' : 'text-ink-500 hover:text-ink-900 hover:bg-surface' }}"
+                        class="px-3 py-2 text-sm font-medium rounded-lg min-h-11 flex items-center justify-between transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isActive ? 'bg-brand-100 text-brand-600 font-semibold' : 'text-ink-500 hover:text-ink-900 hover:bg-surface' }}"
                     >
-                        {{ $item['etiqueta'] }}
+                        <span>{{ $item['etiqueta'] }}</span>
+                        @if ($item['ruta'] === 'panel.solicitudes' && ! empty($solicitudesCount))
+                            <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-brand-600 text-white">{{ $solicitudesCount }}</span>
+                        @endif
                     </a>
                 @endforeach
             </nav>

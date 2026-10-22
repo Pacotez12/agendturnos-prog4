@@ -9,4 +9,13 @@ enum EstadoTurno: string
     case Atendido = 'atendido';
     case Cancelado = 'cancelado';
     case Ausente = 'ausente';
+
+    public function puedePasarA(self $nuevo): bool
+    {
+        return match ($this) {
+            self::Solicitado => in_array($nuevo, [self::Confirmado, self::Cancelado], true),
+            self::Confirmado => in_array($nuevo, [self::Atendido, self::Cancelado, self::Ausente], true),
+            default => false,
+        };
+    }
 }

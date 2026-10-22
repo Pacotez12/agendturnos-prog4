@@ -51,7 +51,7 @@
         @if ($fecha)
             @if (collect($horarios)->contains('libre', true))
                 @php
-                    $fechaFormateada = ucfirst(rtrim($fecha->translatedFormat('D'), '.')) . ' ' . $fecha->format('j') . ' ' . rtrim($fecha->translatedFormat('M'), '.');
+                    $fechaFormateada = \App\Support\Fecha::corta($fecha);
                     $pacienteActual = auth()->user()?->paciente;
                 @endphp
 
