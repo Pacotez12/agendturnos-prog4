@@ -51,7 +51,7 @@ services:
     image: agendturnos-haproxy:latest
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "${HAPROXY_PORT_FORWARD:-8000}:80"
       - "8404:8404"
     depends_on:
       - web
