@@ -17,7 +17,10 @@ use Illuminate\Support\Facades\DB;
 
 class ReservaService
 {
-    public function __construct(private DisponibilidadService $disponibilidad) {}
+    public function __construct(
+        private DisponibilidadService $disponibilidad,
+        private NotificacionService $notificaciones
+    ) {}
 
     /**
      * Arma los datos del formulario de reserva según lo que se eligió hasta ahora.
@@ -64,12 +67,54 @@ class ReservaService
         CarbonInterface $inicio,
         User $usuario,
     ): Turno {
+        return $this->crearTurno(
+            $profesional,
+            $servicio,
+            $paciente,
+            $inicio,
+            $usuario,
+            EstadoTurno::Solicitado,
+            null
+        );
+    }
+
+    public function agendar(
+        Profesional $profesional,
+        Servicio $servicio,
+        Paciente $paciente,
+        CarbonInterface $inicio,
+        User $usuario,
+    ): Turno {
+        $turno = $this->crearTurno(
+            $profesional,
+            $servicio,
+            $paciente,
+            $inicio,
+            $usuario,
+            EstadoTurno::Confirmado,
+            'Agendado por teléfono o en el consultorio'
+        );
+
+        $this->notificaciones->programar($turno, 'confirmacion');
+
+        return $turno;
+    }
+
+    private function crearTurno(
+        Profesional $profesional,
+        Servicio $servicio,
+        Paciente $paciente,
+        CarbonInterface $inicio,
+        User $usuario,
+        EstadoTurno $estado,
+        ?string $detalleHistorial
+    ): Turno {
         $tz = config('app.timezone', 'America/Asuncion');
         $inicioCarbon = Carbon::parse($inicio)->setTimezone($tz);
         $finCarbon = $inicioCarbon->copy()->addMinutes((int) $servicio->duracion_min);
 
         try {
-            return DB::transaction(function () use ($profesional, $servicio, $paciente, $inicioCarbon, $finCarbon, $usuario) {
+            return DB::transaction(function () use ($profesional, $servicio, $paciente, $inicioCarbon, $finCarbon, $usuario, $estado, $detalleHistorial) {
                 if (! $this->disponibilidad->estaLibre($profesional, $servicio, $inicioCarbon)) {
                     throw new HorarioNoDisponible('El horario seleccionado no está disponible.');
                 }
@@ -83,13 +128,14 @@ class ReservaService
                     'consultorio_id' => $consultorioId,
                     'inicio' => $inicioCarbon,
                     'fin' => $finCarbon,
-                    'estado' => EstadoTurno::Solicitado,
+                    'estado' => $estado,
                 ]);
 
                 $turno->historial()->create([
                     'estado_anterior' => null,
-                    'estado_nuevo' => EstadoTurno::Solicitado,
+                    'estado_nuevo' => $estado,
                     'usuario_id' => $usuario->id,
+                    'detalle' => $detalleHistorial,
                 ]);
 
                 return $turno;

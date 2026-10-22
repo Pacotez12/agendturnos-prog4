@@ -10,6 +10,7 @@ use App\Http\Controllers\Paciente\ReservaController;
 use App\Http\Controllers\Paciente\TurnoController;
 use App\Http\Controllers\Panel\DisponibilidadController;
 use App\Http\Controllers\Panel\EspecialidadController;
+use App\Http\Controllers\Panel\PacienteController as PanelPacienteController;
 use App\Http\Controllers\Panel\ProfesionalController;
 use App\Http\Controllers\Panel\ServicioController;
 use App\Http\Controllers\Panel\TurnoController as PanelTurnoController;
@@ -80,6 +81,9 @@ Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
     Route::delete('/panel/disponibilidad/bloqueos/{bloqueo}', [DisponibilidadController::class, 'eliminarBloqueo'])->name('panel.disponibilidad.bloqueos.destroy');
 
     Route::get('/panel/solicitudes', [PanelTurnoController::class, 'solicitudes'])->name('panel.solicitudes');
+    Route::get('/panel/turnos/nuevo', [PanelTurnoController::class, 'crear'])->name('panel.turnos.crear');
+    Route::post('/panel/turnos', [PanelTurnoController::class, 'store'])->name('panel.turnos.store');
+    Route::post('/panel/pacientes', [PanelPacienteController::class, 'store'])->name('panel.pacientes.store');
     Route::get('/panel/turnos/{turno}', [PanelTurnoController::class, 'show'])->name('panel.turnos.show');
     Route::post('/panel/turnos/{turno}/confirmar', [PanelTurnoController::class, 'confirmar'])->name('panel.turnos.confirmar');
     Route::post('/panel/turnos/{turno}/cancelar', [PanelTurnoController::class, 'cancelar'])->name('panel.turnos.cancelar');
