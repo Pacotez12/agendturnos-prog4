@@ -7,7 +7,7 @@
             </p>
         </div>
 
-        <x-card>
+        <x-card :paciente="true">
             <form method="GET" action="{{ route('paciente.reservar') }}" class="space-y-5">
                 <x-select
                     name="profesional"
@@ -49,7 +49,7 @@
         </x-card>
 
         @if ($fecha)
-            <x-card>
+            <x-card :paciente="true">
                 <h2 class="text-lg font-bold font-display text-ink-900 mb-4">
                     Horarios del {{ $fecha->translatedFormat('l j \d\e F') }}
                 </h2>
