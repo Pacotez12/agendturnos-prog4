@@ -40,7 +40,7 @@ Portainer CE no soporta `build:` ni bind mounts relativos, por eso el Stack usa 
 5. Entrar a `https://localhost:9443` y crear el usuario admin (dentro de los 5 minutos de arrancar; el setup token sale en `docker logs portainer`). Elegir el entorno Docker local.
 6. Stacks → Add stack → nombre `agendturnos` → Web editor → pegar `docker-compose.portainer.yml`.
 7. En *Environment variables* definir:
-   - `PROJECT_PATH`: ruta absoluta del proyecto vista por el daemon. En Docker Desktop (Windows): `/run/desktop/mnt/host/c/Users/<usuario>/agendturnos-prog4`.
+   - `PROJECT_PATH` (obligatoria, sin valor por defecto): ruta absoluta del proyecto vista por el daemon. En Docker Desktop (Windows): `/run/desktop/mnt/host/c/Users/<usuario>/agendturnos-prog4`.
    - `REDIS_PORT_FORWARD` (opcional): si el 6379 está ocupado, p. ej. `6381`.
 8. Pulsar **Deploy the stack** y luego, en la consola del contenedor `app`: `php artisan migrate`
 9. Verificar: el Stack figura activo con los 5 servicios en verde y `http://localhost:8080` responde.

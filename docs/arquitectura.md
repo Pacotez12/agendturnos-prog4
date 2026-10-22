@@ -44,7 +44,7 @@ Historia clínica, facturación y contabilidad, inventario, gestión de varias s
 | Estilos | Tailwind CSS 4 (compilado con Vite) | ✅ |
 | Interactividad | Alpine.js | ✅ |
 | Servidor web, arquitectura A | Nginx + PHP-FPM | ✅ |
-| Servidor web, arquitectura B | Apache + mod_php | ⏳ |
+| Servidor web, arquitectura B | Apache + mod_php | ✅ |
 | Balanceador | HAProxy (stats en puerto 8404) | ⏳ |
 | Correo en desarrollo | Mailpit | ✅ |
 | Contenedores | Docker / Docker Compose | ✅ |
@@ -65,12 +65,15 @@ Flujo de una petición: ruta → FormRequest → Controller → Service → Mode
 
 ### 4.1 Entorno de desarrollo actual ✅
 
-Seis contenedores en la red interna `agendturnos_default`. Entre ellos se comunican por el nombre del servicio.
+Siete contenedores en la red interna `agendturnos_default`. Entre ellos se comunican por el nombre del servicio.
 
 ```mermaid
 flowchart LR
     B[Navegador] -- "localhost:8080" --> W[web<br/>Nginx]
     W -- "FastCGI app:9000" --> A[app<br/>PHP-FPM + Laravel]
+    B -- "localhost:8081" --> AP[apache<br/>Apache + mod_php + Laravel]
+    AP --> D
+    AP --> R
     A -- "db:5432" --> D[(db<br/>PostgreSQL 16)]
     A -- "redis:6379" --> R[(redis<br/>Redis 7)]
     A -- "SMTP mailpit:1025" --> M[mailpit]
@@ -82,6 +85,7 @@ flowchart LR
 |---|---|---|---|---|
 | `web` | `nginx:alpine` | 80 | **8080** | Sirve los estáticos y pasa los `.php` a `app` |
 | `app` | `php:8.4-fpm-alpine` | 9000 | — | Ejecuta Laravel |
+| `apache` | `php:8.4-apache` | 80 | **8081** | Arquitectura B: Apache + mod_php con el mismo código, la misma base y el mismo Redis que A |
 | `db` | `postgres:16-alpine` | 5432 | **5436** | Base `agendturnos` |
 | `redis` | `redis:7-alpine` | 6379 | **6379** | Sesiones, caché y colas |
 | `mailpit` | `axllent/mailpit` | 1025 / 8025 | **8025** | Atrapa los correos de desarrollo |
@@ -267,6 +271,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-19 | Arquitectura B (SCRUM-29): servicio `apache` (Apache + mod_php, PHP 8.4 con las mismas extensiones y `php.ini` que A) en el puerto 8081. Comparte código, base y Redis con A, así que la sesión iniciada en un servidor sirve en el otro. También en el Stack de Portainer. |
 | 2026-10-02 | Repositorio creado. Entorno Docker base: Laravel 13, PostgreSQL 16, Redis 7, Nginx + PHP-FPM y Mailpit (`cefc8f7`). |
 | 2026-10-02 | Diseño del modelo de datos corregido (SCRUM-25). |
 | 2026-10-09 | Creación de este documento. |
