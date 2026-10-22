@@ -51,4 +51,21 @@ class UserTest extends TestCase
 
         $this->assertSame('Sistema', $user->nombreVisible());
     }
+
+    public function test_pacientes_ids_incluye_propio_y_familiares(): void
+    {
+        $user = User::factory()->paciente()->create();
+        $propio = Paciente::factory()->create(['user_id' => $user->id]);
+        $familiar1 = Paciente::factory()->create(['responsable_id' => $user->id, 'user_id' => null]);
+        $familiar2 = Paciente::factory()->create(['responsable_id' => $user->id, 'user_id' => null]);
+        $otro = Paciente::factory()->create();
+
+        $ids = $user->pacientesIds();
+
+        $this->assertCount(3, $ids);
+        $this->assertContains($propio->id, $ids);
+        $this->assertContains($familiar1->id, $ids);
+        $this->assertContains($familiar2->id, $ids);
+        $this->assertNotContains($otro->id, $ids);
+    }
 }

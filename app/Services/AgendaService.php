@@ -35,6 +35,43 @@ class AgendaService
         return $query;
     }
 
+    public function turnosDelPaciente(User $user, bool $historial = false): Builder
+    {
+        $query = Turno::query()
+            ->with(['servicio', 'profesional', 'paciente'])
+            ->whereIn('paciente_id', $user->pacientesIds());
+
+        if ($historial) {
+            return $query
+                ->where(function (Builder $q) {
+                    $q->where('inicio', '<', now())
+                        ->orWhereNotIn('estado', [EstadoTurno::Solicitado, EstadoTurno::Confirmado]);
+                })
+                ->orderBy('inicio', 'desc');
+        }
+
+        return $this->filtrarProximos($query)->orderBy('inicio', 'asc');
+    }
+
+    public function proximosDelPaciente(User $user): Builder
+    {
+        return $this->turnosDelPaciente($user, historial: false);
+    }
+
+    public function conteoProximosDelPaciente(User $user): int
+    {
+        $query = Turno::query()->whereIn('paciente_id', $user->pacientesIds());
+
+        return $this->filtrarProximos($query)->count();
+    }
+
+    private function filtrarProximos(Builder $query): Builder
+    {
+        return $query
+            ->where('inicio', '>=', now())
+            ->whereIn('estado', [EstadoTurno::Solicitado, EstadoTurno::Confirmado]);
+    }
+
     public function confirmar(Turno $turno, User $usuario): Turno
     {
         $turno = $this->cambiarEstado($turno, EstadoTurno::Confirmado, $usuario);
@@ -44,13 +81,38 @@ class AgendaService
         return $turno;
     }
 
-    public function cancelar(Turno $turno, ?string $motivo, User $usuario): Turno
+    public function puedeCancelarPaciente(Turno $turno): bool
     {
+        if (! in_array($turno->estado, [EstadoTurno::Solicitado, EstadoTurno::Confirmado], true)) {
+            return false;
+        }
+
+        $horasMinimas = (int) config('agenda.cancelacion_horas', 24);
+        $tz = config('app.timezone', 'America/Asuncion');
+        $limite = now($tz)->addHours($horasMinimas);
+        $inicio = Carbon::parse($turno->inicio)->setTimezone($tz);
+
+        return $inicio->gte($limite);
+    }
+
+    public function cancelar(
+        Turno $turno,
+        ?string $motivo,
+        User $usuario,
+        bool $notificar = true,
+        ?string $detalle = null
+    ): Turno {
+        if ($usuario->rol === RolUsuario::Paciente && ! $this->puedeCancelarPaciente($turno)) {
+            throw new TransicionInvalida('No se puede cancelar el turno con menos de '.config('agenda.cancelacion_horas', 24).' horas de anticipación.');
+        }
+
         $turno = $this->cambiarEstado($turno, EstadoTurno::Cancelado, $usuario, [
             'motivo_cancelacion' => $motivo,
-        ]);
+        ], $detalle);
 
-        $this->notificaciones->programar($turno, 'cancelacion');
+        if ($notificar) {
+            $this->notificaciones->programar($turno, 'cancelacion');
+        }
 
         return $turno;
     }
@@ -68,7 +130,7 @@ class AgendaService
     /**
      * @param  array<string, mixed>  $extra
      */
-    private function cambiarEstado(Turno $turno, EstadoTurno $nuevo, User $usuario, array $extra = []): Turno
+    private function cambiarEstado(Turno $turno, EstadoTurno $nuevo, User $usuario, array $extra = [], ?string $detalle = null): Turno
     {
         if (! $turno->estado->puedePasarA($nuevo)) {
             $accion = match ($nuevo) {
@@ -89,7 +151,7 @@ class AgendaService
             }
         }
 
-        return DB::transaction(function () use ($turno, $nuevo, $usuario, $extra) {
+        return DB::transaction(function () use ($turno, $nuevo, $usuario, $extra, $detalle) {
             $estadoAnterior = $turno->estado;
             $turno->estado = $nuevo;
 
@@ -103,6 +165,7 @@ class AgendaService
                 'estado_anterior' => $estadoAnterior,
                 'estado_nuevo' => $nuevo,
                 'usuario_id' => $usuario->id,
+                'detalle' => $detalle,
             ]);
 
             return $turno;
