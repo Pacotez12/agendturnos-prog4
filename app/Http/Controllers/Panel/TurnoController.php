@@ -103,7 +103,9 @@ class TurnoController extends Controller
         Gate::authorize('view', $turno);
 
         $turno->load([
-            'paciente',
+            'paciente.user',
+            'paciente.responsable.paciente',
+            'paciente.responsable.profesional',
             'profesional',
             'servicio',
             'consultorio',

@@ -98,6 +98,27 @@
                                 {{ $turno->paciente->telefono ?? '—' }}
                             </dd>
                         </div>
+                        <div>
+                            <dt class="text-xs text-ink-500">Correo</dt>
+                            <dd class="font-semibold text-ink-900 mt-0.5">
+                                @if ($turno->paciente->user?->email)
+                                    {{ $turno->paciente->user->email }}
+                                @elseif ($turno->paciente->responsable?->email)
+                                    {{ $turno->paciente->responsable->email }}
+                                    <span class="text-xs font-normal text-ink-500">(responsable)</span>
+                                @else
+                                    —
+                                @endif
+                            </dd>
+                        </div>
+                        @if ($turno->paciente->responsable_id)
+                            <div>
+                                <dt class="text-xs text-ink-500">Responsable</dt>
+                                <dd class="font-semibold text-ink-900 mt-0.5">
+                                    {{ $turno->paciente->responsable?->nombreVisible() ?? '—' }}
+                                </dd>
+                            </div>
+                        @endif
                     </dl>
                 </x-card>
 
