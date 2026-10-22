@@ -54,6 +54,21 @@ services:
       redis:
         condition: service_healthy
 
+  # ---------------------------------------------------------------------------
+  # HAProxy: balancea entre A (web) y B (apache). Stats en :8404
+  # ---------------------------------------------------------------------------
+  haproxy:
+    build:
+      context: .
+      dockerfile: docker/haproxy/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${HAPROXY_PORT_FORWARD:-8000}:80"
+      - "8404:8404"
+    depends_on:
+      - web
+      - apache
+
   # Compila los assets del frontend (Tailwind + Alpine via Vite) y los
   # recompila al guardar. Nadie necesita Node instalado en su maquina.
   node:

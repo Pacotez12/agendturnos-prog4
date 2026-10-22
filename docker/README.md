@@ -7,7 +7,7 @@ Este directorio contiene las configuraciones y Dockerfiles para los servicios we
 - `php-fpm/`: **Arquitectura A (Backend)** — PHP 8.4 FPM con extensiones `pdo_pgsql`, `pgsql`, `redis`, `zip`, `intl`, `bcmath`, `opcache`.
 - `nginx/`: **Arquitectura A (Servidor Web)** — Nginx sirviendo `/public` y proxeando requests PHP a `app:9000`.
 - `apache/`: **Arquitectura B** — Apache 2.4 con `mod_php` (PHP 8.4, mismas extensiones y `php.ini` que A), en http://localhost:8081. Mismo código, misma BD y mismo Redis que A.
-- *(Preparado para el futuro)* `haproxy/`: Balanceador frontal distribuyendo tráfico entre Arquitectura A y B.
+- `haproxy/`: **Balanceador** — HAProxy 3.0 delante de A y B en http://localhost:8000 (`roundrobin`, health check `/health`). Stats en http://localhost:8404. La cabecera `X-Servidor` indica qué nodo respondió.
 
 ## Sesiones compartidas entre nodos (Redis)
 
@@ -15,7 +15,7 @@ Este directorio contiene las configuraciones y Dockerfiles para los servicios we
 
 Verificación:
 
-Si el puerto 6379 del host está ocupado, cambiar `REDIS_PORT_FORWARD` en `.env`. Sin `make` (Windows): `docker compose up -d --build --scale app=2 && docker compose restart web`.
+Si el puerto 6379 o el 8000 del host están ocupados, cambiar `REDIS_PORT_FORWARD` o `HAPROXY_PORT_FORWARD` en `.env`. Sin `make` (Windows): `docker compose up -d --build --scale app=2 && docker compose restart web`.
 
 ```bash
 make scale   # levanta 2 contenedores app y reinicia nginx

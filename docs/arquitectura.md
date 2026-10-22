@@ -45,7 +45,7 @@ Historia clínica, facturación y contabilidad, inventario, gestión de varias s
 | Interactividad | Alpine.js | ✅ |
 | Servidor web, arquitectura A | Nginx + PHP-FPM | ✅ |
 | Servidor web, arquitectura B | Apache + mod_php | ✅ |
-| Balanceador | HAProxy (stats en puerto 8404) | ⏳ |
+| Balanceador | HAProxy (stats en puerto 8404) | ✅ |
 | Correo en desarrollo | Mailpit | ✅ |
 | Contenedores | Docker / Docker Compose | ✅ |
 | Orquestación y despliegue | Portainer (Stack) | ⏳ |
@@ -65,7 +65,7 @@ Flujo de una petición: ruta → FormRequest → Controller → Service → Mode
 
 ### 4.1 Entorno de desarrollo actual ✅
 
-Siete contenedores en la red interna `agendturnos_default`. Entre ellos se comunican por el nombre del servicio.
+Ocho contenedores en la red interna `agendturnos_default`. Entre ellos se comunican por el nombre del servicio.
 
 ```mermaid
 flowchart LR
@@ -85,6 +85,7 @@ flowchart LR
 |---|---|---|---|---|
 | `web` | `nginx:alpine` | 80 | **8080** | Sirve los estáticos y pasa los `.php` a `app` |
 | `app` | `php:8.4-fpm-alpine` | 9000 | — | Ejecuta Laravel |
+| `haproxy` | `haproxy:3.0-alpine` | 80 / 8404 | **8000** (`HAPROXY_PORT_FORWARD`) / **8404** | Balancea entre `web` (A) y `apache` (B); Stats en el 8404 (ver 4.2) |
 | `apache` | `php:8.4-apache` | 80 | **8081** | Arquitectura B: Apache + mod_php con el mismo código, la misma base y el mismo Redis que A |
 | `db` | `postgres:16-alpine` | 5432 | **5436** | Base `agendturnos` |
 | `redis` | `redis:7-alpine` | 6379 | **6379** | Sesiones, caché y colas |
@@ -99,13 +100,13 @@ flowchart LR
 - El usuario `www-data` del contenedor usa el UID 1000, igual que el del host.
 - `app` espera a que `db` y `redis` pasen sus healthchecks antes de arrancar.
 
-### 4.2 Arquitectura objetivo (balanceo) ⏳
+### 4.2 Balanceo con HAProxy ✅
 
 ```mermaid
 flowchart LR
-    U[Usuarios] --> H[HAProxy<br/>:80 · stats :8404]
-    H -- "roundrobin + health check /up" --> A1[Arquitectura A<br/>Nginx + PHP-FPM]
-    H -- "roundrobin + health check /up" --> B1[Arquitectura B<br/>Apache + mod_php]
+    U[Usuarios] -- "localhost:8000" --> H[HAProxy<br/>:80 · stats :8404]
+    H -- "roundrobin + health check /health" --> A1[Arquitectura A<br/>Nginx + PHP-FPM]
+    H -- "roundrobin + health check /health" --> B1[Arquitectura B<br/>Apache + mod_php]
     A1 --> D[(PostgreSQL)]
     B1 --> D
     A1 --> R[(Redis<br/>sesiones compartidas)]
@@ -114,7 +115,11 @@ flowchart LR
 
 - Las dos arquitecturas corren el mismo código y comparten la base de datos y Redis.
 - Como la sesión vive en Redis, el usuario no pierde la sesión cuando HAProxy lo cambia de nodo.
-- **Failover:** si un nodo no responde en `/up`, HAProxy lo marca DOWN y manda todo el tráfico al otro. Cuando el nodo vuelve, pasa a UP solo.
+- **Entrada:** http://localhost:8000 (HAProxy). Las arquitecturas siguen accesibles directo en 8080 (A) y 8081 (B) para compararlas. Stats en http://localhost:8404. La cabecera `X-Servidor` de cada respuesta dice qué nodo la atendió (`a_nginx` o `b_apache`).
+- **Algoritmo `roundrobin`:** las peticiones son cortas y parecidas y la sesión vive en Redis, así que no hace falta fijar al usuario a un nodo. `leastconn` conviene con conexiones largas (websockets, descargas), que esta app no tiene.
+- **Health check:** `GET /health` cada 3 s. `/health` responde 200 solo si el nodo llega a PostgreSQL y a Redis. 3 fallos seguidos → DOWN (~10 s con el nodo detenido); 2 aciertos → UP. `timeout check 10s` porque un nodo recién arrancado compila en frío y, con el código montado desde Windows, tarda hasta ~5 s; un nodo detenido falla antes, por `timeout connect 1s`.
+- **OPcache:** `opcache.revalidate_freq = 2` (antes 0). Con 0, PHP revisaba la fecha de cada archivo en cada petición, lo que sobre el montaje de Windows llevaba `/health` a ~1,8 s; con 2 baja a ~0,2 s. En desarrollo, un cambio en el código se ve a los 2 s como máximo.
+- **Failover:** si un nodo deja de responder, HAProxy lo marca DOWN y manda todo el tráfico al otro. Cuando el nodo vuelve, pasa a UP solo. Mientras detecta la caída, `option redispatch` reintenta en el otro nodo las conexiones fallidas, así que el usuario no ve errores. HAProxy re-resuelve los nombres con el DNS de Docker: si el contenedor vuelve con otra IP, la toma.
 - **Benchmarking:** se mide RPS y latencia (p50, p95 y p99) de A, de B y del conjunto balanceado.
 
 ## 5. Modelo de datos ✅
@@ -180,7 +185,7 @@ erDiagram
 | Agenda de la profesional | HU-06, HU-07, HU-11 ✅, HU-12 | `/agenda`, `/agenda/turnos/{id}`, `/panel/disponibilidad` | 🚧 |
 | Seguimiento | HU-08 | `/mis-turnos` | ⏳ |
 | Notificaciones | HU-09, HU-10 | — (colas y scheduler) | ⏳ |
-| Salud | — | `/up` (incluida en Laravel; health check de HAProxy) | ✅ |
+| Salud | — | `/health` (de Laravel; verifica PostgreSQL y Redis; health check de HAProxy) | ✅ |
 
 **Transiciones de estado de un turno:**
 
@@ -271,6 +276,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-19 | HAProxy (SCRUM-30): balanceo `roundrobin` entre A y B en el puerto 8000, health check contra `/health` (antes `/up`; ahora verifica PostgreSQL y Redis), `option redispatch`, Stats en el 8404 y cabecera `X-Servidor`. Incluido en el Stack de Portainer. `opcache.revalidate_freq` de 0 a 2 (`/health` de ~1,8 s a ~0,2 s). |
 | 2026-10-19 | Arquitectura B (SCRUM-29): servicio `apache` (Apache + mod_php, PHP 8.4 con las mismas extensiones y `php.ini` que A) en el puerto 8081. Comparte código, base y Redis con A, así que la sesión iniciada en un servidor sirve en el otro. También en el Stack de Portainer. |
 | 2026-10-02 | Repositorio creado. Entorno Docker base: Laravel 13, PostgreSQL 16, Redis 7, Nginx + PHP-FPM y Mailpit (`cefc8f7`). |
 | 2026-10-02 | Diseño del modelo de datos corregido (SCRUM-25). |

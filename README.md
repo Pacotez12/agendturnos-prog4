@@ -42,8 +42,9 @@ Portainer CE no soporta `build:` ni bind mounts relativos, por eso el Stack usa 
 7. En *Environment variables* definir:
    - `PROJECT_PATH` (obligatoria, sin valor por defecto): ruta absoluta del proyecto vista por el daemon. En Docker Desktop (Windows): `/run/desktop/mnt/host/c/Users/<usuario>/agendturnos-prog4`.
    - `REDIS_PORT_FORWARD` (opcional): si el 6379 está ocupado, p. ej. `6381`.
+   - `HAPROXY_PORT_FORWARD` (opcional): si el 8000 está ocupado, p. ej. `8001`.
 8. Pulsar **Deploy the stack** y luego, en la consola del contenedor `app`: `php artisan migrate`
-9. Verificar: el Stack figura activo con los 5 servicios en verde y `http://localhost:8080` responde.
+9. Verificar: el Stack figura activo con los 7 servicios en verde, `http://localhost:8000` (HAProxy) responde y en `http://localhost:8404` (Stats) los nodos `a_nginx` y `b_apache` están en UP.
 
 ## Gestión
 
