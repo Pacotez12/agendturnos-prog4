@@ -12,6 +12,7 @@ use App\Http\Controllers\Panel\DisponibilidadController;
 use App\Http\Controllers\Panel\EspecialidadController;
 use App\Http\Controllers\Panel\ProfesionalController;
 use App\Http\Controllers\Panel\ServicioController;
+use App\Http\Controllers\Panel\TurnoController as PanelTurnoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', InicioController::class)->name('inicio');
@@ -77,6 +78,15 @@ Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
     Route::put('/panel/disponibilidad/horario', [DisponibilidadController::class, 'guardarHorario'])->name('panel.disponibilidad.horario');
     Route::post('/panel/disponibilidad/bloqueos', [DisponibilidadController::class, 'guardarBloqueo'])->name('panel.disponibilidad.bloqueos.store');
     Route::delete('/panel/disponibilidad/bloqueos/{bloqueo}', [DisponibilidadController::class, 'eliminarBloqueo'])->name('panel.disponibilidad.bloqueos.destroy');
+
+    Route::get('/panel/solicitudes', [PanelTurnoController::class, 'solicitudes'])->name('panel.solicitudes');
+    Route::get('/panel/turnos/{turno}', [PanelTurnoController::class, 'show'])->name('panel.turnos.show');
+    Route::post('/panel/turnos/{turno}/confirmar', [PanelTurnoController::class, 'confirmar'])->name('panel.turnos.confirmar');
+    Route::post('/panel/turnos/{turno}/cancelar', [PanelTurnoController::class, 'cancelar'])->name('panel.turnos.cancelar');
+    Route::post('/panel/turnos/{turno}/atendido', [PanelTurnoController::class, 'atendido'])->name('panel.turnos.atendido');
+    Route::post('/panel/turnos/{turno}/ausente', [PanelTurnoController::class, 'ausente'])->name('panel.turnos.ausente');
+    Route::get('/panel/turnos/{turno}/reprogramar', [PanelTurnoController::class, 'reprogramar'])->name('panel.turnos.reprogramar');
+    Route::put('/panel/turnos/{turno}/reprogramar', [PanelTurnoController::class, 'updateReprogramar'])->name('panel.turnos.reprogramar.update');
 });
 
 if (app()->environment('local')) {

@@ -6,6 +6,7 @@ use App\Enums\EstadoTurno;
 use App\Models\Disponibilidad;
 use App\Models\Profesional;
 use App\Models\Servicio;
+use App\Models\Turno;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,7 +18,7 @@ class DisponibilidadService
      *
      * @return list<array{hora: string, libre: bool}>
      */
-    public function franjasLibres(Profesional $profesional, Servicio $servicio, CarbonInterface $fecha): array
+    public function franjasLibres(Profesional $profesional, Servicio $servicio, CarbonInterface $fecha, ?Turno $ignorar = null): array
     {
         if (! $this->profesionalOfreceServicio($profesional, $servicio)) {
             return [];
@@ -44,11 +45,16 @@ class DisponibilidadService
         $inicioDia = $fechaCarbon->copy()->startOfDay();
         $finDia = $fechaCarbon->copy()->endOfDay();
 
-        $turnos = $profesional->turnos()
+        $turnosQuery = $profesional->turnos()
             ->where('estado', '!=', EstadoTurno::Cancelado)
             ->where('inicio', '<', $finDia)
-            ->where('fin', '>', $inicioDia)
-            ->get();
+            ->where('fin', '>', $inicioDia);
+
+        if ($ignorar) {
+            $turnosQuery->where('id', '!=', $ignorar->id);
+        }
+
+        $turnos = $turnosQuery->get();
 
         $bloqueos = $profesional->bloqueos()
             ->where('inicio', '<', $finDia)
@@ -112,7 +118,7 @@ class DisponibilidadService
     /**
      * Determina si un profesional está libre para iniciar un servicio en una fecha y hora exacta.
      */
-    public function estaLibre(Profesional $profesional, Servicio $servicio, CarbonInterface $inicio): bool
+    public function estaLibre(Profesional $profesional, Servicio $servicio, CarbonInterface $inicio, ?Turno $ignorar = null): bool
     {
         $tz = config('app.timezone', 'America/Asuncion');
         $inicioCarbon = Carbon::parse($inicio)->setTimezone($tz);
@@ -139,11 +145,16 @@ class DisponibilidadService
             return false;
         }
 
-        $chocaTurno = $profesional->turnos()
+        $chocaTurnoQuery = $profesional->turnos()
             ->where('estado', '!=', EstadoTurno::Cancelado)
             ->where('inicio', '<', $finCarbon)
-            ->where('fin', '>', $inicioCarbon)
-            ->exists();
+            ->where('fin', '>', $inicioCarbon);
+
+        if ($ignorar) {
+            $chocaTurnoQuery->where('id', '!=', $ignorar->id);
+        }
+
+        $chocaTurno = $chocaTurnoQuery->exists();
 
         if ($chocaTurno) {
             return false;

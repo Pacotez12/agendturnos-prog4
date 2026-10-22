@@ -102,7 +102,7 @@
                                                 <button
                                                     type="button"
                                                     @click="eliminarFranja(dia.id, idx)"
-                                                    class="text-danger-700 hover:text-danger-800 ml-1 font-bold p-1 cursor-pointer min-h-6 min-w-6 inline-flex items-center justify-center rounded hover:bg-white"
+                                                    class="text-danger-700 ml-1 font-bold p-1 cursor-pointer min-h-6 min-w-6 inline-flex items-center justify-center rounded hover:bg-white"
                                                     title="Quitar franja"
                                                     aria-label="Quitar franja"
                                                 >
@@ -172,13 +172,13 @@
                                 <button
                                     type="button"
                                     @click="$dispatch('abrir-modal', 'eliminar-bloqueo-{{ $b->id }}')"
-                                    class="text-danger-700 hover:text-danger-800 hover:underline font-semibold text-xs cursor-pointer min-h-9 px-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-700"
+                                    class="text-danger-700 hover:underline font-semibold text-xs cursor-pointer min-h-9 px-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-700"
                                 >
                                     Quitar
                                 </button>
 
                                 <x-modal name="eliminar-bloqueo-{{ $b->id }}" titulo="Quitar bloqueo">
-                                    <p class="text-sm text-ink-700 mb-4">
+                                    <p class="text-sm text-ink-500 mb-4">
                                         ¿Confirmás que querés quitar el bloqueo desde el <strong>{{ $b->inicio->format('d/m/Y H:i') }}</strong> hasta el <strong>{{ $b->fin->format('d/m/Y H:i') }}</strong>?
                                     </p>
                                     <form method="POST" action="{{ route('panel.disponibilidad.bloqueos.destroy', $b) }}" class="flex justify-end gap-3">
