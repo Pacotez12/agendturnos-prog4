@@ -2,10 +2,18 @@
 
 namespace App\Services;
 
+use App\Enums\EstadoTurno;
+use App\Exceptions\HorarioNoDisponible;
+use App\Models\Paciente;
 use App\Models\Profesional;
 use App\Models\Servicio;
+use App\Models\Turno;
+use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 class ReservaService
 {
@@ -47,5 +55,51 @@ class ReservaService
             'fecha' => $dia,
             'horarios' => $dia ? $this->disponibilidad->franjasLibres($profesional, $servicio, $dia) : [],
         ];
+    }
+
+    public function solicitar(
+        Profesional $profesional,
+        Servicio $servicio,
+        Paciente $paciente,
+        CarbonInterface $inicio,
+        User $usuario,
+    ): Turno {
+        $tz = config('app.timezone', 'America/Asuncion');
+        $inicioCarbon = Carbon::parse($inicio)->setTimezone($tz);
+        $finCarbon = $inicioCarbon->copy()->addMinutes((int) $servicio->duracion_min);
+
+        try {
+            return DB::transaction(function () use ($profesional, $servicio, $paciente, $inicioCarbon, $finCarbon, $usuario) {
+                if (! $this->disponibilidad->estaLibre($profesional, $servicio, $inicioCarbon)) {
+                    throw new HorarioNoDisponible('El horario seleccionado no está disponible.');
+                }
+
+                $consultorioId = $this->disponibilidad->consultorioPara($profesional, $inicioCarbon);
+
+                $turno = Turno::create([
+                    'paciente_id' => $paciente->id,
+                    'profesional_id' => $profesional->id,
+                    'servicio_id' => $servicio->id,
+                    'consultorio_id' => $consultorioId,
+                    'inicio' => $inicioCarbon,
+                    'fin' => $finCarbon,
+                    'estado' => EstadoTurno::Solicitado,
+                ]);
+
+                $turno->historial()->create([
+                    'estado_anterior' => null,
+                    'estado_nuevo' => EstadoTurno::Solicitado,
+                    'usuario_id' => $usuario->id,
+                ]);
+
+                return $turno;
+            });
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23P01' || str_contains($e->getMessage(), '23P01') || str_contains($e->getMessage(), 'turnos_sin_solapamiento')) {
+                throw new HorarioNoDisponible('El horario seleccionado no está disponible.', 0, $e);
+            }
+
+            throw $e;
+        }
     }
 }

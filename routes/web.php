@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\Paciente\ReservaController;
+use App\Http\Controllers\Paciente\TurnoController;
 use App\Http\Controllers\Panel\DisponibilidadController;
 use App\Http\Controllers\Panel\EspecialidadController;
 use App\Http\Controllers\Panel\ProfesionalController;
@@ -37,6 +38,8 @@ Route::middleware(['auth', 'rol:paciente'])->group(function () {
     })->name('paciente.inicio');
 
     Route::get('/turnos/nuevo', [ReservaController::class, 'create'])->name('paciente.reservar');
+    Route::post('/turnos', [TurnoController::class, 'store'])->name('paciente.turnos.store');
+    Route::get('/turnos/{turno}', [TurnoController::class, 'show'])->name('paciente.turnos.show');
 });
 
 Route::get('/servicios', [CatalogoController::class, 'index'])->name('servicios.catalogo');
