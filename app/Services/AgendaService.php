@@ -6,6 +6,7 @@ use App\Enums\EstadoTurno;
 use App\Enums\RolUsuario;
 use App\Exceptions\HorarioNoDisponible;
 use App\Exceptions\TransicionInvalida;
+use App\Models\Notificacion;
 use App\Models\Turno;
 use App\Models\User;
 use Carbon\Carbon;
@@ -16,7 +17,10 @@ use Illuminate\Support\Facades\DB;
 
 class AgendaService
 {
-    public function __construct(private DisponibilidadService $disponibilidad) {}
+    public function __construct(
+        private DisponibilidadService $disponibilidad,
+        private NotificacionService $notificaciones
+    ) {}
 
     public function solicitudesPendientes(User $user): Builder
     {
@@ -33,14 +37,22 @@ class AgendaService
 
     public function confirmar(Turno $turno, User $usuario): Turno
     {
-        return $this->cambiarEstado($turno, EstadoTurno::Confirmado, $usuario);
+        $turno = $this->cambiarEstado($turno, EstadoTurno::Confirmado, $usuario);
+
+        $this->notificaciones->programar($turno, 'confirmacion');
+
+        return $turno;
     }
 
     public function cancelar(Turno $turno, ?string $motivo, User $usuario): Turno
     {
-        return $this->cambiarEstado($turno, EstadoTurno::Cancelado, $usuario, [
+        $turno = $this->cambiarEstado($turno, EstadoTurno::Cancelado, $usuario, [
             'motivo_cancelacion' => $motivo,
         ]);
+
+        $this->notificaciones->programar($turno, 'cancelacion');
+
+        return $turno;
     }
 
     public function marcarAtendido(Turno $turno, User $usuario): Turno
@@ -132,6 +144,11 @@ class AgendaService
                     'estado_nuevo' => $turno->estado,
                     'usuario_id' => $usuario->id,
                     'detalle' => $detalle,
+                ]);
+
+                Notificacion::where('turno_id', $turno->id)->where('tipo', 'recordatorio')->delete();
+                $this->notificaciones->programar($turno, 'reprogramacion', [
+                    'anterior' => $inicioAnterior->toIso8601String(),
                 ]);
 
                 return $turno;

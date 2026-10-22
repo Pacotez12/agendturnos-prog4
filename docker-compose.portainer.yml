@@ -18,6 +18,32 @@ services:
       redis:
         condition: service_healthy
 
+  queue:
+    image: agendturnos-app:latest
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan queue:work --tries=3
+    volumes:
+      - ${PROJECT_PATH:?Definí PROJECT_PATH}:/var/www/html:z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    image: agendturnos-app:latest
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan schedule:work
+    volumes:
+      - ${PROJECT_PATH:?Definí PROJECT_PATH}:/var/www/html:z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   web:
     image: agendturnos-web:latest
     restart: unless-stopped
