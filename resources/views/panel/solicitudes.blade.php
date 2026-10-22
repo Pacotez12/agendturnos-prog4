@@ -24,60 +24,68 @@
                     <table class="w-full text-left text-sm text-ink-900 border-collapse">
                         <thead class="bg-surface border-b border-line text-xs font-semibold uppercase tracking-wider text-ink-500">
                             <tr>
-                                <th class="px-4 py-3">Turno</th>
-                                <th class="px-4 py-3">Paciente</th>
-                                <th class="px-4 py-3">Servicio</th>
+                                <th class="px-3 sm:px-4 py-3">Turno</th>
+                                <th class="px-3 sm:px-4 py-3">Paciente</th>
+                                <th class="hidden md:table-cell px-4 py-3">Servicio</th>
                                 @if ($esFuncionario)
-                                    <th class="px-4 py-3">Profesional</th>
+                                    <th class="hidden md:table-cell px-4 py-3">Profesional</th>
                                 @endif
-                                <th class="px-4 py-3 text-right">Acciones</th>
+                                <th class="px-3 sm:px-4 py-3 text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-line">
                             @foreach ($solicitudes as $solicitud)
                                 <tr class="hover:bg-surface/50 transition-colors">
-                                    <td class="px-4 py-3">
-                                        <a href="{{ route('panel.turnos.show', $solicitud) }}" class="font-semibold text-ink-900 hover:text-brand-600 block">
-                                            {{ ucfirst($solicitud->inicio->translatedFormat('D j M')) }}
+                                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+                                        <a href="{{ route('panel.turnos.show', $solicitud) }}" class="font-semibold text-ink-900 hover:text-brand-600 block text-xs sm:text-sm">
+                                            {{ \App\Support\Fecha::corta($solicitud->inicio) }}
                                         </a>
                                         <span class="text-xs text-ink-500">
                                             {{ $solicitud->inicio->format('H:i') }} – {{ $solicitud->fin->format('H:i') }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3">
-                                        <span class="font-medium text-ink-900 block">
+                                    <td class="px-3 sm:px-4 py-3">
+                                        <span class="font-medium text-ink-900 block text-xs sm:text-sm">
                                             {{ $solicitud->paciente->nombre }} {{ $solicitud->paciente->apellido }}
                                         </span>
-                                        <span class="text-xs text-ink-500">
+                                        <span class="text-xs text-ink-500 block">
                                             {{ $solicitud->created_at->diffForHumans() }}
                                         </span>
+                                        <div class="md:hidden text-xs text-ink-500 mt-0.5">
+                                            <span>{{ $solicitud->servicio->nombre }}</span>
+                                            @if ($esFuncionario)
+                                                <span class="block">
+                                                    {{ $solicitud->profesional->nombre }} {{ $solicitud->profesional->apellido }}
+                                                </span>
+                                            @endif
+                                        </div>
                                     </td>
-                                    <td class="px-4 py-3 text-ink-900">
+                                    <td class="hidden md:table-cell px-4 py-3 text-ink-900">
                                         {{ $solicitud->servicio->nombre }}
                                     </td>
                                     @if ($esFuncionario)
-                                        <td class="px-4 py-3 text-ink-900">
+                                        <td class="hidden md:table-cell px-4 py-3 text-ink-900">
                                             {{ $solicitud->profesional->nombre }} {{ $solicitud->profesional->apellido }}
                                         </td>
                                     @endif
-                                    <td class="px-4 py-3 text-right">
-                                        <div class="flex items-center justify-end gap-2">
+                                    <td class="px-3 sm:px-4 py-3 text-right">
+                                        <div class="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-1.5 sm:gap-2">
                                             <a
                                                 href="{{ route('panel.turnos.show', $solicitud) }}"
-                                                class="text-xs font-medium text-ink-500 hover:text-ink-900 px-2 py-1 rounded min-h-9 inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                                                class="text-xs font-medium text-ink-500 hover:text-ink-900 px-2 py-1 rounded min-h-8 sm:min-h-9 inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
                                             >
                                                 Ver
                                             </a>
                                             <form method="POST" action="{{ route('panel.turnos.confirmar', $solicitud) }}" class="inline">
                                                 @csrf
-                                                <x-button type="submit" variant="primary">
+                                                <x-button type="submit" variant="primary" class="w-full sm:w-auto text-xs py-1.5 px-3">
                                                     Confirmar
                                                 </x-button>
                                             </form>
                                             <button
                                                 type="button"
                                                 @click="$dispatch('abrir-modal', 'rechazar-solicitud-{{ $solicitud->id }}')"
-                                                class="text-xs font-bold text-danger-700 px-2 py-1 rounded min-h-9 inline-flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-700"
+                                                class="text-xs font-bold text-danger-700 px-2 py-1 rounded min-h-8 sm:min-h-9 inline-flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-700"
                                             >
                                                 Rechazar
                                             </button>
@@ -85,7 +93,7 @@
 
                                         <x-modal name="rechazar-solicitud-{{ $solicitud->id }}" titulo="¿Rechazar la solicitud?">
                                             <p class="text-sm text-ink-500 mb-4">
-                                                {{ $solicitud->paciente->nombre }} {{ $solicitud->paciente->apellido }} · {{ ucfirst($solicitud->inicio->translatedFormat('D j M, H:i')) }} · {{ $solicitud->servicio->nombre }}. El turno queda cancelado y el horario se libera.
+                                                {{ $solicitud->paciente->nombre }} {{ $solicitud->paciente->apellido }} · {{ \App\Support\Fecha::corta($solicitud->inicio) }}, {{ $solicitud->inicio->format('H:i') }} · {{ $solicitud->servicio->nombre }}. El turno queda cancelado y el horario se libera.
                                             </p>
                                             <form method="POST" action="{{ route('panel.turnos.cancelar', $solicitud) }}" class="space-y-4">
                                                 @csrf

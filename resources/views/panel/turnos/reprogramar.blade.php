@@ -34,7 +34,7 @@
         <x-card class="bg-surface/50">
             <span class="text-xs text-ink-500 font-medium">Turno actual:</span>
             <div class="font-semibold text-ink-900 text-sm mt-0.5">
-                {{ ucfirst($turno->inicio->translatedFormat('D j M, H:i')) }} · {{ $turno->servicio->nombre }} · {{ $turno->profesional->nombre }} {{ $turno->profesional->apellido }}
+                {{ \App\Support\Fecha::corta($turno->inicio) }}, {{ $turno->inicio->format('H:i') }} · {{ $turno->servicio->nombre }} · {{ $turno->profesional->nombre }} {{ $turno->profesional->apellido }}
             </div>
         </x-card>
 
@@ -106,7 +106,7 @@
                     >
                         <span x-show="! horaSeleccionada">Reprogramar turno</span>
                         <span x-show="horaSeleccionada" x-cloak>
-                            Reprogramar a {{ ucfirst($fecha->translatedFormat('D j M')) }}, <span x-text="horaSeleccionada"></span>
+                            Reprogramar a {{ \App\Support\Fecha::corta($fecha) }}, <span x-text="horaSeleccionada"></span>
                         </span>
                     </x-button>
                 </div>

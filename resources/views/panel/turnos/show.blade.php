@@ -125,7 +125,7 @@
 
                         <x-modal name="modal-rechazar-turno" titulo="¿Rechazar la solicitud?">
                             <p class="text-sm text-ink-500 mb-4">
-                                {{ $turno->paciente->nombre }} {{ $turno->paciente->apellido }} · {{ ucfirst($turno->inicio->translatedFormat('D j M, H:i')) }} · {{ $turno->servicio->nombre }}. El turno queda cancelado y el horario se libera.
+                                {{ $turno->paciente->nombre }} {{ $turno->paciente->apellido }} · {{ \App\Support\Fecha::corta($turno->inicio) }}, {{ $turno->inicio->format('H:i') }} · {{ $turno->servicio->nombre }}. El turno queda cancelado y el horario se libera.
                             </p>
                             <form method="POST" action="{{ route('panel.turnos.cancelar', $turno) }}" class="space-y-4">
                                 @csrf
@@ -183,7 +183,7 @@
 
                         <x-modal name="modal-cancelar-turno" titulo="¿Cancelar el turno?">
                             <p class="text-sm text-ink-500 mb-4">
-                                {{ $turno->paciente->nombre }} {{ $turno->paciente->apellido }} · {{ ucfirst($turno->inicio->translatedFormat('D j M, H:i')) }} · {{ $turno->servicio->nombre }}. El turno queda cancelado y el horario se libera.
+                                {{ $turno->paciente->nombre }} {{ $turno->paciente->apellido }} · {{ \App\Support\Fecha::corta($turno->inicio) }}, {{ $turno->inicio->format('H:i') }} · {{ $turno->servicio->nombre }}. El turno queda cancelado y el horario se libera.
                             </p>
                             <form method="POST" action="{{ route('panel.turnos.cancelar', $turno) }}" class="space-y-4">
                                 @csrf
@@ -231,7 +231,7 @@
                                         {{ ucfirst($h->estado_nuevo->value) }}
                                     </p>
                                     <p class="text-xs text-ink-500">
-                                        {{ $h->created_at->format('d/m H:i') }} · {{ $h->usuario?->email ?? 'Sistema' }}
+                                        {{ $h->created_at->format('d/m H:i') }} · {{ $h->usuario?->nombreVisible() ?? 'Sistema' }}
                                     </p>
                                     @if ($h->detalle)
                                         <p class="text-xs text-ink-900 bg-surface rounded p-1.5 mt-1 border border-line/60">

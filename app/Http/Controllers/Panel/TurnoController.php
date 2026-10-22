@@ -42,7 +42,7 @@ class TurnoController extends Controller
             'profesional',
             'servicio',
             'consultorio',
-            'historial' => fn ($q) => $q->with('usuario')->orderBy('created_at', 'asc'),
+            'historial' => fn ($q) => $q->with('usuario.paciente', 'usuario.profesional')->orderBy('created_at', 'asc'),
         ]);
 
         return view('panel.turnos.show', [

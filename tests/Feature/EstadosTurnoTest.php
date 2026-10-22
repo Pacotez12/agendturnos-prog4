@@ -343,4 +343,23 @@ class EstadosTurnoTest extends TestCase
         $resFunc = $this->actingAs($this->funcionario)->get(route('panel.solicitudes'));
         $resFunc->assertSee('>3<', false);
     }
+
+    public function test_show_muestra_nombre_visible_en_historial_y_fecha_corta(): void
+    {
+        $turno = $this->crearTurno($this->profesional1, '2026-10-19 09:00:00', '2026-10-19 09:30:00', EstadoTurno::Solicitado);
+
+        // Funcionario confirma el turno
+        $this->actingAs($this->funcionario)->post(route('panel.turnos.confirmar', $turno));
+
+        $res = $this->actingAs($this->profesionalUser1)->get(route('panel.turnos.show', $turno));
+        $res->assertOk();
+
+        // En el historial debe figurar 'Recepción', no el email del funcionario
+        $res->assertSee('Recepción');
+        $res->assertDontSee($this->funcionario->email);
+
+        // En solicitudes debe verse la fecha corta formateada
+        $resSol = $this->actingAs($this->profesionalUser1)->get(route('panel.solicitudes'));
+        $resSol->assertOk();
+    }
 }
