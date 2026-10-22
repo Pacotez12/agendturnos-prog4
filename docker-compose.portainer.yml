@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
-      - ${PROJECT_PATH:-/run/desktop/mnt/host/c/Users/julit/agendturnos-prog4}:/var/www/html:z
+      - ${PROJECT_PATH:?Definí PROJECT_PATH}:/var/www/html:z
     depends_on:
       db:
         condition: service_healthy
@@ -24,7 +24,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ${PROJECT_PATH:-/run/desktop/mnt/host/c/Users/julit/agendturnos-prog4}:/var/www/html:ro,z
+      - ${PROJECT_PATH:?Definí PROJECT_PATH}:/var/www/html:ro,z
     depends_on:
       - app
 
@@ -37,7 +37,7 @@ services:
     ports:
       - "8081:80"
     volumes:
-      - ${PROJECT_PATH:-/run/desktop/mnt/host/c/Users/julit/agendturnos-prog4}:/var/www/html:z
+      - ${PROJECT_PATH:?Definí PROJECT_PATH}:/var/www/html:z
     depends_on:
       db:
         condition: service_healthy
