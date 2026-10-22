@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\Paciente\ReservaController;
 use App\Http\Controllers\Panel\DisponibilidadController;
 use App\Http\Controllers\Panel\EspecialidadController;
 use App\Http\Controllers\Panel\ProfesionalController;
@@ -34,6 +35,8 @@ Route::middleware(['auth', 'rol:paciente'])->group(function () {
     Route::get('/inicio', function () {
         return view('paciente.inicio');
     })->name('paciente.inicio');
+
+    Route::get('/turnos/nuevo', [ReservaController::class, 'create'])->name('paciente.reservar');
 });
 
 Route::get('/servicios', [CatalogoController::class, 'index'])->name('servicios.catalogo');
