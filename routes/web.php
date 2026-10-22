@@ -41,7 +41,9 @@ Route::middleware(['auth', 'rol:paciente'])->group(function () {
 
     Route::get('/turnos/nuevo', [ReservaController::class, 'create'])->name('paciente.reservar');
     Route::post('/turnos', [TurnoController::class, 'store'])->name('paciente.turnos.store');
+    Route::get('/mis-turnos', [TurnoController::class, 'index'])->name('paciente.turnos');
     Route::get('/turnos/{turno}', [TurnoController::class, 'show'])->name('paciente.turnos.show');
+    Route::post('/turnos/{turno}/cancelar', [TurnoController::class, 'cancelar'])->name('paciente.turnos.cancelar');
 });
 
 Route::get('/servicios', [CatalogoController::class, 'index'])->name('servicios.catalogo');

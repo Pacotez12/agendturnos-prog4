@@ -50,6 +50,18 @@ class User extends Authenticatable
         return $this->hasMany(Paciente::class, 'responsable_id');
     }
 
+    /**
+     * @return array<int, int>
+     */
+    public function pacientesIds(): array
+    {
+        return Paciente::query()
+            ->where('user_id', $this->id)
+            ->orWhere('responsable_id', $this->id)
+            ->pluck('id')
+            ->all();
+    }
+
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new RestablecerContrasena($token));

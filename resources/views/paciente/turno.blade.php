@@ -46,6 +46,9 @@
                 <x-button :pill="true" href="{{ route('paciente.inicio') }}" class="w-full sm:w-auto">
                     Volver al inicio
                 </x-button>
+                <x-button variant="secondary" :pill="true" href="{{ route('paciente.turnos') }}" class="w-full sm:w-auto">
+                    Mis turnos
+                </x-button>
                 <x-button variant="secondary" :pill="true" href="{{ route('paciente.reservar') }}" class="w-full sm:w-auto">
                     Reservar otro turno
                 </x-button>
