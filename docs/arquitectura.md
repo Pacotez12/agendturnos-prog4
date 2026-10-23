@@ -183,9 +183,10 @@ erDiagram
 |---|---|---|---|
 | Autenticación y usuarios | HU-01, HU-02 | `/registro`, `/login`, `/logout`, `/inicio` (paciente), `/panel` | ✅ |
 | Servicios y especialidades | HU-03, SCRUM-39 | `/servicios` (catálogo público) · `/panel/servicios`, `/panel/especialidades`, `/panel/profesionales/{id}/servicios` | ✅ |
-| Agendamiento | HU-04, HU-05 | `/turnos/nuevo` y la consulta de horarios libres | ⏳ |
-| Agenda de la profesional | HU-06, HU-07, HU-11, HU-12 | `/panel/agenda`, `/panel/turnos/{id}`, `/panel/disponibilidad` | ✅ |
-| Seguimiento | HU-08 | `/mis-turnos` | ✅ |
+| Agendamiento | HU-04, HU-05 | `/turnos/nuevo` (horarios libres y solicitud), `/turnos/{id}` | ✅ |
+| Agendamiento por operador | HU-13 | `/panel/turnos/nuevo`, `/panel/pacientes` (alta sin cuenta) | ✅ |
+| Agenda de la profesional | HU-06, HU-07, HU-11, HU-12 | `/panel/agenda`, `/panel/solicitudes`, `/panel/turnos/{id}` (confirmar, reprogramar, cancelar, atendido, ausente), `/panel/disponibilidad` | ✅ |
+| Seguimiento | HU-08 | `/mis-turnos`, `/turnos/{id}/cancelar` | ✅ |
 | Notificaciones | HU-09, HU-10 | — (colas y scheduler) | ✅ |
 | Salud | — | `/health` (de Laravel; verifica PostgreSQL y Redis; health check de HAProxy) | ✅ |
 
@@ -266,6 +267,8 @@ Scrum con sprints de 2 semanas en Jira (proyecto `SCRUM`).
 
 Cada historia la implementa de punta a punta (backend y vista) quien la tiene asignada.
 
+En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (backend) y HU-06, HU-08 y HU-12 (frontend), para llegar con el flujo completo del turno al Avance 3. Reporte de cada sprint en `docs/sprints/`.
+
 ## 10. Convenciones
 
 - **Ramas:** `feat/SCRUM-<n>-<descripcion>` (ej. `feat/SCRUM-25-modelo-datos`) y Pull Request a `main`, con revisión de un compañero.
@@ -278,6 +281,7 @@ Cada historia la implementa de punta a punta (backend y vista) quien la tiene as
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-23 | Reporte del Sprint 2 (`docs/sprints/sprint-2.md`) con la evidencia del Avance 3; módulos y rutas al día y reasignación de historias del Sprint 2. |
 | 2026-10-22 | Agenda de la profesional (HU-06, SCRUM-16): pantalla `/panel/agenda` con vistas Día (columnas por profesional) y Semana (columnas por día con selector de profesional para funcionario), grilla horaria dinámica según disponibilidad, filtros por estado, navegación por fechas, posicionamiento vertical por duración y cola lateral "Por confirmar". |
 | 2026-10-22 | Mis turnos (HU-08, SCRUM-20): pantalla `/mis-turnos` con pestañas Próximos e Historial (con motivo de cancelación y paginación), visualización de turnos propios y de dependientes, cancelación por el paciente con antelación mínima configurable (`AGENDA_CANCELACION_HORAS`), enlace alternativo a WhatsApp y modal de confirmación. |
 | 2026-10-22 | Detalle del turno (HU-12, SCRUM-19): tarjeta de datos del paciente ampliada con correo (del paciente o su responsable con indicador) y nombre del responsable para menores/dependientes; relaciones cargadas con eager loading en `Panel\TurnoController::show`. |
