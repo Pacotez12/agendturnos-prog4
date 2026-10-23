@@ -32,7 +32,7 @@
                         {{ $pacienteSeleccionado->nombre }} {{ $pacienteSeleccionado->apellido }}
                     </span>
                     <span class="text-sm text-ink-500">
-                        · {{ $pacienteSeleccionado->tipo_documento }} {{ $pacienteSeleccionado->documento }}
+                        <span class="hidden sm:inline">·</span> {{ $pacienteSeleccionado->tipo_documento }} {{ $pacienteSeleccionado->documento }}
                         @if ($pacienteSeleccionado->telefono)
                             · {{ $pacienteSeleccionado->telefono }}
                         @endif
