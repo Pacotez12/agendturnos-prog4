@@ -85,7 +85,7 @@ class OrdenProfesionalesTest extends TestCase
 
         $response->assertOk();
         // Profesional por defecto debe ser el primero según el orden
-        $response->assertSee('Dra. Bernardo Zapata');
+        $response->assertSee('Bernardo Zapata');
         // El orden en el selector debe mostrar primero al de menor orden
         $posicionPrimero = strpos($response->getContent(), 'Bernardo Zapata');
         $posicionSegundo = strpos($response->getContent(), 'Alberto Alvarez');

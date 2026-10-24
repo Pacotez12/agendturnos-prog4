@@ -87,7 +87,10 @@ Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
     Route::get('/panel/solicitudes', [PanelTurnoController::class, 'solicitudes'])->name('panel.solicitudes');
     Route::get('/panel/turnos/nuevo', [PanelTurnoController::class, 'crear'])->name('panel.turnos.crear');
     Route::post('/panel/turnos', [PanelTurnoController::class, 'store'])->name('panel.turnos.store');
+    Route::get('/panel/pacientes', [PanelPacienteController::class, 'index'])->name('panel.pacientes');
     Route::post('/panel/pacientes', [PanelPacienteController::class, 'store'])->name('panel.pacientes.store');
+    Route::get('/panel/pacientes/{paciente}', [PanelPacienteController::class, 'show'])->name('panel.pacientes.show');
+    Route::put('/panel/pacientes/{paciente}/contacto', [PanelPacienteController::class, 'actualizarContacto'])->name('panel.pacientes.contacto.update');
     Route::get('/panel/turnos/{turno}', [PanelTurnoController::class, 'show'])->name('panel.turnos.show');
     Route::post('/panel/turnos/{turno}/confirmar', [PanelTurnoController::class, 'confirmar'])->name('panel.turnos.confirmar');
     Route::post('/panel/turnos/{turno}/cancelar', [PanelTurnoController::class, 'cancelar'])->name('panel.turnos.cancelar');

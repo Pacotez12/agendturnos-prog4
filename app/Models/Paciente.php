@@ -47,6 +47,11 @@ class Paciente extends Model
         return $this->hasMany(Turno::class);
     }
 
+    public function dependientes(): HasMany
+    {
+        return $this->hasMany(Paciente::class, 'responsable_id', 'user_id');
+    }
+
     public function nombreCompleto(): string
     {
         return trim("{$this->nombre} {$this->apellido}");
@@ -56,7 +61,7 @@ class Paciente extends Model
      * @param  Builder<Paciente>  $query
      * @return Builder<Paciente>
      */
-    public function scopeBuscar(Builder $query, string $texto): Builder
+    public function scopeBuscar(Builder $query, string $texto, ?int $limit = null): Builder
     {
         $escaped = addcslashes($texto, '%_\\');
 
@@ -67,14 +72,15 @@ class Paciente extends Model
         );
         $normalize = fn (string $col): string => "translate(lower({$col}), 'áéíóúüñ', 'aeiouun')";
 
-        return $query
+        $query = $query
             ->where(function (Builder $q) use ($escaped, $qNorm, $normalize) {
                 $q->whereRaw("{$normalize('nombre')} LIKE ?", ["%{$qNorm}%"])
                     ->orWhereRaw("{$normalize('apellido')} LIKE ?", ["%{$qNorm}%"])
                     ->orWhere('documento', 'ILIKE', "%{$escaped}%");
             })
             ->orderBy('apellido')
-            ->orderBy('nombre')
-            ->limit(10);
+            ->orderBy('nombre');
+
+        return $limit !== null ? $query->limit($limit) : $query;
     }
 }

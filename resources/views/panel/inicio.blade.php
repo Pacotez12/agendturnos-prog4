@@ -146,7 +146,7 @@
                                             <p class="text-xs text-ink-500 mt-1">
                                                 {{ $turno->servicio->nombre }}
                                                 @if ($esFuncionario)
-                                                    <span class="text-line">·</span> Dra. {{ $turno->profesional->nombre }} {{ $turno->profesional->apellido }}
+                                                    <span class="text-line">·</span> {{ $turno->profesional->nombre }} {{ $turno->profesional->apellido }}
                                                 @endif
                                                 <span class="text-line">·</span> {{ $turno->inicio->format('H:i') }} – {{ $turno->fin->format('H:i') }}
                                             </p>

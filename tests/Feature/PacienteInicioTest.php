@@ -101,7 +101,7 @@ class PacienteInicioTest extends TestCase
         $response->assertOk();
         $response->assertSee('Tu próximo turno');
         $response->assertSee('Limpieza dental');
-        $response->assertSee('Dra. Ana González');
+        $response->assertSee('Ana González');
         $response->assertSee('11:00');
         $response->assertSee(route('paciente.turnos.show', $turno1));
         $response->assertSee(route('paciente.reservar'));

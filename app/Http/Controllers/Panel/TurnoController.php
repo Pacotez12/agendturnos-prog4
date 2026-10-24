@@ -46,7 +46,7 @@ class TurnoController extends Controller
         $q = trim((string) $request->input('q'));
         $pacientes = collect();
         if (mb_strlen($q) >= 3) {
-            $pacientes = Paciente::buscar($q)->with('responsable.paciente')->get();
+            $pacientes = Paciente::buscar($q, 10)->with('responsable.paciente')->get();
         }
 
         $pacienteSeleccionado = null;
