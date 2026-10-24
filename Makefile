@@ -1,4 +1,4 @@
-.PHONY: up scale down build sh artisan migrate fresh logs assets portainer portainer-build
+.PHONY: up scale down build sh artisan migrate fresh demo logs assets portainer portainer-build
 
 up:
 	docker compose up -d
@@ -25,6 +25,9 @@ migrate:
 
 fresh:
 	docker compose exec app php artisan migrate:fresh
+
+demo:
+	docker compose exec -u www-data app php artisan demo:cargar --fresh
 
 logs:
 	docker compose logs -f
