@@ -132,7 +132,7 @@ Los resultados empíricos, metodología, análisis de paridad e interpretación 
 
 ## 5. Modelo de datos ✅
 
-Migraciones, seeders y tests de integridad (SCRUM-25); modelos Eloquent con relaciones, Enums (`RolUsuario`, `EstadoTurno`, `EstadoNotificacion`) y factories (SCRUM-40). Pendiente: el detalle en `docs/der.md`, `docs/diccionario-datos.md` y `docs/normalizacion.md`.
+Migraciones, seeders y tests de integridad (SCRUM-25); modelos Eloquent con relaciones, Enums (`RolUsuario`, `EstadoTurno`, `EstadoNotificacion`) y factories (SCRUM-40). Diagrama completo, diccionario de datos, restricciones, índices y justificación de la 3FN en [`diccionario-datos.md`](diccionario-datos.md).
 
 ```mermaid
 erDiagram
@@ -294,6 +294,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Diccionario de datos completo (`docs/diccionario-datos.md`): MER con cardinalidades, todas las tablas y columnas generadas desde el esquema real, restricciones, índices y justificación de la 3FN. |
 | 2026-10-24 | Documentación interactiva de la API con Scramble (SCRUM-61 complemento): paquete `dedoc/scramble` (^0.13) instalado; configuración en `config/scramble.php` acotada a prefijo `api/v1` (`api_path`), título "Glow Dental Protect API" versión 1.0.0 y descripción en español; UI interactiva en `/docs/api` y especificación OpenAPI 3.1 en `/docs/api.json`; esquema de seguridad Bearer (Sanctum) declarado en components y aplicado exclusivamente a las operaciones protegidas (`DELETE /token` y `GET /mis-turnos`); acceso a la UI restringido únicamente a entorno local (`Gate::define('viewApiDocs')` y 403 Forbidden en producción); docblocks PHPDoc en controladores `Api\v1` para resumen y descripción en español; documentación en `docs/api.md` con instrucciones de autorización interactiva y suite de tests en `DocumentacionApiTest`. |
 | 2026-10-24 | Benchmark comparativo de arquitecturas (SCRUM-33 / SCRUM-35): script ejecutable `scripts/benchmark.sh` y target `make bench` con herramienta `hey` (`williamyeh/hey --network host`); paridad verificada y ajustada entre A (Nginx + PHP-FPM) y B (Apache + mod_php) con 150 workers concurrentes y OPcache idéntico; modo producción temporal con `php artisan optimize` sin tocar `.env`; pruebas en `/health`, portada `/` y API `/api/v1/servicios` a concurrencias 10, 50 y 100 con 3 repeticiones (mediana); captura del dashboard de HAProxy (`docs/img/haproxy-stats.png`) y reporte completo en `docs/benchmark.md` con resumen en `docs/benchmark-resumen.csv`. |
 | 2026-10-24 | API REST v1 (SCRUM-61): endpoints públicos (`/api/v1/servicios`, `/api/v1/profesionales` sin datos privados, `/api/v1/disponibilidad` en ISO 8601, sin fechas pasadas), autenticación por token Sanctum (`/api/v1/token` emisión con throttle 5/min y revocación 204), consulta paginada de turnos propios y dependientes (`/api/v1/mis-turnos` con filtro de historial y control de rol paciente 403), rate limiting global de 60/min, respuestas con API Resources y documentación completa en `docs/api.md`. |
