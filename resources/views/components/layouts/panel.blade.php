@@ -17,6 +17,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBF7F2">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171311">
     @fonts
