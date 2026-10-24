@@ -6,11 +6,11 @@
 | **Objetivo** | Gestión de agenda de la profesional, seguimiento del paciente, arquitectura B, HAProxy con health checks y failover en vivo; entrega del Avance 3 (30/10). |
 | **Equipo** | Marco Brizuela (Scrum Master), Juan Morán (backend), Enzo Ferrari (frontend), Julio Ybañez (DevOps), Félix Villasanti (QA) |
 
-> Estado al 23/10/2026. Se completa al cierre del sprint.
+> Estado al 24/10/2026. Se completa al cierre del sprint (30/10).
 
 ## 1. Resultado
 
-**Completado (17 de 20 tickets):**
+**Completado del compromiso inicial (17 de 20 tickets):**
 
 | Ticket | Historia / tarea | Responsable | Entrega |
 |---|---|---|---|
@@ -32,15 +32,38 @@
 | SCRUM-20 | HU-08 Consultar estado de mis turnos | Marco Brizuela | PR #24 |
 | SCRUM-16 | HU-06 Ver agenda de turnos | Marco Brizuela | PR #25 |
 
+**Agregado durante el sprint y completado (23 y 24/10):**
+
+| Ticket | Historia / tarea | Responsable | Entrega |
+|---|---|---|---|
+| SCRUM-44 | HU-16 Inicio del panel con indicadores del día | Marco Brizuela | PR #29 |
+| SCRUM-50 | HU-22 Reenviar recordatorio desde el panel | Marco Brizuela | PR #29 |
+| SCRUM-45 | HU-17 Inicio del paciente con su próximo turno | Marco Brizuela | PR #29 |
+| SCRUM-60 | Orden configurable de profesionales | Marco Brizuela | PR #30 |
+| SCRUM-55 | Datos de demostración (`make demo`) | Marco Brizuela | PR #31 |
+| SCRUM-56 | HU-25 Horario silencioso para avisos | Marco Brizuela | PR #32 |
+| SCRUM-57 | HU-26 Límite de solicitudes y de intentos | Marco Brizuela | PR #33 |
+| SCRUM-58 | HU-27 Validación de celular paraguayo | Marco Brizuela | PR #34 |
+| SCRUM-59 | HU-28 Política de privacidad y consentimiento | Marco Brizuela | PR #35 |
+| SCRUM-54 | Favicon, páginas de error, navegación y rendimiento | Marco Brizuela | PR #36, #39 |
+| SCRUM-46 | HU-18 Pacientes en el panel | Marco Brizuela | PR #37 |
+| SCRUM-51 | HU-23 Panel instalable (PWA) | Marco Brizuela | PR #38 |
+| SCRUM-61 | API REST v1 | Marco Brizuela | PR #42 |
+| SCRUM-33, SCRUM-35 | Benchmark A contra B y HAProxy Stats (adelantado del Sprint 3) | Marco Brizuela; revisa Félix Villasanti | PR #43 |
+| — | Modo oscuro | Marco Brizuela | PR #28 |
+
+**Descartado:** SCRUM-47 Estadísticas del consultorio (ver `docs/alcance-cambios.md`, CA-06).
+
 **Abiertos:**
 
 | Ticket | Estado |
 |---|---|
-| SCRUM-32 Ceremonias del Sprint 2 y documento del Avance 3 | Este reporte; falta la review y la retrospectiva con el equipo. |
-| SCRUM-28 Ceremonias del Sprint 1 | Falta completar la retrospectiva del Sprint 1 (`sprint-1.md`, sección 6). |
+| SCRUM-43 HU-15 Avisos por WhatsApp | Código integrado (PR #27). Falta la prueba de punta a punta: la plantilla de mensaje está en revisión en Meta. |
+| SCRUM-62 Cambios de alcance y cierre del reporte | Registro de cambios de alcance listo; faltan la review y la retrospectiva con el equipo (secciones 6 y 7). |
 | SCRUM-37 QA del Sprint 1 | Plan y casos de prueba en curso. |
 
 **Replanificado durante el sprint:**
+- Se sumaron 16 tickets nuevos el 23 y 24/10, después de revisar el sistema funcionando: inicio del panel y del paciente, recordatorio manual, pacientes en el panel y medidas de protección (límites, validación de celular, privacidad). Los cambios que amplían la Declaración de Alcance están justificados en `docs/alcance-cambios.md`.
 - HU-09 y HU-10 (notificaciones), previstas para el Sprint 3, se adelantaron a este sprint.
 - HU-05, HU-07, HU-09 y HU-10 (backend) y HU-06, HU-08 y HU-12 (frontend) se reasignaron a Marco Brizuela para llegar con el flujo completo del turno al Avance 3.
 
@@ -66,16 +89,19 @@
 
 | Métrica | Valor |
 |---|---|
-| Tickets comprometidos | 20 |
-| Tickets completados al 23/10 | 17 (85 %) |
-| Pull Requests integrados (#12 a #25) | 14 |
-| Tests automatizados | 228, todos en verde (129 al cierre del Sprint 1) |
-| Migraciones | 17 |
+| Tickets comprometidos al inicio | 20 |
+| Completados del compromiso inicial al 24/10 | 17 (85 %) |
+| Tickets agregados durante el sprint | 16 (13 completados, 1 descartado, 2 en curso) |
+| Pull Requests integrados (#12 a #43) | 31 |
+| Tests automatizados | 339, todos en verde (129 al cierre del Sprint 1) |
+| Migraciones | 20 |
 
 ## 5. Impedimentos
 
 - Las historias de backend y frontend del flujo del turno se concentraron en una persona para llegar a la fecha del Avance 3. Para el Sprint 3 conviene repartir de nuevo la carga.
 - Los tres Pull Requests de HAProxy y la arquitectura B dependían uno del otro; al integrarlos hubo que resolver conflictos entre ellos.
+- La prueba real de WhatsApp depende de que Meta apruebe la plantilla del mensaje; no está en manos del equipo. Mientras tanto, el correo cubre todos los avisos.
+- Al sumar tickets a mitad de sprint, el alcance creció. Se controló con un registro de cambios y descartando lo que no aportaba (estadísticas, bot de WhatsApp).
 
 ## 6. Sprint Review
 
@@ -83,13 +109,17 @@
 
 - Fecha:
 - Asistentes:
-- Demostración: reserva del paciente, confirmación desde el panel, correo de confirmación, agenda por día y por semana, failover de HAProxy.
+- Demostración: reserva del paciente, confirmación desde el panel, correo de confirmación, agenda por día y por semana, inicio del panel con recordatorio manual, pacientes, failover de HAProxy.
 - Comentarios:
 - Cambios al backlog:
 
 ## 7. Retrospectiva
 
-> Completar con el equipo.
+> Completar con el equipo. Preguntas guía (15 minutos alcanzan):
+> 1. ¿Qué nos ayudó a llegar con el flujo completo del turno al Avance 3?
+> 2. ¿Qué nos frenó? (dependencias entre tareas, concentración del trabajo en una persona, falta de tiempo para revisar).
+> 3. ¿Cómo repartimos el Sprint 3 (API, benchmark, documentación final) para que no recaiga en una sola persona?
+> 4. ¿Qué tiene que estar listo antes de la defensa y quién lo presenta?
 
 **Qué salió bien**
 -
