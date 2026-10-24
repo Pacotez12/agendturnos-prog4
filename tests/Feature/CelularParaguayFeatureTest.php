@@ -22,6 +22,7 @@ class CelularParaguayFeatureTest extends TestCase
             'email' => 'juan@example.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
+            'privacidad' => '1',
         ]);
 
         $response->assertSessionDoesntHaveErrors();
@@ -45,6 +46,7 @@ class CelularParaguayFeatureTest extends TestCase
             'email' => 'juan2@example.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
+            'privacidad' => '1',
         ]);
 
         $response->assertSessionHasErrors([
