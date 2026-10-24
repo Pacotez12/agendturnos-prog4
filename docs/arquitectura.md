@@ -190,7 +190,12 @@ erDiagram
 | Notificaciones | HU-09, HU-10, HU-25 | — (colas, scheduler y horario silencioso) | ✅ |
 | Inicio del panel y del paciente | HU-16, HU-17, HU-22, HU-23 | `/panel`, `/inicio`, POST `/panel/turnos/{turno}/recordatorio` (PWA instalable para el panel con `/manifest.webmanifest` y `/sw.js`) | ✅ |
 | Avisos por WhatsApp | HU-15 | — (mismo job de notificaciones) | ✅ |
+| API REST v1 | SCRUM-61 | `/api/v1/servicios`, `/api/v1/profesionales`, `/api/v1/disponibilidad`, `/api/v1/token`, `/api/v1/mis-turnos` (ver [`docs/api.md`](api.md)) | ✅ |
 | Salud | — | `/health` (de Laravel; verifica PostgreSQL y Redis; health check de HAProxy) | ✅ |
+
+### 6.1 API REST v1 ✅
+
+La plataforma expone una API REST bajo el prefijo `/api/v1` documentada en detalle en [`docs/api.md`](api.md). La API permite a clientes externos consultar catálogo, profesionales, disponibilidad y los turnos del paciente mediante autenticación con tokens personales (Laravel Sanctum). Implementa rate limiting general (60/min) y reforzado para autenticación (5/min), y respuestas consistentes con API Resources.
 
 **Transiciones de estado de un turno:**
 
@@ -283,6 +288,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | API REST v1 (SCRUM-61): endpoints públicos (`/api/v1/servicios`, `/api/v1/profesionales` sin datos privados, `/api/v1/disponibilidad` en ISO 8601, sin fechas pasadas), autenticación por token Sanctum (`/api/v1/token` emisión con throttle 5/min y revocación 204), consulta paginada de turnos propios y dependientes (`/api/v1/mis-turnos` con filtro de historial y control de rol paciente 403), rate limiting global de 60/min, respuestas con API Resources y documentación completa en `docs/api.md`. |
 | 2026-10-24 | Portada: con sesión del personal, "Reservar turno" lleva a Nuevo turno del panel en vez del inicio del panel. |
 | 2026-10-24 | Favicon con más contraste: isotipo en crema sobre cuadrado redondeado marrón, sin destellos (ilegibles a 16 px); regenerados `favicon.ico` (16/32/48), íconos PWA 192/512, maskable y `apple-touch-icon.png` a sangre. |
 | 2026-10-24 | Panel instalable como app PWA (HU-23, SCRUM-51): manifest WebManifest (`/manifest.webmanifest`) vinculado exclusivamente al layout del panel con iconos (192, 512 y 512 maskable con margen de seguridad), Service Worker (`/sw.js`) liviano con passthrough a red sin caché de datos ni páginas y pantalla de desconexión inline ante fallas de navegación, registro condicional desde `app.js` y configuración Nginx con `application/manifest+json` y cabeceras `no-cache`. |

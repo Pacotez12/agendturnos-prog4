@@ -18,4 +18,15 @@ enum EstadoTurno: string
             default => false,
         };
     }
+
+    public function etiqueta(): string
+    {
+        return match ($this) {
+            self::Solicitado => 'Solicitado',
+            self::Confirmado => 'Confirmado',
+            self::Atendido => 'Atendido',
+            self::Cancelado => 'Cancelado',
+            self::Ausente => 'Ausente',
+        };
+    }
 }
