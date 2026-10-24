@@ -3,7 +3,7 @@
         <div>
             <a
                 href="{{ route('panel.profesionales') }}"
-                class="text-xs font-semibold text-brand-600 hover:text-brand-700 inline-flex items-center gap-1 mb-2"
+                class="text-xs font-semibold text-brand-text hover:text-brand-700 inline-flex items-center gap-1 mb-2"
             >
                 &larr; Volver a profesionales
             </a>
@@ -20,7 +20,7 @@
             @method('PUT')
 
             @foreach ($especialidades as $esp)
-                <div class="bg-white rounded-lg border border-line p-5 shadow-2xs">
+                <div class="bg-card rounded-lg border border-line p-5 shadow-2xs">
                     <h2 class="text-xs font-bold text-ink-500 uppercase tracking-wider mb-4 pb-2 border-b border-line">
                         {{ $esp->nombre }}
                     </h2>
@@ -65,7 +65,7 @@
             @endforeach
 
             <!-- Botones de acción -->
-            <div class="bg-white p-4 rounded-lg border border-line shadow-2xs flex items-center justify-end gap-3">
+            <div class="bg-card p-4 rounded-lg border border-line shadow-2xs flex items-center justify-end gap-3">
                 <x-button variant="secondary" :href="route('panel.profesionales')">
                     Cancelar
                 </x-button>

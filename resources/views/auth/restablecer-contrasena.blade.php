@@ -1,5 +1,5 @@
 <x-layouts.invitado titulo="Nueva contraseña">
-    <div class="max-w-md mx-auto bg-white p-8 rounded-2xl border border-line shadow-xs">
+    <div class="max-w-md mx-auto bg-card p-8 rounded-2xl border border-line shadow-xs">
         <div class="text-center mb-6">
             <h1 class="text-2xl font-bold font-display text-ink-900">
                 Nueva contraseña

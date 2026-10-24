@@ -11,7 +11,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg border border-line overflow-hidden shadow-2xs">
+        <div class="bg-card rounded-lg border border-line overflow-hidden shadow-2xs">
             @if ($solicitudes->isEmpty())
                 <div class="p-8">
                     <x-empty-state
@@ -37,7 +37,7 @@
                             @foreach ($solicitudes as $solicitud)
                                 <tr class="hover:bg-surface/50 transition-colors">
                                     <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
-                                        <a href="{{ route('panel.turnos.show', $solicitud) }}" class="font-semibold text-ink-900 hover:text-brand-600 block text-xs sm:text-sm">
+                                        <a href="{{ route('panel.turnos.show', $solicitud) }}" class="font-semibold text-ink-900 hover:text-brand-text block text-xs sm:text-sm">
                                             {{ \App\Support\Fecha::corta($solicitud->inicio) }}
                                         </a>
                                         <span class="text-xs text-ink-500">

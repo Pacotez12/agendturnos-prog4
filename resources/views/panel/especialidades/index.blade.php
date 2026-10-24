@@ -18,7 +18,7 @@
         </div>
 
         <!-- Tabla de especialidades -->
-        <div class="bg-white rounded-lg border border-line overflow-hidden shadow-2xs">
+        <div class="bg-card rounded-lg border border-line overflow-hidden shadow-2xs">
             @if ($especialidades->isEmpty())
                 <div class="p-8">
                     <x-empty-state
@@ -48,11 +48,11 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         @if ($esp->activa)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
                                                 Activa
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-stone-800 dark:text-stone-300">
                                                 Inactiva
                                             </span>
                                         @endif
@@ -60,7 +60,7 @@
                                     <td class="px-4 py-3 text-right">
                                         <a
                                             href="{{ route('panel.especialidades.edit', $esp) }}"
-                                            class="text-xs font-semibold text-brand-600 hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                                            class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
                                         >
                                             Editar
                                         </a>

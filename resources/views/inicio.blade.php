@@ -43,7 +43,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <x-card :paciente="true" class="p-5 flex flex-col justify-start">
                     <div class="mb-3">
-                        <x-phosphor-tooth class="size-6 text-brand-600" aria-hidden="true" />
+                        <x-phosphor-tooth class="size-6 text-brand-text" aria-hidden="true" />
                     </div>
                     <h3 class="font-bold text-ink-900 text-base">
                         1. Elegí el servicio
@@ -55,7 +55,7 @@
 
                 <x-card :paciente="true" class="p-5 flex flex-col justify-start">
                     <div class="mb-3">
-                        <x-phosphor-calendar-check class="size-6 text-brand-600" aria-hidden="true" />
+                        <x-phosphor-calendar-check class="size-6 text-brand-text" aria-hidden="true" />
                     </div>
                     <h3 class="font-bold text-ink-900 text-base">
                         2. Elegí día y horario
@@ -67,7 +67,7 @@
 
                 <x-card :paciente="true" class="p-5 flex flex-col justify-start">
                     <div class="mb-3">
-                        <x-phosphor-envelope-simple class="size-6 text-brand-600" aria-hidden="true" />
+                        <x-phosphor-envelope-simple class="size-6 text-brand-text" aria-hidden="true" />
                     </div>
                     <h3 class="font-bold text-ink-900 text-base">
                         3. Te confirmamos
@@ -128,17 +128,17 @@
         <!-- Pie de contacto -->
         <section class="pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-ink-500">
             <div class="flex items-center gap-2">
-                <x-phosphor-map-pin class="size-4 shrink-0 text-brand-600" aria-hidden="true" />
+                <x-phosphor-map-pin class="size-4 shrink-0 text-brand-text" aria-hidden="true" />
                 <span>Félix López 407 c/ Fermín López, San Pablo, Asunción</span>
             </div>
             <div class="flex flex-wrap items-center gap-4">
-                <a href="tel:021522797" class="inline-flex items-center gap-1.5 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">
-                    <x-phosphor-phone class="size-4 shrink-0 text-brand-600" aria-hidden="true" />
+                <a href="tel:021522797" class="inline-flex items-center gap-1.5 hover:text-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">
+                    <x-phosphor-phone class="size-4 shrink-0 text-brand-text" aria-hidden="true" />
                     <span>(021) 522-797</span>
                 </a>
                 <span aria-hidden="true">·</span>
-                <a href="mailto:glowdentalprotect@gmail.com" class="inline-flex items-center gap-1.5 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">
-                    <x-phosphor-envelope-simple class="size-4 shrink-0 text-brand-600" aria-hidden="true" />
+                <a href="mailto:glowdentalprotect@gmail.com" class="inline-flex items-center gap-1.5 hover:text-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">
+                    <x-phosphor-envelope-simple class="size-4 shrink-0 text-brand-text" aria-hidden="true" />
                     <span>glowdentalprotect@gmail.com</span>
                 </a>
             </div>

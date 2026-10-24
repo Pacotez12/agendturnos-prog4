@@ -13,7 +13,7 @@
             <div>
                 <a
                     href="{{ route('panel.turnos.show', $turno) }}"
-                    class="text-sm font-semibold text-brand-600 hover:text-brand-700 min-h-11 inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg"
+                    class="text-sm font-semibold text-brand-text hover:text-brand-700 min-h-11 inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg"
                 >
                     &larr; Volver al turno
                 </a>
@@ -52,7 +52,7 @@
                         value="{{ $fecha->toDateString() }}"
                         min="{{ now()->toDateString() }}"
                         onchange="this.form.submit()"
-                        class="min-h-11 rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                        class="min-h-11 rounded-lg border border-line bg-card px-3 py-2 text-sm text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
                     >
                     <noscript>
                         <x-button type="submit" variant="secondary">

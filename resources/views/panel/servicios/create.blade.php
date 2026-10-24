@@ -3,7 +3,7 @@
         <div>
             <a
                 href="{{ route('panel.servicios') }}"
-                class="text-xs font-semibold text-brand-600 hover:text-brand-700 inline-flex items-center gap-1 mb-2"
+                class="text-xs font-semibold text-brand-text hover:text-brand-700 inline-flex items-center gap-1 mb-2"
             >
                 &larr; Volver a servicios
             </a>
@@ -15,7 +15,7 @@
             </p>
         </div>
 
-        <div class="bg-white p-6 rounded-lg border border-line shadow-2xs">
+        <div class="bg-card p-6 rounded-lg border border-line shadow-2xs">
             <form action="{{ route('panel.servicios.store') }}" method="POST" class="space-y-5">
                 @csrf
 
@@ -71,7 +71,7 @@
                         name="descripcion"
                         rows="3"
                         placeholder="Breve explicación del procedimiento orientada al paciente..."
-                        class="block w-full rounded-lg border bg-white px-3 py-2 text-ink-900 placeholder:text-ink-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 disabled:opacity-50 transition-colors duration-150 motion-reduce:transition-none @error('descripcion') border-danger-700 @else border-line @enderror"
+                        class="block w-full rounded-lg border bg-card px-3 py-2 text-ink-900 placeholder:text-ink-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 disabled:opacity-50 transition-colors duration-150 motion-reduce:transition-none @error('descripcion') border-danger-700 @else border-line @enderror"
                     >{{ old('descripcion') }}</textarea>
                     @error('descripcion')
                         <p class="mt-1 text-xs text-danger-700" role="alert">{{ $message }}</p>

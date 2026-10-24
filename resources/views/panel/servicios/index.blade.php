@@ -18,7 +18,7 @@
         </div>
 
         <!-- Filtros -->
-        <div class="bg-white p-4 rounded-lg border border-line">
+        <div class="bg-card p-4 rounded-lg border border-line">
             <form method="GET" action="{{ route('panel.servicios') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label for="filtro-especialidad" class="block text-xs font-semibold text-ink-900 mb-1">
@@ -27,7 +27,7 @@
                     <select
                         id="filtro-especialidad"
                         name="especialidad"
-                        class="block w-full min-h-11 rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                        class="block w-full min-h-11 rounded-lg border border-line bg-card px-3 py-2 text-sm text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
                     >
                         <option value="">Todas las especialidades</option>
                         @foreach ($especialidades as $esp)
@@ -45,7 +45,7 @@
                     <select
                         id="filtro-estado"
                         name="estado"
-                        class="block w-full min-h-11 rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                        class="block w-full min-h-11 rounded-lg border border-line bg-card px-3 py-2 text-sm text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
                     >
                         <option value="">Todos los estados</option>
                         <option value="activo" @selected(request('estado') === 'activo')>Activos</option>
@@ -70,7 +70,7 @@
         </div>
 
         <!-- Tabla de servicios -->
-        <div class="bg-white rounded-lg border border-line overflow-hidden shadow-2xs">
+        <div class="bg-card rounded-lg border border-line overflow-hidden shadow-2xs">
             @if ($servicios->isEmpty())
                 <div class="p-8">
                     <x-empty-state
@@ -117,11 +117,11 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         @if ($servicio->activo)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
                                                 Activo
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-stone-800 dark:text-stone-300">
                                                 Inactivo
                                             </span>
                                         @endif
@@ -129,7 +129,7 @@
                                     <td class="px-4 py-3 text-right">
                                         <a
                                             href="{{ route('panel.servicios.edit', $servicio) }}"
-                                            class="text-xs font-semibold text-brand-600 hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                                            class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
                                         >
                                             Editar
                                         </a>

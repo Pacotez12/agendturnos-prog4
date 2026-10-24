@@ -12,9 +12,9 @@
 
     $variantClasses = match ($variant) {
         'primary' => 'bg-brand-600 hover:bg-brand-700 active:bg-brand-700 text-white shadow-xs',
-        'secondary' => 'border border-line bg-white hover:bg-cream-50 active:bg-cream-50 text-ink-900',
-        'ghost' => 'text-brand-600 hover:text-brand-700 hover:bg-cream-50 active:bg-cream-50',
-        'danger' => 'bg-danger-700 hover:bg-red-800 active:bg-red-800 text-white shadow-xs',
+        'secondary' => 'border border-line bg-card hover:bg-cream-50 active:bg-cream-50 text-ink-900',
+        'ghost' => 'text-brand-600 dark:text-brand-text hover:text-brand-700 hover:bg-cream-50 active:bg-cream-50',
+        'danger' => 'bg-danger-700 dark:bg-red-700 hover:bg-red-800 active:bg-red-800 text-white shadow-xs',
         default => 'bg-brand-600 hover:bg-brand-700 active:bg-brand-700 text-white shadow-xs',
     };
 
