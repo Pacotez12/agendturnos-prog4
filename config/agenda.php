@@ -6,4 +6,5 @@ return [
     'silencio_desde' => env('AVISOS_SILENCIO_DESDE', '21:00'),
     'silencio_hasta' => env('AVISOS_SILENCIO_HASTA', '08:00'),
     'max_solicitudes_pendientes' => (int) env('AGENDA_MAX_SOLICITUDES', 2),
+    'rate_limit_api' => (int) env('RATE_LIMIT_API', 60),
 ];

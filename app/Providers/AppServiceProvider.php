@@ -58,7 +58,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            $limit = (int) config('agenda.rate_limit_api', 60);
+
+            return $limit > 0
+                ? Limit::perMinute($limit)->by($request->user()?->id ?: $request->ip())
+                : Limit::none();
         });
 
         RateLimiter::for('api-token', function (Request $request) {
