@@ -9,6 +9,13 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ServicioController extends Controller
 {
+    /**
+     * Listar servicios activos.
+     *
+     * Retorna el catálogo de servicios odontológicos activos pertenecientes a especialidades activas, con su precio en guaraníes, duración estimada e identificadores de profesionales que los prestan.
+     *
+     * @unauthenticated
+     */
     public function index(): AnonymousResourceCollection
     {
         $servicios = Servicio::with(['especialidad', 'profesionales'])

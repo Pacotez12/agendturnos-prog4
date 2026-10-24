@@ -6,6 +6,23 @@ La API permite a aplicaciones externas (clientes web, aplicaciones móviles, int
 
 ---
 
+## Documentación interactiva (Scramble / OpenAPI)
+
+En entorno de desarrollo local (`local`), la API cuenta con una interfaz gráfica interactiva generada con **Scramble** y especificación OpenAPI 3.1:
+
+- **UI interactiva:** [http://localhost:8080/docs/api](http://localhost:8080/docs/api)
+- **Especificación OpenAPI (JSON):** [http://localhost:8080/docs/api.json](http://localhost:8080/docs/api.json)
+
+### Probar endpoints protegidos desde la UI:
+1. Generá un token enviando una petición `POST /api/v1/token` con las credenciales de un paciente (o desde la consola con `php artisan tinker`).
+2. Copiá el valor del token retornado en la respuesta JSON.
+3. En la interfaz de Scramble en [http://localhost:8080/docs/api](http://localhost:8080/docs/api), hacé clic en el botón de autorización e ingresá el token Bearer.
+4. En cada endpoint (por ejemplo `GET /api/v1/mis-turnos` o `DELETE /api/v1/token`), hacé clic en **"Try it"** / **"Send API Request"** para ejecutar las peticiones directamente desde el navegador.
+
+> **Seguridad:** En entorno de producción (`production`), el acceso a `/docs/api` y `/docs/api.json` está restringido y responde `403 Forbidden`.
+
+---
+
 ## 1. Información general
 
 - **URL base:** `http://localhost:8080/api/v1`

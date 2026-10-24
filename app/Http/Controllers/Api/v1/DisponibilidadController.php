@@ -17,6 +17,13 @@ class DisponibilidadController extends Controller
         protected DisponibilidadService $disponibilidadService,
     ) {}
 
+    /**
+     * Consultar franjas horarias disponibles.
+     *
+     * Retorna los intervalos de inicio y fin disponibles para agendar un turno con un profesional y servicio específicos en una fecha determinada (parámetros requeridos: profesional_id, servicio_id y fecha en formato YYYY-MM-DD).
+     *
+     * @unauthenticated
+     */
     public function index(ConsultarDisponibilidadRequest $request): AnonymousResourceCollection
     {
         $profesional = Profesional::findOrFail($request->integer('profesional_id'));

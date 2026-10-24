@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Enums\RolUsuario;
 use App\Services\AgendaService;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Http\Request;
@@ -70,5 +73,8 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by(strtolower(trim($email)).'|'.$request->ip());
         });
+
+        // Todas las rutas con token Bearer; las públicas se marcan con @unauthenticated en el controlador.
+        Scramble::afterOpenApiGenerated(fn (OpenApi $openApi) => $openApi->secure(SecurityScheme::http('bearer')));
     }
 }
