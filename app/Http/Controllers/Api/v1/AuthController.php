@@ -13,6 +13,13 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * Crear token de acceso personal.
+     *
+     * Autentica al usuario mediante correo y contraseña para emitir un token Bearer (Sanctum) junto con la información básica del usuario.
+     *
+     * @unauthenticated
+     */
     public function crearToken(CrearTokenRequest $request): JsonResponse
     {
         $user = User::where('email', strtolower(trim($request->input('email'))))->first();
@@ -35,6 +42,11 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Revocar token de acceso actual.
+     *
+     * Invalida y elimina el token Bearer utilizado para autenticar la petición actual, cerrando la sesión API.
+     */
     public function revocarToken(Request $request): Response
     {
         $request->user()->currentAccessToken()->delete();

@@ -9,6 +9,13 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ProfesionalController extends Controller
 {
+    /**
+     * Listar profesionales activos.
+     *
+     * Retorna la lista de profesionales activos de la clínica ordenados alfabéticamente, incluyendo los servicios que realiza cada uno y su especialidad.
+     *
+     * @unauthenticated
+     */
     public function index(): AnonymousResourceCollection
     {
         $profesionales = Profesional::with(['servicios.especialidad'])

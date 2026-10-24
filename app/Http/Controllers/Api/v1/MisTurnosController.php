@@ -15,6 +15,11 @@ class MisTurnosController extends Controller
         protected AgendaService $agendaService,
     ) {}
 
+    /**
+     * Listar turnos del paciente autenticado.
+     *
+     * Retorna el listado paginado de turnos pertenecientes al paciente autenticado. Por defecto devuelve turnos futuros/pendientes; si se especifica historial=1 o true, lista el historial completo (pasados, cancelados y completados).
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $user = $request->user();
