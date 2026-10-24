@@ -38,6 +38,164 @@ class AgendaService
         return $query;
     }
 
+    public function turnosPasadosSinMarcar(User $user): Builder
+    {
+        $ahora = now(config('app.timezone', 'America/Asuncion'));
+
+        $query = Turno::query()
+            ->where('estado', EstadoTurno::Confirmado)
+            ->where('fin', '<', $ahora)
+            ->where('inicio', '>=', $ahora->copy()->subDays(7));
+
+        if ($user->rol === RolUsuario::Profesional) {
+            $query->where('profesional_id', $user->profesional?->id);
+        }
+
+        return $query;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function datosInicioPanel(User $user): array
+    {
+        $tz = config('app.timezone', 'America/Asuncion');
+        $ahora = now($tz);
+        $hora = $ahora->hour;
+
+        $saludo = match (true) {
+            $hora < 5 => 'Buenas noches',
+            $hora < 12 => 'Buen día',
+            $hora < 19 => 'Buenas tardes',
+            default => 'Buenas noches',
+        };
+
+        $fechaHoyTexto = ucfirst($ahora->translatedFormat('l j \d\e F'));
+
+        $profesionalId = $user->rol === RolUsuario::Profesional ? $user->profesional?->id : null;
+
+        // Indicador 1: Turnos hoy
+        $queryHoy = Turno::query()
+            ->whereDate('inicio', $ahora->toDateString())
+            ->where('estado', '!=', EstadoTurno::Cancelado);
+
+        if ($profesionalId) {
+            $queryHoy->where('profesional_id', $profesionalId);
+        }
+
+        $turnosHoyCount = (clone $queryHoy)->count();
+        $atendidosHoyCount = (clone $queryHoy)->where('estado', EstadoTurno::Atendido)->count();
+
+        // Indicador 2: Por confirmar
+        $solicitudesCount = $this->solicitudesPendientes($user)->count();
+
+        // Indicador 3 y 4: Semana actual (Lunes a Domingo)
+        $inicioSemana = $ahora->copy()->startOfWeek(Carbon::MONDAY)->startOfDay();
+        $finSemana = $ahora->copy()->endOfWeek(Carbon::SUNDAY)->endOfDay();
+
+        $querySemana = Turno::query()
+            ->whereBetween('inicio', [$inicioSemana, $finSemana]);
+
+        if ($profesionalId) {
+            $querySemana->where('profesional_id', $profesionalId);
+        }
+
+        $atendidosSemanaCount = (clone $querySemana)->where('estado', EstadoTurno::Atendido)->count();
+        $confirmadosSemanaCount = (clone $querySemana)
+            ->whereIn('estado', [EstadoTurno::Confirmado, EstadoTurno::Atendido, EstadoTurno::Ausente])
+            ->count();
+        $ausentesSemanaCount = (clone $querySemana)->where('estado', EstadoTurno::Ausente)->count();
+
+        $totalResueltosSemana = $atendidosSemanaCount + $ausentesSemanaCount;
+        $porcentajeInasistencia = $totalResueltosSemana > 0
+            ? (int) round(($ausentesSemanaCount / $totalResueltosSemana) * 100)
+            : 0;
+
+        // Próximos de hoy
+        $queryProximos = Turno::query()
+            ->with(['servicio', 'paciente', 'profesional', 'notificaciones'])
+            ->whereDate('inicio', $ahora->toDateString())
+            ->where('fin', '>=', $ahora)
+            ->where('estado', '!=', EstadoTurno::Cancelado)
+            ->orderBy('inicio', 'asc');
+
+        if ($profesionalId) {
+            $queryProximos->where('profesional_id', $profesionalId);
+        }
+
+        $proximosDeHoy = $queryProximos->get();
+
+        // Pendientes
+        $turnosSinMarcarCount = $this->turnosPasadosSinMarcar($user)->count();
+
+        return [
+            'saludo' => $saludo,
+            'nombreUsuario' => $user->nombreVisible(),
+            'fechaHoyTexto' => $fechaHoyTexto,
+            'esFuncionario' => $user->rol === RolUsuario::Funcionario,
+            'indicadores' => [
+                'turnosHoy' => $turnosHoyCount,
+                'atendidosHoy' => $atendidosHoyCount,
+                'solicitudes' => $solicitudesCount,
+                'atendidosSemana' => $atendidosSemanaCount,
+                'confirmadosSemana' => $confirmadosSemanaCount,
+                'ausentesSemana' => $ausentesSemanaCount,
+                'porcentajeInasistencia' => $porcentajeInasistencia,
+            ],
+            'proximosDeHoy' => $proximosDeHoy,
+            'pendientes' => [
+                'solicitudes' => $solicitudesCount,
+                'sinMarcar' => $turnosSinMarcarCount,
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function datosInicioPaciente(User $user): array
+    {
+        $pacientePropio = $user->paciente;
+        $proximoPropio = null;
+
+        if ($pacientePropio) {
+            $proximoPropio = Turno::query()
+                ->with(['servicio', 'profesional'])
+                ->where('paciente_id', $pacientePropio->id)
+                ->where('inicio', '>=', now())
+                ->whereIn('estado', [EstadoTurno::Solicitado, EstadoTurno::Confirmado])
+                ->orderBy('inicio', 'asc')
+                ->first();
+        }
+
+        $dependientes = $user->dependientes()->get();
+        $proximosDependientes = [];
+
+        foreach ($dependientes as $dep) {
+            $proximoDep = Turno::query()
+                ->with(['servicio', 'profesional'])
+                ->where('paciente_id', $dep->id)
+                ->where('inicio', '>=', now())
+                ->whereIn('estado', [EstadoTurno::Solicitado, EstadoTurno::Confirmado])
+                ->orderBy('inicio', 'asc')
+                ->first();
+
+            if ($proximoDep) {
+                $proximosDependientes[] = [
+                    'paciente' => $dep,
+                    'turno' => $proximoDep,
+                ];
+            }
+        }
+
+        return [
+            'nombre' => $user->paciente?->nombre ?? $user->nombreVisible(),
+            'proximoPropio' => $proximoPropio,
+            'proximosDependientes' => $proximosDependientes,
+            'tieneProximos' => $proximoPropio !== null || count($proximosDependientes) > 0,
+        ];
+    }
+
     /**
      * @return array{
      *     profesionales: Collection<int, Profesional>,

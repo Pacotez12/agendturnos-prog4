@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Panel;
 
+use App\Enums\EstadoTurno;
 use App\Enums\RolUsuario;
 use App\Exceptions\HorarioNoDisponible;
 use App\Exceptions\TransicionInvalida;
@@ -13,6 +14,7 @@ use App\Models\Servicio;
 use App\Models\Turno;
 use App\Services\AgendaService;
 use App\Services\DisponibilidadService;
+use App\Services\NotificacionService;
 use App\Services\ReservaService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -220,5 +222,25 @@ class TurnoController extends Controller
         } catch (TransicionInvalida $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function recordatorio(Turno $turno, NotificacionService $notificaciones): RedirectResponse
+    {
+        Gate::authorize('operate', $turno);
+
+        if ($turno->estado !== EstadoTurno::Confirmado || $turno->inicio->isPast()) {
+            return back()->with('error', 'Solo se puede enviar recordatorio a turnos confirmados que todavía no empezaron.');
+        }
+
+        $minutos = $turno->minutosDesdeUltimoRecordatorio();
+        if ($minutos !== null && $minutos < 15) {
+            return back()->with('error', "Ya se envió un recordatorio hace {$minutos} min");
+        }
+
+        $notificaciones->reenviarRecordatorio($turno, auth()->user());
+
+        $nombre = $turno->paciente?->nombreCompleto() ?? 'el paciente';
+
+        return back()->with('success', "Recordatorio enviado a {$nombre}");
     }
 }

@@ -190,6 +190,26 @@
                             </form>
                         @endif
 
+                        @if ($turno->inicio->gt(now()))
+                            @php
+                                $minutosUltimoRecordatorio = $turno->minutosDesdeUltimoRecordatorio();
+                            @endphp
+                            @if ($minutosUltimoRecordatorio !== null && $minutosUltimoRecordatorio < 15)
+                                <x-button type="button" variant="secondary" disabled>
+                                    <x-phosphor-bell class="w-4 h-4 mr-1.5" />
+                                    Enviado hace {{ $minutosUltimoRecordatorio }} min
+                                </x-button>
+                            @else
+                                <form method="POST" action="{{ route('panel.turnos.recordatorio', $turno) }}" class="inline">
+                                    @csrf
+                                    <x-button type="submit" variant="secondary">
+                                        <x-phosphor-bell class="w-4 h-4 mr-1.5" />
+                                        Recordar
+                                    </x-button>
+                                </form>
+                            @endif
+                        @endif
+
                         <x-button :href="route('panel.turnos.reprogramar', $turno)" variant="secondary">
                             Reprogramar
                         </x-button>
