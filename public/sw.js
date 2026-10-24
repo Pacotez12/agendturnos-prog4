@@ -30,6 +30,7 @@ const OFFLINE_HTML = `<!DOCTYPE html>
             background: #ffffff;
             padding: 2rem;
             border-radius: 1rem;
+            border: 1px solid #E8DFD8;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             max-width: 24rem;
             width: 100%;
@@ -56,14 +57,38 @@ const OFFLINE_HTML = `<!DOCTYPE html>
             cursor: pointer;
         }
         button:hover {
-            background-color: #7A3E22;
+            background-color: #7A3F22;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #171311;
+                color: #F2ECE6;
+            }
+            .card {
+                background: #221C19;
+                border-color: #3A322D;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            }
+            h1 {
+                color: #E0A47C;
+            }
+            p {
+                color: #A89E96;
+            }
+            button {
+                background-color: #995432;
+                color: #ffffff;
+            }
+            button:hover {
+                background-color: #7A3F22;
+            }
         }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>Sin conexión</h1>
-        <p>Sin conexión. Revisá tu internet y volvé a intentar.</p>
+        <h1>No pudimos conectar</h1>
+        <p>No pudimos comunicarnos con la clínica. Probá de nuevo en un momento.</p>
         <button type="button" onclick="window.location.reload()">Reintentar</button>
     </div>
 </body>

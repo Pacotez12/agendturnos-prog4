@@ -97,7 +97,10 @@ class PwaTest extends TestCase
         $this->assertStringNotContainsString('caches.open', $sw);
 
         // Mensaje offline inline cuando falla la red en navegación
-        $this->assertStringContainsString('Sin conexión. Revisá tu internet y volvé a intentar.', $sw);
+        $this->assertStringContainsString('No pudimos comunicarnos con la clínica. Probá de nuevo en un momento.', $sw);
+        $this->assertStringContainsString('No pudimos conectar', $sw);
+        $this->assertStringContainsString('Reintentar', $sw);
+        $this->assertStringContainsString('prefers-color-scheme: dark', $sw);
     }
 
     public function test_app_js_registra_service_worker_solo_si_existe_manifest(): void

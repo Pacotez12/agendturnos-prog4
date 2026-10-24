@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\EstadoTurno;
+use App\Exceptions\TransicionInvalida;
 use App\Models\Consultorio;
 use App\Models\Disponibilidad;
 use App\Models\Especialidad;
@@ -11,6 +12,7 @@ use App\Models\Profesional;
 use App\Models\Servicio;
 use App\Models\Turno;
 use App\Models\User;
+use App\Services\AgendaService;
 use App\Services\DisponibilidadService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -141,6 +143,22 @@ class EstadosTurnoTest extends TestCase
         ]);
     }
 
+    public function test_si_el_turno_ya_fue_cancelado_en_la_base_intentar_confirmarlo_con_el_objeto_viejo_lanza_transicion_invalida(): void
+    {
+        $turno = $this->crearTurno($this->profesional1, '2026-10-19 09:00:00', '2026-10-19 09:30:00', EstadoTurno::Solicitado);
+
+        // Objeto viejo que aún tiene estado Solicitado en memoria
+        $objetoViejo = clone $turno;
+        $this->assertSame(EstadoTurno::Solicitado, $objetoViejo->estado);
+
+        // En la base de datos se cancela el turno concurrentemente
+        Turno::where('id', $turno->id)->update(['estado' => EstadoTurno::Cancelado]);
+
+        $this->expectException(TransicionInvalida::class);
+
+        app(AgendaService::class)->confirmar($objetoViejo, $this->funcionario);
+    }
+
     public function test_cancelar_turno_guarda_motivo_y_libera_el_horario(): void
     {
         $turno = $this->crearTurno($this->profesional1, '2026-10-19 09:00:00', '2026-10-19 09:30:00', EstadoTurno::Confirmado);
@@ -216,6 +234,23 @@ class EstadosTurnoTest extends TestCase
         $res2 = $this->actingAs($this->profesionalUser1)->post(route('panel.turnos.ausente', $turno2));
         $res2->assertSessionHas('success', 'Turno marcado como ausente.');
         $this->assertSame(EstadoTurno::Ausente, $turno2->fresh()->estado);
+    }
+
+    public function test_reprogramar_pantalla_sin_parametros_responde_200(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-19 08:00:00', config('app.timezone')));
+        $turno = $this->crearTurno($this->profesional1, '2026-10-19 09:00:00', '2026-10-19 09:30:00', EstadoTurno::Confirmado);
+
+        $response = $this->actingAs($this->profesionalUser1)
+            ->get(route('panel.turnos.reprogramar', $turno));
+
+        $response->assertOk();
+
+        // Turno en el pasado: usa hoy
+        $turnoPasado = $this->crearTurno($this->profesional1, '2026-10-15 09:00:00', '2026-10-15 09:30:00', EstadoTurno::Confirmado);
+        $responsePasado = $this->actingAs($this->profesionalUser1)
+            ->get(route('panel.turnos.reprogramar', $turnoPasado));
+        $responsePasado->assertOk();
     }
 
     public function test_reprogramar_mueve_el_turno_y_deja_detalle_en_historial(): void
@@ -361,5 +396,31 @@ class EstadosTurnoTest extends TestCase
         // En solicitudes debe verse la fecha corta formateada
         $resSol = $this->actingAs($this->profesionalUser1)->get(route('panel.solicitudes'));
         $resSol->assertOk();
+    }
+
+    public function test_detalle_turno_enlace_volver_respeta_referer_del_panel_o_va_a_la_agenda(): void
+    {
+        $turno = $this->crearTurno($this->profesional1, '2026-10-19 09:00:00', '2026-10-19 09:30:00', EstadoTurno::Confirmado);
+
+        // 1. Llegando con Referer de /panel/pacientes/5
+        $referer = url('/panel/pacientes/5');
+        $resConReferer = $this->actingAs($this->profesionalUser1)
+            ->withHeader('Referer', $referer)
+            ->get(route('panel.turnos.show', $turno));
+
+        $resConReferer->assertOk();
+        $resConReferer->assertSee('href="'.$referer.'"', false);
+        $resConReferer->assertDontSee('Volver a solicitudes');
+        $resConReferer->assertSee('Volver');
+
+        // 2. Sin Referer -> va a la agenda con la fecha del turno
+        $this->flushHeaders();
+        $agendaUrl = route('panel.agenda', ['fecha' => '2026-10-19']);
+        $resSinReferer = $this->actingAs($this->profesionalUser1)
+            ->get(route('panel.turnos.show', $turno));
+
+        $resSinReferer->assertOk();
+        $resSinReferer->assertSee('href="'.$agendaUrl.'"', false);
+        $resSinReferer->assertDontSee('Volver a solicitudes');
     }
 }

@@ -30,7 +30,7 @@ class AvisoTurno extends Notification
         $turno = $this->notificacion->turno;
         $tipo = $this->notificacion->tipo;
 
-        $cuando = $turno->inicio->isToday() ? 'hoy' : 'mañana';
+        $cuando = Fecha::cuando($turno->inicio);
 
         $subject = match ($tipo) {
             'confirmacion' => 'Tu turno está confirmado · '.Fecha::corta($turno->inicio).', '.$turno->inicio->format('H:i'),

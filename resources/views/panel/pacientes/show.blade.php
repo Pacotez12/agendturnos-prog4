@@ -177,7 +177,8 @@
                     />
                 </div>
             @else
-                <div class="overflow-x-auto">
+                <!-- Tabla para escritorio -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm text-ink-900 border-collapse">
                         <thead class="bg-surface border-b border-line text-xs font-semibold uppercase tracking-wider text-ink-500">
                             <tr>
@@ -219,6 +220,41 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Tarjetas para móvil -->
+                <div class="sm:hidden divide-y divide-line">
+                    @foreach ($turnos as $turno)
+                        <div class="p-3 sm:p-4 space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-semibold text-sm text-ink-900">
+                                            {{ \App\Support\Fecha::corta($turno->inicio) }}
+                                        </span>
+                                        <span class="text-xs text-ink-500">
+                                            {{ $turno->inicio->format('H:i') }}
+                                        </span>
+                                    </div>
+                                    <p class="font-semibold text-sm text-ink-900 mt-1">
+                                        {{ $turno->servicio->nombre }}
+                                    </p>
+                                    <p class="text-xs text-ink-500">
+                                        {{ $turno->profesional->nombre }} {{ $turno->profesional->apellido }}
+                                    </p>
+                                </div>
+                                <div class="flex flex-col items-end gap-2 shrink-0">
+                                    <x-estado-turno :estado="$turno->estado" />
+                                    <a
+                                        href="{{ route('panel.turnos.show', $turno) }}"
+                                        class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 transition-colors"
+                                    >
+                                        Ver turno
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
 
                 @if ($turnos->hasPages())

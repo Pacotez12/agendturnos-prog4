@@ -304,6 +304,23 @@ class WhatsAppTest extends TestCase
 
             return $params[1]['text'] === 'Te recordamos tu turno de mañana.';
         });
+
+        // Recordatorio dentro de 5 días (2026-10-23 es viernes)
+        $turno5Dias = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
+        $notif5Dias = Notificacion::create([
+            'turno_id' => $turno5Dias->id,
+            'destinatario_id' => $this->pacienteUser->id,
+            'tipo' => 'recordatorio',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        app(WhatsAppService::class)->enviarAviso($notif5Dias);
+
+        Http::assertSent(function (Request $request) {
+            $params = $request->data()['template']['components'][0]['parameters'];
+
+            return $params[1]['text'] === 'Te recordamos tu turno de Vie 23 oct.';
+        });
     }
 
     public function test_turno_familiar_va_al_telefono_del_responsable_con_frases_correspondientes(): void

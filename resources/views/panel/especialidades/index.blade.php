@@ -12,7 +12,8 @@
             </div>
             <div>
                 <x-button :href="route('panel.especialidades.create')">
-                    + Nueva especialidad
+                    <x-phosphor-plus class="size-4" aria-hidden="true" />
+                    Nueva especialidad
                 </x-button>
             </div>
         </div>
@@ -27,7 +28,8 @@
                     />
                 </div>
             @else
-                <div class="overflow-x-auto">
+                <!-- Tabla para escritorio -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm text-ink-900 border-collapse">
                         <thead class="bg-surface border-b border-line text-xs font-semibold uppercase tracking-wider text-ink-500">
                             <tr>
@@ -69,6 +71,41 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Tarjetas para móvil -->
+                <div class="sm:hidden divide-y divide-line">
+                    @foreach ($especialidades as $esp)
+                        <div class="p-4 space-y-2">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="font-bold text-ink-900 text-base">
+                                        {{ $esp->nombre }}
+                                    </p>
+                                    <p class="text-xs text-ink-500 mt-0.5">
+                                        {{ $esp->servicios_count }} {{ $esp->servicios_count === 1 ? 'servicio' : 'servicios' }}
+                                    </p>
+                                </div>
+                                <a
+                                    href="{{ route('panel.especialidades.edit', $esp) }}"
+                                    class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 shrink-0"
+                                >
+                                    Editar
+                                </a>
+                            </div>
+                            <div>
+                                @if ($esp->activa)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
+                                        Activa
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-stone-800 dark:text-stone-300">
+                                        Inactiva
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </div>

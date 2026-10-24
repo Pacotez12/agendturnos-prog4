@@ -12,7 +12,7 @@
             </div>
             <div class="sm:shrink-0">
                 <x-button :href="route('paciente.reservar')" :pill="true" variant="primary" class="w-full sm:w-auto shadow-xs">
-                    <x-phosphor-plus class="w-4 h-4 mr-2" aria-hidden="true" />
+                    <x-phosphor-plus class="w-4 h-4" aria-hidden="true" />
                     Reservar turno
                 </x-button>
             </div>
@@ -49,7 +49,7 @@
 
                         <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 pb-4 border-b border-line">
                             <div>
-                                <p class="text-2xl sm:text-3xl font-bold font-display text-ink-900 capitalize">
+                                <p class="text-2xl sm:text-3xl font-bold font-display text-ink-900">
                                     {{ ucfirst($proximoPropio->inicio->translatedFormat('l j \d\e F')) }}
                                 </p>
                                 <p class="text-3xl sm:text-4xl font-extrabold text-brand-text font-display mt-0.5">
@@ -135,7 +135,7 @@
             <!-- Acciones rápidas al pie -->
             <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-line">
                 <x-button :href="route('paciente.reservar')" :pill="true" variant="primary" class="w-full sm:w-auto">
-                    <x-phosphor-plus class="w-4 h-4 mr-2" aria-hidden="true" />
+                    <x-phosphor-plus class="w-4 h-4" aria-hidden="true" />
                     Reservar turno
                 </x-button>
 

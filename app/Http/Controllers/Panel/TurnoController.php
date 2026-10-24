@@ -179,17 +179,21 @@ class TurnoController extends Controller
     {
         Gate::authorize('operate', $turno);
 
-        $fecha = null;
-        $horarios = [];
+        $tz = config('app.timezone', 'America/Asuncion');
+        $hoy = now($tz)->startOfDay();
 
         if ($request->filled('fecha')) {
             $request->validate([
                 'fecha' => ['date_format:Y-m-d', 'after_or_equal:today'],
             ]);
 
-            $fecha = Carbon::parse($request->input('fecha'), config('app.timezone'));
-            $horarios = $disponibilidad->franjasLibres($turno->profesional, $turno->servicio, $fecha, $turno);
+            $fecha = Carbon::parse($request->input('fecha'), $tz)->startOfDay();
+        } else {
+            $fechaTurno = $turno->inicio->copy()->timezone($tz)->startOfDay();
+            $fecha = $fechaTurno->isBefore($hoy) ? $hoy : $fechaTurno;
         }
+
+        $horarios = $disponibilidad->franjasLibres($turno->profesional, $turno->servicio, $fecha, $turno);
 
         return view('panel.turnos.reprogramar', [
             'turno' => $turno,

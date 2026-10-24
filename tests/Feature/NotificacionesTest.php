@@ -20,6 +20,8 @@ use App\Services\ReservaService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Queue\CallQueuedHandler;
+use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -176,6 +178,60 @@ class NotificacionesTest extends TestCase
         app()->call([$job, 'handle']);
 
         Notification::assertNothingSent();
+    }
+
+    public function test_confirmacion_en_cola_de_un_turno_luego_cancelado_no_manda_correo(): void
+    {
+        Notification::fake();
+
+        $turno = $this->crearTurno();
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'tipo' => 'confirmacion',
+            'destinatario_id' => $this->pacienteUser->id,
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        $turno->update(['estado' => EstadoTurno::Cancelado]);
+
+        $job = new EnviarNotificacion($notificacion);
+        app()->call([$job, 'handle']);
+
+        Notification::assertNothingSent();
+        $this->assertModelMissing($notificacion);
+    }
+
+    public function test_job_con_notificacion_borrada_no_lanza_excepcion(): void
+    {
+        $turno = $this->crearTurno();
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'tipo' => 'confirmacion',
+            'destinatario_id' => $this->pacienteUser->id,
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        $job = new EnviarNotificacion($notificacion);
+        $this->assertTrue($job->deleteWhenMissingModels);
+
+        $notificacion->delete();
+
+        $payload = json_encode([
+            'job' => 'Illuminate\Queue\CallQueuedHandler@call',
+            'data' => [
+                'commandName' => get_class($job),
+                'command' => serialize($job),
+            ],
+            'deleteWhenMissingModels' => $job->deleteWhenMissingModels,
+        ]);
+
+        $queueJob = new SyncJob(app(), $payload, 'sync', 'default');
+        $handler = app(CallQueuedHandler::class);
+
+        $handler->call($queueJob, json_decode($payload, true)['data']);
+        $this->assertTrue($queueJob->isDeleted());
     }
 
     public function test_job_falla_marca_fallida(): void
@@ -381,6 +437,7 @@ class NotificacionesTest extends TestCase
 
     public function test_recordatorio_de_un_turno_del_mismo_dia_dice_hoy(): void
     {
+        Carbon::setTestNow(Carbon::parse('2026-10-18 10:00:00', config('app.timezone')));
         $turno = $this->crearTurno('2026-10-18 15:00:00', '2026-10-18 15:30:00', EstadoTurno::Confirmado);
         $notificacion = Notificacion::create([
             'turno_id' => $turno->id,
@@ -394,6 +451,42 @@ class NotificacionesTest extends TestCase
 
         $this->assertSame('Recordatorio: hoy a las 15:00 en Glow Dental', $mail->subject);
         $this->assertStringContainsString('Te esperamos hoy', $mail->render());
+    }
+
+    public function test_recordatorio_de_un_turno_de_manana_dice_manana(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-18 10:00:00', config('app.timezone')));
+        $turno = $this->crearTurno('2026-10-19 15:00:00', '2026-10-19 15:30:00', EstadoTurno::Confirmado);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'tipo' => 'recordatorio',
+            'destinatario_id' => $this->pacienteUser->id,
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        $mail = (new AvisoTurno($notificacion))->toMail($this->pacienteUser);
+
+        $this->assertSame('Recordatorio: mañana a las 15:00 en Glow Dental', $mail->subject);
+        $this->assertStringContainsString('Te esperamos mañana', $mail->render());
+    }
+
+    public function test_recordatorio_de_un_turno_de_dentro_de_5_dias_dice_fecha_corta(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-18 10:00:00', config('app.timezone')));
+        $turno = $this->crearTurno('2026-10-23 15:00:00', '2026-10-23 15:30:00', EstadoTurno::Confirmado);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'tipo' => 'recordatorio',
+            'destinatario_id' => $this->pacienteUser->id,
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        $mail = (new AvisoTurno($notificacion))->toMail($this->pacienteUser);
+
+        $this->assertSame('Recordatorio: Vie 23 oct a las 15:00 en Glow Dental', $mail->subject);
+        $this->assertStringContainsString('Te esperamos Vie 23 oct', $mail->render());
     }
 
     public function test_render_correo_contiene_asunto_y_textos_segun_tipo(): void
@@ -490,9 +583,9 @@ class NotificacionesTest extends TestCase
         $avisoRec = new AvisoTurno($notifRec);
         $mailRec = $avisoRec->toMail($this->pacienteUser);
 
-        $this->assertSame('Recordatorio: mañana a las 09:00 en Glow Dental', $mailRec->subject);
+        $this->assertSame('Recordatorio: Vie 23 oct a las 09:00 en Glow Dental', $mailRec->subject);
         $renderedRec = $mailRec->render();
-        $this->assertStringContainsString('Te esperamos mañana', $renderedRec);
+        $this->assertStringContainsString('Te esperamos Vie 23 oct', $renderedRec);
         $this->assertStringContainsString('te recordamos tu turno.', $renderedRec);
         $this->assertStringContainsString('Viernes 23 de octubre, 09:00', $renderedRec);
         $this->assertStringContainsString('Ver mi turno', $renderedRec);

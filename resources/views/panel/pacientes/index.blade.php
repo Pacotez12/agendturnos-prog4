@@ -17,6 +17,7 @@
             </div>
             <div>
                 <x-button :href="route('panel.turnos.crear')">
+                    <x-phosphor-plus class="size-4" aria-hidden="true" />
                     Nuevo turno
                 </x-button>
             </div>

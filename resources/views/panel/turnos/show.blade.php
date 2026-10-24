@@ -1,3 +1,14 @@
+@php
+    $anterior = url()->previous();
+    $actual = url()->current();
+    $panelUrl = url('/panel');
+    $volverUrl = route('panel.agenda', ['fecha' => $turno->inicio->toDateString()]);
+
+    if ($anterior && $anterior !== $actual && str_starts_with($anterior, $panelUrl)) {
+        $volverUrl = $anterior;
+    }
+@endphp
+
 <x-layouts.panel :titulo="'Turno de ' . $turno->paciente->nombre . ' ' . $turno->paciente->apellido">
     <div class="space-y-6">
         <!-- Encabezado con estado -->
@@ -15,10 +26,10 @@
             </div>
             <div>
                 <a
-                    href="{{ route('panel.solicitudes') }}"
+                    href="{{ $volverUrl }}"
                     class="text-sm font-semibold text-brand-text hover:text-brand-700 min-h-11 inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg"
                 >
-                    &larr; Volver a solicitudes
+                    &larr; Volver
                 </a>
             </div>
         </div>
@@ -196,14 +207,14 @@
                             @endphp
                             @if ($minutosUltimoRecordatorio !== null && $minutosUltimoRecordatorio < 15)
                                 <x-button type="button" variant="secondary" disabled>
-                                    <x-phosphor-bell class="w-4 h-4 mr-1.5" />
+                                    <x-phosphor-bell class="size-4" aria-hidden="true" />
                                     Enviado hace {{ $minutosUltimoRecordatorio }} min
                                 </x-button>
                             @else
                                 <form method="POST" action="{{ route('panel.turnos.recordatorio', $turno) }}" class="inline">
                                     @csrf
                                     <x-button type="submit" variant="secondary">
-                                        <x-phosphor-bell class="w-4 h-4 mr-1.5" />
+                                        <x-phosphor-bell class="size-4" aria-hidden="true" />
                                         Recordar
                                     </x-button>
                                 </form>
@@ -211,6 +222,7 @@
                         @endif
 
                         <x-button :href="route('panel.turnos.reprogramar', $turno)" variant="secondary">
+                            <x-phosphor-arrows-clockwise class="size-4" aria-hidden="true" />
                             Reprogramar
                         </x-button>
 

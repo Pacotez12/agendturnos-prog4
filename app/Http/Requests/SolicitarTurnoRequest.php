@@ -18,14 +18,8 @@ class SolicitarTurnoRequest extends FormRequest
     public function pacientesPermitidos(): array
     {
         $user = $this->user();
-        $ids = [];
 
-        if ($user?->paciente) {
-            $ids[] = $user->paciente->id;
-        }
-
-        // HU-14 sumará los dependientes aquí.
-        return $ids;
+        return $user ? $user->pacientesIds() : [];
     }
 
     public function rules(): array

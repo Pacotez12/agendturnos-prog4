@@ -274,7 +274,35 @@ class AgendaService
         for ($i = 0; $i < 5; $i++) {
             $dias[] = $lunes->copy()->addDays($i);
         }
-        $finSemana = $dias[4]->copy()->endOfDay();
+
+        $sabado = $lunes->copy()->addDays(5);
+        $domingo = $lunes->copy()->addDays(6);
+
+        $hayDispSabado = Disponibilidad::where('profesional_id', $profesionalSeleccionado->id)
+            ->where('dia_semana', 6)
+            ->exists();
+        $hayTurnosSabado = Turno::where('profesional_id', $profesionalSeleccionado->id)
+            ->whereBetween('inicio', [$sabado->copy()->startOfDay(), $sabado->copy()->endOfDay()])
+            ->when($estado, fn ($q) => $q->where('estado', $estado), fn ($q) => $q->where('estado', '!=', EstadoTurno::Cancelado))
+            ->exists();
+
+        $hayDispDomingo = Disponibilidad::where('profesional_id', $profesionalSeleccionado->id)
+            ->where('dia_semana', 7)
+            ->exists();
+        $hayTurnosDomingo = Turno::where('profesional_id', $profesionalSeleccionado->id)
+            ->whereBetween('inicio', [$domingo->copy()->startOfDay(), $domingo->copy()->endOfDay()])
+            ->when($estado, fn ($q) => $q->where('estado', $estado), fn ($q) => $q->where('estado', '!=', EstadoTurno::Cancelado))
+            ->exists();
+
+        if ($hayDispSabado || $hayTurnosSabado || $hayDispDomingo || $hayTurnosDomingo) {
+            $dias[] = $sabado;
+        }
+
+        if ($hayDispDomingo || $hayTurnosDomingo) {
+            $dias[] = $domingo;
+        }
+
+        $finSemana = end($dias)->copy()->endOfDay();
 
         $query = Turno::query()
             ->with(['servicio', 'paciente', 'profesional'])
@@ -290,8 +318,9 @@ class AgendaService
         $turnos = $query->orderBy('inicio', 'asc')->get();
         $turnosPorDia = $turnos->groupBy(fn ($t) => $t->inicio->toDateString());
 
+        $diasSemana = array_map(fn ($d) => (int) $d->dayOfWeekIso, $dias);
         $disponibilidades = Disponibilidad::where('profesional_id', $profesionalSeleccionado->id)
-            ->whereIn('dia_semana', [1, 2, 3, 4, 5])
+            ->whereIn('dia_semana', $diasSemana)
             ->get();
 
         [$horaMin, $horaMax] = $this->calcularRangoHoras($disponibilidades, $turnos);
@@ -470,43 +499,47 @@ class AgendaService
      */
     private function cambiarEstado(Turno $turno, EstadoTurno $nuevo, User $usuario, array $extra = [], ?string $detalle = null): Turno
     {
-        if (! $turno->estado->puedePasarA($nuevo)) {
-            $accion = match ($nuevo) {
-                EstadoTurno::Confirmado => 'confirmar',
-                EstadoTurno::Cancelado => 'cancelar',
-                EstadoTurno::Atendido => 'marcar como atendido',
-                EstadoTurno::Ausente => 'marcar como ausente',
-                default => 'cambiar de estado',
-            };
-            throw new TransicionInvalida("No se puede {$accion} un turno en estado {$turno->estado->value}.");
-        }
-
-        if (in_array($nuevo, [EstadoTurno::Atendido, EstadoTurno::Ausente], true)) {
-            $tz = config('app.timezone', 'America/Asuncion');
-            if (Carbon::parse($turno->inicio)->setTimezone($tz)->gt(now($tz))) {
-                $accion = $nuevo === EstadoTurno::Atendido ? 'marcar como atendido' : 'marcar como ausente';
-                throw new TransicionInvalida("Solo se puede {$accion} un turno que ya haya iniciado.");
-            }
-        }
-
         return DB::transaction(function () use ($turno, $nuevo, $usuario, $extra, $detalle) {
-            $estadoAnterior = $turno->estado;
-            $turno->estado = $nuevo;
+            $turnoActual = Turno::where('id', $turno->id)->lockForUpdate()->firstOrFail();
+
+            if (! $turnoActual->estado->puedePasarA($nuevo)) {
+                $accion = match ($nuevo) {
+                    EstadoTurno::Confirmado => 'confirmar',
+                    EstadoTurno::Cancelado => 'cancelar',
+                    EstadoTurno::Atendido => 'marcar como atendido',
+                    EstadoTurno::Ausente => 'marcar como ausente',
+                    default => 'cambiar de estado',
+                };
+                throw new TransicionInvalida("No se puede {$accion} un turno en estado {$turnoActual->estado->value}.");
+            }
+
+            if (in_array($nuevo, [EstadoTurno::Atendido, EstadoTurno::Ausente], true)) {
+                $tz = config('app.timezone', 'America/Asuncion');
+                if (Carbon::parse($turnoActual->inicio)->setTimezone($tz)->gt(now($tz))) {
+                    $accion = $nuevo === EstadoTurno::Atendido ? 'marcar como atendido' : 'marcar como ausente';
+                    throw new TransicionInvalida("Solo se puede {$accion} un turno que ya haya iniciado.");
+                }
+            }
+
+            $estadoAnterior = $turnoActual->estado;
+            $turnoActual->estado = $nuevo;
 
             foreach ($extra as $key => $value) {
-                $turno->{$key} = $value;
+                $turnoActual->{$key} = $value;
             }
 
-            $turno->save();
+            $turnoActual->save();
 
-            $turno->historial()->create([
+            $turnoActual->historial()->create([
                 'estado_anterior' => $estadoAnterior,
                 'estado_nuevo' => $nuevo,
                 'usuario_id' => $usuario->id,
                 'detalle' => $detalle,
             ]);
 
-            return $turno;
+            $turno->setRawAttributes($turnoActual->getAttributes(), true);
+
+            return $turnoActual;
         });
     }
 

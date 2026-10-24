@@ -226,6 +226,37 @@ class AgendaTest extends TestCase
         $resFunc->assertDontSee('Carlos Gómez');
     }
 
+    public function test_turno_un_sabado_aparece_en_la_vista_semanal_cuando_hay_disponibilidad_el_sabado(): void
+    {
+        // Sin disponibilidad el sábado: semana muestra 5 días (no muestra sábado)
+        $resSinSabado = $this->actingAs($this->profesionalUser1)->get(route('panel.agenda', [
+            'vista' => 'semana',
+            'fecha' => '2026-10-26',
+        ]));
+        $resSinSabado->assertOk();
+        $resSinSabado->assertDontSee('Sábado');
+
+        // Con disponibilidad el sábado (dia_semana 6) y un turno el sábado 2026-10-31
+        Disponibilidad::factory()->create([
+            'profesional_id' => $this->profesional1->id,
+            'consultorio_id' => $this->consultorio->id,
+            'dia_semana' => 6,
+            'hora_inicio' => '08:00',
+            'hora_fin' => '13:00',
+        ]);
+
+        $this->crearTurno($this->profesional1, $this->paciente1, '2026-10-31 09:00:00', '2026-10-31 09:30:00', EstadoTurno::Confirmado);
+
+        $resConSabado = $this->actingAs($this->profesionalUser1)->get(route('panel.agenda', [
+            'vista' => 'semana',
+            'fecha' => '2026-10-26',
+        ]));
+
+        $resConSabado->assertOk();
+        $resConSabado->assertSee('Sábado');
+        $resConSabado->assertSee('Carlos Gómez');
+    }
+
     public function test_por_confirmar_muestra_solicitados_pendientes(): void
     {
         // Turno solicitado futuro

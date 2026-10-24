@@ -22,7 +22,8 @@
                     />
                 </div>
             @else
-                <div class="overflow-x-auto">
+                <!-- Tabla para escritorio -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm text-ink-900 border-collapse">
                         <thead class="bg-surface border-b border-line text-xs font-semibold uppercase tracking-wider text-ink-500">
                             <tr>
@@ -56,6 +57,33 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Tarjetas para móvil -->
+                <div class="sm:hidden divide-y divide-line">
+                    @foreach ($profesionales as $prof)
+                        <div class="p-4 space-y-2">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="font-bold text-ink-900 text-base">
+                                        Dra. {{ $prof->nombre }} {{ $prof->apellido }}
+                                    </p>
+                                    <p class="text-xs text-ink-500 font-mono mt-0.5">
+                                        Matrícula: {{ $prof->matricula }}
+                                    </p>
+                                </div>
+                                <a
+                                    href="{{ route('panel.profesionales.servicios', $prof) }}"
+                                    class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 shrink-0 text-right"
+                                >
+                                    Servicios que ofrece
+                                </a>
+                            </div>
+                            <div class="text-xs text-ink-500">
+                                {{ $prof->servicios_count }} {{ $prof->servicios_count === 1 ? 'servicio asignado' : 'servicios asignados' }}
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </div>

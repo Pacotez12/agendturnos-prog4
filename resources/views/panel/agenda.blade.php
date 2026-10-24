@@ -41,7 +41,7 @@
             <div>
                 <h1 class="text-2xl font-bold font-display text-ink-900">
                     @if ($vista === 'semana')
-                        Semana del {{ $dias[0]->translatedFormat('j \d\e F') }} al {{ $dias[4]->translatedFormat('j \d\e F') }}
+                        Semana del {{ $dias[0]->translatedFormat('j \d\e F') }} al {{ end($dias)->translatedFormat('j \d\e F') }}
                     @else
                         {{ ucfirst($fecha->translatedFormat('l j \d\e F')) }}
                     @endif
@@ -197,9 +197,9 @@
                                 @endforeach
                             </div>
                         @else
-                            <!-- Vista Semana: 5 días (Lunes a Viernes) -->
+                            <!-- Vista Semana: 5 a 7 días -->
                             <!-- Encabezado de columnas: Días -->
-                            <div class="grid border-b border-line pb-2 mb-2 text-xs font-bold text-ink-900" style="grid-template-columns: 50px repeat(5, minmax(0, 1fr));">
+                            <div class="grid border-b border-line pb-2 mb-2 text-xs font-bold text-ink-900" style="grid-template-columns: 50px repeat({{ count($dias) }}, minmax(0, 1fr));">
                                 <div></div>
                                 @foreach ($dias as $dia)
                                     <div class="px-2 truncate">
@@ -214,7 +214,7 @@
                             </div>
 
                             <!-- Cuerpo de la grilla -->
-                            <div class="relative grid" style="grid-template-columns: 50px repeat(5, minmax(0, 1fr)); height: {{ $alturaGrilla }}px;">
+                            <div class="relative grid" style="grid-template-columns: 50px repeat({{ count($dias) }}, minmax(0, 1fr)); height: {{ $alturaGrilla }}px;">
                                 <!-- Columna de horas -->
                                 <div class="border-r border-line select-none">
                                     @foreach ($franjas as $hora)

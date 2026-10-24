@@ -12,7 +12,8 @@
             </div>
             <div>
                 <x-button :href="route('panel.servicios.create')">
-                    + Nuevo servicio
+                    <x-phosphor-plus class="size-4" aria-hidden="true" />
+                    Nuevo servicio
                 </x-button>
             </div>
         </div>
@@ -79,7 +80,8 @@
                     />
                 </div>
             @else
-                <div class="overflow-x-auto">
+                <!-- Tabla para escritorio -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm text-ink-900 border-collapse">
                         <thead class="bg-surface border-b border-line text-xs font-semibold uppercase tracking-wider text-ink-500">
                             <tr>
@@ -138,6 +140,56 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Tarjetas para móvil -->
+                <div class="sm:hidden divide-y divide-line">
+                    @foreach ($servicios as $servicio)
+                        <div class="p-4 space-y-2">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="font-bold text-ink-900 text-base">
+                                        {{ $servicio->nombre }}
+                                    </p>
+                                    @if ($servicio->descripcion)
+                                        <p class="text-xs text-ink-500 line-clamp-2 mt-0.5">
+                                            {{ $servicio->descripcion }}
+                                        </p>
+                                    @endif
+                                </div>
+                                <a
+                                    href="{{ route('panel.servicios.edit', $servicio) }}"
+                                    class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 shrink-0"
+                                >
+                                    Editar
+                                </a>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-500">
+                                <span>{{ $servicio->especialidad?->nombre ?? 'Sin especialidad' }}</span>
+                                <span>·</span>
+                                <span>{{ $servicio->duracion_min }} min</span>
+                                <span>·</span>
+                                <span class="font-medium text-ink-900">
+                                    @if ($servicio->precio !== null)
+                                        Gs. {{ number_format($servicio->precio, 0, ',', '.') }}
+                                    @else
+                                        <span class="italic text-ink-500">Consultar</span>
+                                    @endif
+                                </span>
+                            </div>
+                            <div>
+                                @if ($servicio->activo)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
+                                        Activo
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-stone-800 dark:text-stone-300">
+                                        Inactivo
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </div>

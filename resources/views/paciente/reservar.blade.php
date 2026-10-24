@@ -63,7 +63,6 @@
             @if (collect($horarios)->contains('libre', true))
                 @php
                     $fechaFormateada = \App\Support\Fecha::corta($fecha);
-                    $pacienteActual = auth()->user()?->paciente;
                 @endphp
 
                 <form
@@ -94,26 +93,44 @@
                         @enderror
                     </x-card>
 
-                    @if ($pacienteActual)
+                    @if ($pacienteActual || ($familiares ?? collect())->isNotEmpty())
                         <x-card :paciente="true" class="space-y-3">
                             <h2 class="text-lg font-bold font-display text-ink-900">
                                 ¿Para quién es el turno?
                             </h2>
 
-                            <div>
-                                <label class="flex items-center gap-3 p-3 rounded-xl border border-line hover:bg-cream-50 cursor-pointer has-checked:border-brand-600 has-checked:bg-brand-100">
-                                    <input
-                                        type="radio"
-                                        name="paciente_id"
-                                        value="{{ $pacienteActual->id }}"
-                                        checked
-                                        class="size-4 text-brand-600 focus:ring-brand-600 border-line"
-                                    >
-                                    <div>
-                                        <span class="block text-sm font-semibold text-ink-900">Para mí</span>
-                                        <span class="block text-xs text-ink-500">{{ $pacienteActual->nombre }} {{ $pacienteActual->apellido }}</span>
-                                    </div>
-                                </label>
+                            <div class="space-y-2">
+                                @if ($pacienteActual)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border border-line hover:bg-cream-50 cursor-pointer has-checked:border-brand-600 has-checked:bg-brand-100">
+                                        <input
+                                            type="radio"
+                                            name="paciente_id"
+                                            value="{{ $pacienteActual->id }}"
+                                            {{ old('paciente_id', (string) $pacienteActual->id) == $pacienteActual->id ? 'checked' : '' }}
+                                            class="size-4 text-brand-600 focus:ring-brand-600 border-line"
+                                        >
+                                        <div>
+                                            <span class="block text-sm font-semibold text-ink-900">Para mí</span>
+                                            <span class="block text-xs text-ink-500">{{ $pacienteActual->nombre }} {{ $pacienteActual->apellido }}</span>
+                                        </div>
+                                    </label>
+                                @endif
+
+                                @foreach ($familiares ?? [] as $familiar)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border border-line hover:bg-cream-50 cursor-pointer has-checked:border-brand-600 has-checked:bg-brand-100">
+                                        <input
+                                            type="radio"
+                                            name="paciente_id"
+                                            value="{{ $familiar->id }}"
+                                            {{ old('paciente_id', ! $pacienteActual && $loop->first ? (string) $familiar->id : '') == $familiar->id ? 'checked' : '' }}
+                                            class="size-4 text-brand-600 focus:ring-brand-600 border-line"
+                                        >
+                                        <div>
+                                            <span class="block text-sm font-semibold text-ink-900">Para {{ $familiar->nombre }}</span>
+                                            <span class="block text-xs text-ink-500">{{ $familiar->nombre }} {{ $familiar->apellido }}</span>
+                                        </div>
+                                    </label>
+                                @endforeach
                             </div>
 
                             @error('paciente_id')

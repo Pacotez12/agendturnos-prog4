@@ -12,11 +12,11 @@
             </div>
             <div class="flex items-center gap-3">
                 <x-button :href="route('panel.agenda')" variant="secondary">
-                    <x-phosphor-calendar-blank class="w-4 h-4 mr-2" aria-hidden="true" />
+                    <x-phosphor-calendar-blank class="w-4 h-4" aria-hidden="true" />
                     Ver agenda
                 </x-button>
                 <x-button :href="route('panel.turnos.crear')" variant="primary">
-                    <x-phosphor-plus class="w-4 h-4 mr-2" aria-hidden="true" />
+                    <x-phosphor-plus class="w-4 h-4" aria-hidden="true" />
                     Nuevo turno
                 </x-button>
             </div>

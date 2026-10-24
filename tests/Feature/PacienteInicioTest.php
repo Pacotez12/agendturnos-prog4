@@ -126,4 +126,16 @@ class PacienteInicioTest extends TestCase
         $response->assertSee('15:00');
         $response->assertSee(route('paciente.turnos.show', $turnoHijo));
     }
+
+    public function test_inicio_del_paciente_muestra_fecha_con_de_en_minuscula_y_sin_clase_capitalize(): void
+    {
+        // Turno el 26 de octubre de 2026 a las 10:00 (lunes)
+        $this->crearTurno('2026-10-26 10:00:00', '2026-10-26 10:30:00', EstadoTurno::Confirmado);
+
+        $response = $this->actingAs($this->pacienteUser)->get('/inicio');
+
+        $response->assertOk();
+        $response->assertSee('26 de octubre');
+        $response->assertDontSee('font-display text-ink-900 capitalize', false);
+    }
 }

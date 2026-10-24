@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Notificacion;
 use App\Models\Turno;
+use App\Support\Fecha;
 use App\Support\Telefono;
 use Illuminate\Support\Facades\Http;
 
@@ -79,7 +80,7 @@ class WhatsAppService
 
     private function armarFrase(string $tipo, bool $esPropio, string $nombrePaciente, Turno $turno): string
     {
-        $cuando = $turno->inicio->isToday() ? 'hoy' : 'mañana';
+        $cuando = Fecha::cuando($turno->inicio);
         // Meta rechaza parámetros con saltos de línea o espacios repetidos
         $motivo = rtrim(preg_replace('/\s+/', ' ', trim((string) $turno->motivo_cancelacion)), '.');
 

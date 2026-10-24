@@ -16,4 +16,20 @@ class Fecha
 
         return "{$dia} {$f->format('j')} {$mes}";
     }
+
+    /**
+     * Devuelve 'hoy', 'mañana' o la fecha corta si dista más tiempo.
+     */
+    public static function cuando(CarbonInterface $f): string
+    {
+        if ($f->isToday()) {
+            return 'hoy';
+        }
+
+        if ($f->isTomorrow()) {
+            return 'mañana';
+        }
+
+        return self::corta($f);
+    }
 }

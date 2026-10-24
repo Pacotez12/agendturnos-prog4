@@ -182,7 +182,7 @@
         </div>
     </div>
 
-    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 sm:pb-8">
         @if (session('success'))
             <x-alert type="success" class="mb-6">
                 {{ session('success') }}

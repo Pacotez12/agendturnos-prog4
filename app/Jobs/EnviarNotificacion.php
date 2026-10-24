@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\EstadoNotificacion;
+use App\Enums\EstadoTurno;
 use App\Models\Notificacion;
 use App\Notifications\AvisoTurno;
 use App\Services\WhatsAppService;
@@ -14,6 +15,8 @@ use Throwable;
 class EnviarNotificacion implements ShouldQueue
 {
     use Queueable;
+
+    public bool $deleteWhenMissingModels = true;
 
     public int $tries = 3;
 
@@ -30,6 +33,14 @@ class EnviarNotificacion implements ShouldQueue
         $this->notificacion->refresh();
 
         if ($this->notificacion->estado === EstadoNotificacion::Enviada) {
+            return;
+        }
+
+        $turno = $this->notificacion->turno?->fresh();
+        if ($turno && $turno->estado === EstadoTurno::Cancelado && $this->notificacion->tipo !== 'cancelacion') {
+            // El turno se canceló mientras el aviso esperaba en la cola: ya no corresponde enviarlo
+            $this->notificacion->delete();
+
             return;
         }
 

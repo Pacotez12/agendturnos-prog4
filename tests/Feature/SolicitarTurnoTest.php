@@ -194,6 +194,92 @@ class SolicitarTurnoTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Lucas Rojas');
+        $response->assertSee('El turno de Lucas fue solicitado');
+    }
+
+    public function test_show_renderiza_textos_segun_estado_para_titular_y_familiar(): void
+    {
+        $dependiente = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $this->pacienteUser->id,
+            'nombre' => 'Lucas',
+            'apellido' => 'Rojas',
+        ]);
+
+        $casos = [
+            [
+                'estado' => EstadoTurno::Confirmado,
+                'titular_titulo' => 'Tu turno está confirmado',
+                'titular_sub' => 'Te esperamos. Si no podés venir, cancelalo con anticipación.',
+                'familiar_titulo' => 'El turno de Lucas está confirmado',
+                'familiar_sub' => 'Te esperamos. Si no podés venir, cancelalo con anticipación.',
+            ],
+            [
+                'estado' => EstadoTurno::Cancelado,
+                'titular_titulo' => 'Este turno fue cancelado',
+                'titular_sub' => null,
+                'familiar_titulo' => 'El turno de Lucas fue cancelado',
+                'familiar_sub' => null,
+            ],
+            [
+                'estado' => EstadoTurno::Atendido,
+                'titular_titulo' => 'Turno atendido',
+                'titular_sub' => null,
+                'familiar_titulo' => 'El turno de Lucas fue atendido',
+                'familiar_sub' => null,
+            ],
+            [
+                'estado' => EstadoTurno::Ausente,
+                'titular_titulo' => 'No asististe a este turno',
+                'titular_sub' => null,
+                'familiar_titulo' => 'Lucas no asistió a este turno',
+                'familiar_sub' => null,
+            ],
+        ];
+
+        $offset = 1;
+        foreach ($casos as $caso) {
+            $turnoTitular = Turno::factory()->create([
+                'paciente_id' => $this->paciente->id,
+                'profesional_id' => $this->profesional->id,
+                'servicio_id' => $this->servicio->id,
+                'consultorio_id' => $this->consultorio->id,
+                'inicio' => Carbon::parse('2026-10-25 10:00:00', config('app.timezone'))->addDays($offset),
+                'fin' => Carbon::parse('2026-10-25 10:30:00', config('app.timezone'))->addDays($offset),
+                'estado' => $caso['estado'],
+            ]);
+
+            $resTitular = $this->actingAs($this->pacienteUser)->get(route('paciente.turnos.show', $turnoTitular));
+            $resTitular->assertOk();
+            $resTitular->assertSee($caso['titular_titulo']);
+            if ($caso['titular_sub']) {
+                $resTitular->assertSee($caso['titular_sub']);
+            } else {
+                $resTitular->assertDontSee('La clínica lo revisa y lo confirma');
+            }
+
+            $offset++;
+            $turnoFamiliar = Turno::factory()->create([
+                'paciente_id' => $dependiente->id,
+                'profesional_id' => $this->profesional->id,
+                'servicio_id' => $this->servicio->id,
+                'consultorio_id' => $this->consultorio->id,
+                'inicio' => Carbon::parse('2026-10-25 10:00:00', config('app.timezone'))->addDays($offset),
+                'fin' => Carbon::parse('2026-10-25 10:30:00', config('app.timezone'))->addDays($offset),
+                'estado' => $caso['estado'],
+            ]);
+
+            $resFamiliar = $this->actingAs($this->pacienteUser)->get(route('paciente.turnos.show', $turnoFamiliar));
+            $resFamiliar->assertOk();
+            $resFamiliar->assertSee($caso['familiar_titulo']);
+            if ($caso['familiar_sub']) {
+                $resFamiliar->assertSee($caso['familiar_sub']);
+            } else {
+                $resFamiliar->assertDontSee('La clínica lo revisa y lo confirma');
+            }
+
+            $offset++;
+        }
     }
 
     public function test_horario_ocupado_por_turno_confirmado_redirige_con_error_y_no_crea_turno(): void
@@ -315,5 +401,72 @@ class SolicitarTurnoTest extends TestCase
         $response->assertSee('María Rojas');
         $response->assertSee('Solicitar turno');
         $response->assertSee('value="'.$this->paciente->id.'"', false);
+    }
+
+    public function test_tutor_puede_solicitar_para_su_familiar(): void
+    {
+        $familiar = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $this->pacienteUser->id,
+            'nombre' => 'Lucas',
+            'apellido' => 'Rojas',
+        ]);
+
+        $response = $this->actingAs($this->pacienteUser)->post('/turnos', [
+            'profesional' => $this->profesional->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-19',
+            'hora' => '09:00',
+            'paciente_id' => $familiar->id,
+        ]);
+
+        $turno = Turno::latest('id')->first();
+        $response->assertRedirect(route('paciente.turnos.show', $turno));
+        $this->assertSame($familiar->id, $turno->paciente_id);
+    }
+
+    public function test_tutor_no_puede_solicitar_para_el_familiar_de_otro(): void
+    {
+        $otroUser = User::factory()->paciente()->create();
+        $familiarDeOtro = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $otroUser->id,
+            'nombre' => 'Sofi',
+            'apellido' => 'Pérez',
+        ]);
+
+        $response = $this->actingAs($this->pacienteUser)->post('/turnos', [
+            'profesional' => $this->profesional->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-19',
+            'hora' => '09:00',
+            'paciente_id' => $familiarDeOtro->id,
+        ]);
+
+        $response->assertSessionHasErrors('paciente_id');
+        $this->assertSame(0, Turno::count());
+    }
+
+    public function test_el_formulario_muestra_la_opcion_del_familiar(): void
+    {
+        $familiar = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $this->pacienteUser->id,
+            'nombre' => 'Lucas',
+            'apellido' => 'Rojas',
+        ]);
+
+        $response = $this->actingAs($this->pacienteUser)->get('/turnos/nuevo?'.http_build_query([
+            'profesional' => $this->profesional->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-19',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Para mí');
+        $response->assertSee('María Rojas');
+        $response->assertSee('Para Lucas');
+        $response->assertSee('Lucas Rojas');
+        $response->assertSee('value="'.$familiar->id.'"', false);
     }
 }
