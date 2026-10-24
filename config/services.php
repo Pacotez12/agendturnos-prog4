@@ -39,7 +39,13 @@ return [
         'numero' => env('WHATSAPP_NUMERO'),
         'token' => env('WHATSAPP_TOKEN'),
         'phone_id' => env('WHATSAPP_PHONE_ID'),
-        'plantilla' => env('WHATSAPP_PLANTILLA', 'aviso_turno'),
+        // Plantillas aprobadas en Meta, una por tipo de aviso
+        'plantillas' => [
+            'confirmacion' => 'turno_confirmado',
+            'cancelacion' => 'turno_cancelado',
+            'reprogramacion' => 'turno_reprogramado',
+            'recordatorio' => 'turno_recordatorio',
+        ],
     ],
 
 ];

@@ -95,7 +95,12 @@ class WhatsAppTest extends TestCase
         config()->set([
             'services.whatsapp.token' => 'meta-secret-token',
             'services.whatsapp.phone_id' => '10987654321',
-            'services.whatsapp.plantilla' => 'aviso_turno',
+            'services.whatsapp.plantillas' => [
+                'confirmacion' => 'turno_confirmado',
+                'cancelacion' => 'turno_cancelado',
+                'reprogramacion' => 'turno_reprogramado',
+                'recordatorio' => 'turno_recordatorio',
+            ],
         ]);
     }
 
@@ -155,7 +160,26 @@ class WhatsAppTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_envio_confirmacion_turno_propio_con_parametros_esperados(): void
+    public function test_tipo_sin_plantilla_configurada_no_hace_request_http(): void
+    {
+        Http::preventStrayRequests();
+        $this->configurarCredencialesWhatsApp();
+        config()->set(['services.whatsapp.plantillas' => []]);
+
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'destinatario_id' => $this->pacienteUser->id,
+            'tipo' => 'confirmacion',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        app(WhatsAppService::class)->enviarAviso($notificacion);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_envio_confirmacion_usa_plantilla_turno_confirmado_y_parametros_en_orden(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -182,17 +206,17 @@ class WhatsAppTest extends TestCase
                 && $data['messaging_product'] === 'whatsapp'
                 && $data['to'] === '595981123456'
                 && $data['type'] === 'template'
-                && $data['template']['name'] === 'aviso_turno'
+                && $data['template']['name'] === 'turno_confirmado'
                 && $data['template']['language']['code'] === 'es'
                 && $data['template']['components'][0]['parameters'][0]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][1]['text'] === 'Tu turno está confirmado.'
+                && $data['template']['components'][0]['parameters'][1]['text'] === 'Carlos Gómez'
                 && $data['template']['components'][0]['parameters'][2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
                 && $data['template']['components'][0]['parameters'][3]['text'] === 'Ana González'
                 && $data['template']['components'][0]['parameters'][4]['text'] === 'Limpieza dental';
         });
     }
 
-    public function test_envio_cancelacion_con_y_sin_motivo(): void
+    public function test_envio_cancelacion_usa_plantilla_turno_cancelado(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -201,42 +225,29 @@ class WhatsAppTest extends TestCase
             'https://graph.facebook.com/v25.0/10987654321/messages' => Http::response(['messages' => [['id' => 'wamid.123']]], 200),
         ]);
 
-        // Sin motivo
-        $turnoSinMotivo = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Cancelado);
-        $notif1 = Notificacion::create([
-            'turno_id' => $turnoSinMotivo->id,
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Cancelado, null, 'Urgencia médica');
+        $notif = Notificacion::create([
+            'turno_id' => $turno->id,
             'destinatario_id' => $this->pacienteUser->id,
             'tipo' => 'cancelacion',
             'estado' => EstadoNotificacion::Pendiente,
         ]);
 
-        app(WhatsAppService::class)->enviarAviso($notif1);
+        app(WhatsAppService::class)->enviarAviso($notif);
 
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
+        Http::assertSent(function (Request $request) use ($turno) {
+            $data = $request->data();
 
-            return $params[1]['text'] === 'Tu turno fue cancelado.';
-        });
-
-        // Con motivo
-        $turnoConMotivo = $this->crearTurno('2026-10-23 10:00:00', '2026-10-23 10:30:00', EstadoTurno::Cancelado, null, "Urgencia\n  médica.");
-        $notif2 = Notificacion::create([
-            'turno_id' => $turnoConMotivo->id,
-            'destinatario_id' => $this->pacienteUser->id,
-            'tipo' => 'cancelacion',
-            'estado' => EstadoNotificacion::Pendiente,
-        ]);
-
-        app(WhatsAppService::class)->enviarAviso($notif2);
-
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
-
-            return $params[1]['text'] === 'Tu turno fue cancelado. Motivo: Urgencia médica.';
+            return $data['template']['name'] === 'turno_cancelado'
+                && $data['template']['components'][0]['parameters'][0]['text'] === 'Carlos Gómez'
+                && $data['template']['components'][0]['parameters'][1]['text'] === 'Carlos Gómez'
+                && $data['template']['components'][0]['parameters'][2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
+                && $data['template']['components'][0]['parameters'][3]['text'] === 'Ana González'
+                && $data['template']['components'][0]['parameters'][4]['text'] === 'Limpieza dental';
         });
     }
 
-    public function test_envio_reprogramacion(): void
+    public function test_envio_reprogramacion_usa_plantilla_turno_reprogramado(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -245,7 +256,7 @@ class WhatsAppTest extends TestCase
             'https://graph.facebook.com/v25.0/10987654321/messages' => Http::response(['messages' => [['id' => 'wamid.123']]], 200),
         ]);
 
-        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
+        $turno = $this->crearTurno('2026-10-23 11:00:00', '2026-10-23 11:30:00', EstadoTurno::Confirmado);
         $notificacion = Notificacion::create([
             'turno_id' => $turno->id,
             'destinatario_id' => $this->pacienteUser->id,
@@ -255,14 +266,19 @@ class WhatsAppTest extends TestCase
 
         app(WhatsAppService::class)->enviarAviso($notificacion);
 
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
+        Http::assertSent(function (Request $request) use ($turno) {
+            $data = $request->data();
 
-            return $params[1]['text'] === 'Tu turno cambió de horario.';
+            return $data['template']['name'] === 'turno_reprogramado'
+                && $data['template']['components'][0]['parameters'][0]['text'] === 'Carlos Gómez'
+                && $data['template']['components'][0]['parameters'][1]['text'] === 'Carlos Gómez'
+                && $data['template']['components'][0]['parameters'][2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
+                && $data['template']['components'][0]['parameters'][3]['text'] === 'Ana González'
+                && $data['template']['components'][0]['parameters'][4]['text'] === 'Limpieza dental';
         });
     }
 
-    public function test_envio_recordatorio_hoy_y_manana(): void
+    public function test_envio_recordatorio_usa_plantilla_turno_recordatorio(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -271,59 +287,29 @@ class WhatsAppTest extends TestCase
             'https://graph.facebook.com/v25.0/10987654321/messages' => Http::response(['messages' => [['id' => 'wamid.123']]], 200),
         ]);
 
-        // Recordatorio de hoy (TestNow = 2026-10-18 12:00:00)
-        $turnoHoy = $this->crearTurno('2026-10-18 16:00:00', '2026-10-18 16:30:00', EstadoTurno::Confirmado);
-        $notifHoy = Notificacion::create([
-            'turno_id' => $turnoHoy->id,
+        $turno = $this->crearTurno('2026-10-19 10:00:00', '2026-10-19 10:30:00', EstadoTurno::Confirmado);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
             'destinatario_id' => $this->pacienteUser->id,
             'tipo' => 'recordatorio',
             'estado' => EstadoNotificacion::Pendiente,
         ]);
 
-        app(WhatsAppService::class)->enviarAviso($notifHoy);
+        app(WhatsAppService::class)->enviarAviso($notificacion);
 
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
+        Http::assertSent(function (Request $request) use ($turno) {
+            $data = $request->data();
 
-            return $params[1]['text'] === 'Te recordamos tu turno de hoy.';
-        });
-
-        // Recordatorio de mañana (2026-10-19)
-        $turnoManana = $this->crearTurno('2026-10-19 10:00:00', '2026-10-19 10:30:00', EstadoTurno::Confirmado);
-        $notifManana = Notificacion::create([
-            'turno_id' => $turnoManana->id,
-            'destinatario_id' => $this->pacienteUser->id,
-            'tipo' => 'recordatorio',
-            'estado' => EstadoNotificacion::Pendiente,
-        ]);
-
-        app(WhatsAppService::class)->enviarAviso($notifManana);
-
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
-
-            return $params[1]['text'] === 'Te recordamos tu turno de mañana.';
-        });
-
-        // Recordatorio dentro de 5 días (2026-10-23 es viernes)
-        $turno5Dias = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
-        $notif5Dias = Notificacion::create([
-            'turno_id' => $turno5Dias->id,
-            'destinatario_id' => $this->pacienteUser->id,
-            'tipo' => 'recordatorio',
-            'estado' => EstadoNotificacion::Pendiente,
-        ]);
-
-        app(WhatsAppService::class)->enviarAviso($notif5Dias);
-
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
-
-            return $params[1]['text'] === 'Te recordamos tu turno de Vie 23 oct.';
+            return $data['template']['name'] === 'turno_recordatorio'
+                && $data['template']['components'][0]['parameters'][0]['text'] === 'Carlos Gómez'
+                && $data['template']['components'][0]['parameters'][1]['text'] === 'Carlos Gómez'
+                && $data['template']['components'][0]['parameters'][2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
+                && $data['template']['components'][0]['parameters'][3]['text'] === 'Ana González'
+                && $data['template']['components'][0]['parameters'][4]['text'] === 'Limpieza dental';
         });
     }
 
-    public function test_turno_familiar_va_al_telefono_del_responsable_con_frases_correspondientes(): void
+    public function test_turno_familiar_envia_al_responsable_con_parametro_2_nombre_del_familiar(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -355,55 +341,11 @@ class WhatsAppTest extends TestCase
             $params = $data['template']['components'][0]['parameters'];
 
             return $data['to'] === '595981123456'
+                && $data['template']['name'] === 'turno_confirmado'
                 && $params[0]['text'] === 'Carlos Gómez'
-                && $params[1]['text'] === 'El turno de Sofía Gómez está confirmado.';
-        });
-
-        // Cancelación con motivo para familiar
-        $turno->update(['motivo_cancelacion' => 'Consulta no disponible']);
-        $notifCancel = Notificacion::create([
-            'turno_id' => $turno->id,
-            'destinatario_id' => $this->pacienteUser->id,
-            'tipo' => 'cancelacion',
-            'estado' => EstadoNotificacion::Pendiente,
-        ]);
-        app(WhatsAppService::class)->enviarAviso($notifCancel);
-
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
-
-            return $params[1]['text'] === 'El turno de Sofía Gómez fue cancelado. Motivo: Consulta no disponible.';
-        });
-
-        // Reprogramación para familiar
-        $notifReprog = Notificacion::create([
-            'turno_id' => $turno->id,
-            'destinatario_id' => $this->pacienteUser->id,
-            'tipo' => 'reprogramacion',
-            'estado' => EstadoNotificacion::Pendiente,
-        ]);
-        app(WhatsAppService::class)->enviarAviso($notifReprog);
-
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
-
-            return $params[1]['text'] === 'El turno de Sofía Gómez cambió de horario.';
-        });
-
-        // Recordatorio para familiar
-        $turnoHoy = $this->crearTurno('2026-10-18 17:00:00', '2026-10-18 17:30:00', EstadoTurno::Confirmado, $familiar);
-        $notifRec = Notificacion::create([
-            'turno_id' => $turnoHoy->id,
-            'destinatario_id' => $this->pacienteUser->id,
-            'tipo' => 'recordatorio',
-            'estado' => EstadoNotificacion::Pendiente,
-        ]);
-        app(WhatsAppService::class)->enviarAviso($notifRec);
-
-        Http::assertSent(function (Request $request) {
-            $params = $request->data()['template']['components'][0]['parameters'];
-
-            return $params[1]['text'] === 'Te recordamos el turno de Sofía Gómez de hoy.';
+                && $params[1]['text'] === 'Sofía Gómez'
+                && $params[3]['text'] === 'Ana González'
+                && $params[4]['text'] === 'Limpieza dental';
         });
     }
 
