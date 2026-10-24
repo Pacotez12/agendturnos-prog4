@@ -104,6 +104,10 @@
         @if ($user)
             <div class="shrink-0 p-4 border-t border-line bg-surface/50">
                 <div class="mb-3 px-2">
+                    <x-reloj />
+                </div>
+
+                <div class="mb-3 px-2">
                     <p class="text-sm font-semibold text-ink-900 truncate" title="{{ $user->email }}">
                         {{ $user->email }}
                     </p>
