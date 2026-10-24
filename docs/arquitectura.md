@@ -29,9 +29,17 @@ Glow Dental Protect es una clínica odontológica unipersonal. Ofrece consultas,
 - Agenda de la profesional: ver, confirmar, reprogramar y cancelar turnos; administrar el horario semanal y los bloqueos.
 - Seguimiento del estado del turno por parte del paciente.
 - Notificaciones (confirmación, cancelación, reprogramación) y recordatorios automáticos.
+- Varias profesionales, cada una con sus servicios, horario y agenda.
+- Recepción (rol funcionario): carga de turnos para pacientes que llaman o vienen al consultorio, incluso sin cuenta.
+- Familiares a cargo: un paciente pide turnos para menores o personas a su cargo.
+- Avisos de turno por WhatsApp, solo salientes y con plantilla aprobada (el correo sigue siendo el canal principal).
+- API REST v1 de consulta (ver [`api.md`](api.md)).
+- Panel del personal instalable como app (PWA), sin modo sin conexión.
 
 ### Fuera de alcance (versión inicial)
-Historia clínica, facturación y contabilidad, inventario, gestión de varias sucursales (el modelo de datos queda preparado), app móvil nativa, integración directa con redes sociales, pagos en línea, telemedicina, IA y marketing.
+Historia clínica, facturación y contabilidad, inventario, gestión de varias sucursales (el modelo de datos queda preparado), app móvil nativa, chat o bot por WhatsApp e integración con Instagram y Facebook, pagos en línea, telemedicina, IA y marketing.
+
+Cada cambio respecto de la Declaración de Alcance inicial, con su motivo y decisión, está en [`alcance-cambios.md`](alcance-cambios.md).
 
 ## 3. Stack tecnológico
 
@@ -294,6 +302,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Registro de cambios de alcance (`docs/alcance-cambios.md`, SCRUM-62), sección Alcance alineada con lo construido y reporte del Sprint 2 actualizado al 24/10. |
 | 2026-10-24 | Documentación interactiva de la API con Scramble (SCRUM-61 complemento): paquete `dedoc/scramble` (^0.13) instalado; configuración en `config/scramble.php` acotada a prefijo `api/v1` (`api_path`), título "Glow Dental Protect API" versión 1.0.0 y descripción en español; UI interactiva en `/docs/api` y especificación OpenAPI 3.1 en `/docs/api.json`; esquema de seguridad Bearer (Sanctum) declarado en components y aplicado exclusivamente a las operaciones protegidas (`DELETE /token` y `GET /mis-turnos`); acceso a la UI restringido únicamente a entorno local (`Gate::define('viewApiDocs')` y 403 Forbidden en producción); docblocks PHPDoc en controladores `Api\v1` para resumen y descripción en español; documentación en `docs/api.md` con instrucciones de autorización interactiva y suite de tests en `DocumentacionApiTest`. |
 | 2026-10-24 | Benchmark comparativo de arquitecturas (SCRUM-33 / SCRUM-35): script ejecutable `scripts/benchmark.sh` y target `make bench` con herramienta `hey` (`williamyeh/hey --network host`); paridad verificada y ajustada entre A (Nginx + PHP-FPM) y B (Apache + mod_php) con 150 workers concurrentes y OPcache idéntico; modo producción temporal con `php artisan optimize` sin tocar `.env`; pruebas en `/health`, portada `/` y API `/api/v1/servicios` a concurrencias 10, 50 y 100 con 3 repeticiones (mediana); captura del dashboard de HAProxy (`docs/img/haproxy-stats.png`) y reporte completo en `docs/benchmark.md` con resumen en `docs/benchmark-resumen.csv`. |
 | 2026-10-24 | API REST v1 (SCRUM-61): endpoints públicos (`/api/v1/servicios`, `/api/v1/profesionales` sin datos privados, `/api/v1/disponibilidad` en ISO 8601, sin fechas pasadas), autenticación por token Sanctum (`/api/v1/token` emisión con throttle 5/min y revocación 204), consulta paginada de turnos propios y dependientes (`/api/v1/mis-turnos` con filtro de historial y control de rol paciente 403), rate limiting global de 60/min, respuestas con API Resources y documentación completa en `docs/api.md`. |
