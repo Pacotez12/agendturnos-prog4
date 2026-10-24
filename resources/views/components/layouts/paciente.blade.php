@@ -202,6 +202,17 @@
         {{ $slot }}
     </main>
 
+    <footer class="py-6 pb-24 sm:pb-6 border-t border-line text-xs text-ink-500">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+            <span>&copy; {{ date('Y') }} Glow Dental Protect. Todos los derechos reservados.</span>
+            @if (Route::has('privacidad'))
+                <a href="{{ route('privacidad') }}" class="hover:text-ink-900 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">
+                    Privacidad
+                </a>
+            @endif
+        </div>
+    </footer>
+
     <!-- Botón flotante WhatsApp -->
     <x-whatsapp-button />
 </body>

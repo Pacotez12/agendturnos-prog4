@@ -99,6 +99,26 @@
                 required
             />
 
+            <!-- Política de privacidad -->
+            <div class="space-y-1">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        name="privacidad"
+                        value="1"
+                        @checked(old('privacidad'))
+                        required
+                        class="size-4 mt-1 rounded border-line text-brand-600 focus:ring-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                    >
+                    <span class="text-sm text-ink-900">
+                        Leí y acepto la <a href="{{ route('privacidad') }}" target="_blank" rel="noopener" class="font-semibold text-brand-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">política de privacidad</a>.
+                    </span>
+                </label>
+                @error('privacidad')
+                    <p class="text-xs text-danger-700" role="alert">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Botón de Envío -->
             <div class="pt-2">
                 <x-button

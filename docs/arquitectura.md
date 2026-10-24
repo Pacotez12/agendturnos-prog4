@@ -181,7 +181,7 @@ erDiagram
 
 | Módulo | Historias | Rutas previstas | Estado |
 |---|---|---|---|
-| Autenticación y usuarios | HU-01, HU-02, HU-27 | `/registro` (con validación de celular), `/login`, `/logout`, `/inicio` (paciente), `/panel` | ✅ |
+| Autenticación y usuarios | HU-01, HU-02, HU-27, HU-28 | `/registro` (validación de celular y consentimiento), `/login`, `/logout`, `/inicio` (paciente), `/panel`, `/privacidad` | ✅ |
 | Servicios y especialidades | HU-03, SCRUM-39 | `/servicios` (catálogo público) · `/panel/servicios`, `/panel/especialidades`, `/panel/profesionales/{id}/servicios` | ✅ |
 | Agendamiento | HU-04, HU-05, HU-26 | `/turnos/nuevo` (horarios libres, solicitud y límite antiabuso), `/turnos/{id}` | ✅ |
 | Agendamiento por operador | HU-13, HU-27 | `/panel/turnos/nuevo`, `/panel/pacientes` (alta sin cuenta con validación de celular) | ✅ |
@@ -283,6 +283,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Política de privacidad y consentimiento (HU-28, SCRUM-59): ruta pública `/privacidad` con responsable (Glow Dental Protect, Asunción), datos personales guardados (aclarando expresamente que no se almacena historia clínica ni diagnósticos), finalidad, destinatarios, retención, derechos según normativa paraguaya y fecha de última actualización; casilla obligatoria de consentimiento en `/registro` con validación `accepted` y guardado de timestamp `privacidad_aceptada_at` en `users`; enlace a privacidad en el pie de layouts invitado y paciente. |
 | 2026-10-24 | Validación y normalización de celular paraguayo (HU-27, SCRUM-58): regla `CelularParaguay` (acepta 09XXXXXXXX, 9XXXXXXXX, +5959XXXXXXXX y 5959XXXXXXXX con prefijo móvil `9[6-9]`, ignorando espacios, guiones y paréntesis); helpers `Telefono::normalizar` (guarda como 09XXXXXXXX) y `Telefono::legible` ("0981 123 456"); normalización reutilizada en `WhatsAppService`; aplicado en registro de pacientes y alta desde el panel con placeholder y formato legible en vistas del panel. |
 | 2026-10-24 | Límite de solicitudes y protección contra abuso (HU-26, SCRUM-57): tope de solicitudes pendientes futuras por cuenta (`AGENDA_MAX_SOLICITUDES`, default 2) sumando titular y dependientes, con mensaje de validación y enlace a Mis turnos en la vista de reserva; panel sin límite; rate limiting con `RateLimiter` para login (5/min por email+IP con segundos en mensaje), registro (3/min por IP), recuperación de contraseña (3/min por IP) y solicitud de turnos (10/min por usuario). |
 | 2026-10-24 | Horario silencioso para avisos automáticos (HU-25, SCRUM-56): `NotificacionService::programar()` despacha jobs con delay hasta la hora de fin silenciosa (configurable con `AVISOS_SILENCIO_DESDE` y `AVISOS_SILENCIO_HASTA`, por defecto 21:00 a 08:00) si cae en el rango silencioso que cruza medianoche; reenvío manual (`reenviarRecordatorio`) con parámetro `$inmediato = true` sin delay; método auxiliar testeable `momentoDeEnvio()`. |

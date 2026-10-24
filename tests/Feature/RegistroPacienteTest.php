@@ -24,6 +24,7 @@ class RegistroPacienteTest extends TestCase
             'email' => 'juan.perez@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'privacidad' => '1',
         ]);
 
         $response->assertRedirect();
@@ -105,6 +106,7 @@ class RegistroPacienteTest extends TestCase
             'email' => 'ana@example.com',
             'password' => 'secreta123',
             'password_confirmation' => 'secreta123',
+            'privacidad' => '1',
         ]);
 
         $user = User::where('email', 'ana@example.com')->first();

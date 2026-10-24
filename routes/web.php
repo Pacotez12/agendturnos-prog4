@@ -20,6 +20,7 @@ use App\Http\Controllers\Panel\TurnoController as PanelTurnoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', InicioController::class)->name('inicio');
+Route::view('/privacidad', 'privacidad')->name('privacidad');
 
 Route::middleware('guest')->group(function () {
     Route::get('/registro', [RegistroController::class, 'create'])->name('registro');

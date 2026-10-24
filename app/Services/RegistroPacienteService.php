@@ -15,6 +15,7 @@ class RegistroPacienteService
                 'email' => $data['email'],
                 'password' => $data['password'], // El cast 'hashed' en el modelo User se encarga de hashearla
                 'rol' => 'paciente',
+                'privacidad_aceptada_at' => now(),
             ]);
 
             Paciente::create([
