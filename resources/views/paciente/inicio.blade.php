@@ -65,7 +65,7 @@
                                     {{ $proximoPropio->servicio->nombre }}
                                 </p>
                                 <p class="text-sm text-ink-500 mt-0.5">
-                                    Dra. {{ $proximoPropio->profesional->nombre }} {{ $proximoPropio->profesional->apellido }}
+                                    {{ $proximoPropio->profesional->nombre }} {{ $proximoPropio->profesional->apellido }}
                                     @if ($proximoPropio->consultorio)
                                         <span class="text-line">·</span> Consultorio {{ $proximoPropio->consultorio->nombre }}
                                     @endif
@@ -114,7 +114,7 @@
                                             {{ ucfirst($tDep->inicio->translatedFormat('l j \d\e F')) }} a las {{ $tDep->inicio->format('H:i') }}
                                         </p>
                                         <p class="text-xs text-ink-500 mt-0.5">
-                                            {{ $tDep->servicio->nombre }} <span class="text-line">·</span> Dra. {{ $tDep->profesional->nombre }} {{ $tDep->profesional->apellido }}
+                                            {{ $tDep->servicio->nombre }} <span class="text-line">·</span> {{ $tDep->profesional->nombre }} {{ $tDep->profesional->apellido }}
                                         </p>
                                     </div>
 

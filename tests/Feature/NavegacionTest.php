@@ -160,6 +160,7 @@ class NavegacionTest extends TestCase
             'panel.agenda',
             'panel.solicitudes',
             'panel.turnos.crear',
+            'panel.pacientes',
             'panel.disponibilidad',
             'panel.servicios',
             'panel.servicios.create',
@@ -182,6 +183,7 @@ class NavegacionTest extends TestCase
             'panel.agenda',
             'panel.solicitudes',
             'panel.turnos.crear',
+            'panel.pacientes',
             'panel.disponibilidad',
             'privacidad',
         ];
