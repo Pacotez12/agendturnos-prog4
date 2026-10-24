@@ -23,13 +23,13 @@ Route::get('/', InicioController::class)->name('inicio');
 
 Route::middleware('guest')->group(function () {
     Route::get('/registro', [RegistroController::class, 'create'])->name('registro');
-    Route::post('/registro', [RegistroController::class, 'store']);
+    Route::post('/registro', [RegistroController::class, 'store'])->middleware('throttle:registro');
 
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store']);
 
     Route::get('/olvide-mi-contrasena', [PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('/olvide-mi-contrasena', [PasswordResetLinkController::class, 'store'])->middleware('throttle:5,1')->name('password.email');
+    Route::post('/olvide-mi-contrasena', [PasswordResetLinkController::class, 'store'])->middleware('throttle:recuperar-contrasena')->name('password.email');
 
     Route::get('/restablecer-contrasena/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/restablecer-contrasena', [NewPasswordController::class, 'store'])->name('password.update');
@@ -41,7 +41,7 @@ Route::middleware(['auth', 'rol:paciente'])->group(function () {
     Route::get('/inicio', PacienteInicioController::class)->name('paciente.inicio');
 
     Route::get('/turnos/nuevo', [ReservaController::class, 'create'])->name('paciente.reservar');
-    Route::post('/turnos', [TurnoController::class, 'store'])->name('paciente.turnos.store');
+    Route::post('/turnos', [TurnoController::class, 'store'])->middleware('throttle:solicitar-turno')->name('paciente.turnos.store');
     Route::get('/mis-turnos', [TurnoController::class, 'index'])->name('paciente.turnos');
     Route::get('/turnos/{turno}', [TurnoController::class, 'show'])->name('paciente.turnos.show');
     Route::post('/turnos/{turno}/cancelar', [TurnoController::class, 'cancelar'])->name('paciente.turnos.cancelar');
