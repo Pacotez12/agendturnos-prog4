@@ -16,11 +16,11 @@
                     <span>{{ $nuevoPaciente ? 'Paciente nuevo' : 'Paciente' }}</span>
                 </h2>
                 @if ($pacienteSeleccionado)
-                    <a href="{{ route('panel.turnos.crear') }}" class="text-xs font-semibold text-brand-600 hover:underline">
+                    <a href="{{ route('panel.turnos.crear') }}" class="text-xs font-semibold text-brand-text hover:underline">
                         Cambiar
                     </a>
                 @elseif ($nuevoPaciente)
-                    <a href="{{ route('panel.turnos.crear') }}" class="text-xs font-semibold text-brand-600 hover:underline">
+                    <a href="{{ route('panel.turnos.crear') }}" class="text-xs font-semibold text-brand-text hover:underline">
                         Buscar uno existente
                     </a>
                 @endif
@@ -119,7 +119,7 @@
                                         </div>
                                         <a
                                             href="{{ route('panel.turnos.crear', array_filter([...request()->except('q'), 'paciente' => $p->id])) }}"
-                                            class="inline-flex items-center text-xs font-bold text-brand-600 hover:text-brand-700 px-3 py-1.5 rounded-md hover:bg-brand-100 transition-colors shrink-0"
+                                            class="inline-flex items-center text-xs font-bold text-brand-text hover:text-brand-700 px-3 py-1.5 rounded-md hover:bg-brand-100 transition-colors shrink-0"
                                         >
                                             Elegir
                                         </a>
@@ -135,7 +135,7 @@
 
                     <p class="text-xs text-ink-500">
                         ¿No aparece?
-                        <a href="{{ route('panel.turnos.crear', ['nuevo_paciente' => 1]) }}" class="font-semibold text-brand-600 hover:underline">
+                        <a href="{{ route('panel.turnos.crear', ['nuevo_paciente' => 1]) }}" class="font-semibold text-brand-text hover:underline">
                             Cargar paciente nuevo
                         </a>
                     </p>

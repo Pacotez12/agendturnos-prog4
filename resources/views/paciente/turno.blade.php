@@ -2,7 +2,7 @@
     <div class="max-w-xl mx-auto py-4 sm:py-8">
         <x-card :paciente="true" class="p-6 sm:p-8 space-y-6">
             <div class="flex flex-col items-center text-center space-y-3">
-                <div class="size-16 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+                <div class="size-16 rounded-full bg-brand-100 text-brand-text flex items-center justify-center">
                     <x-phosphor-check class="size-8" aria-hidden="true" />
                 </div>
                 <h1 class="text-2xl font-bold font-display text-ink-900">

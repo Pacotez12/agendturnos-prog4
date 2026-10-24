@@ -16,7 +16,7 @@
             <div>
                 <a
                     href="{{ route('panel.solicitudes') }}"
-                    class="text-sm font-semibold text-brand-600 hover:text-brand-700 min-h-11 inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg"
+                    class="text-sm font-semibold text-brand-text hover:text-brand-700 min-h-11 inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg"
                 >
                     &larr; Volver a solicitudes
                 </a>

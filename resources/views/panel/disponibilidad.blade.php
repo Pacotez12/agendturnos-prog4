@@ -18,7 +18,7 @@
                         name="profesional_id"
                         id="selector_profesional"
                         onchange="this.form.submit()"
-                        class="min-h-11 rounded-lg border border-line bg-white px-3 py-2 text-sm font-medium text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                        class="min-h-11 rounded-lg border border-line bg-card px-3 py-2 text-sm font-medium text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
                     >
                         @foreach($profesionales as $p)
                             <option value="{{ $p->id }}" @selected($profesional->id === $p->id)>
@@ -102,7 +102,7 @@
                                                 <button
                                                     type="button"
                                                     @click="eliminarFranja(dia.id, idx)"
-                                                    class="text-danger-700 ml-1 font-bold p-1 cursor-pointer min-h-6 min-w-6 inline-flex items-center justify-center rounded hover:bg-white"
+                                                    class="text-danger-700 ml-1 font-bold p-1 cursor-pointer min-h-6 min-w-6 inline-flex items-center justify-center rounded hover:bg-card"
                                                     title="Quitar franja"
                                                     aria-label="Quitar franja"
                                                 >
@@ -121,7 +121,7 @@
                                         <button
                                             type="button"
                                             @click="agregarFranja(dia.id)"
-                                            class="text-brand-600 hover:text-brand-700 text-sm font-semibold inline-flex items-center cursor-pointer min-h-9 px-2.5 rounded-lg hover:bg-cream-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 transition-colors"
+                                            class="text-brand-text hover:text-brand-700 text-sm font-semibold inline-flex items-center cursor-pointer min-h-9 px-2.5 rounded-lg hover:bg-cream-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 transition-colors"
                                         >
                                             + franja
                                         </button>
@@ -236,8 +236,8 @@
                             />
 
                             @if($errors->has('confirmar'))
-                                <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3 text-xs space-y-2 mt-2">
-                                    <p class="font-medium flex items-center gap-1.5"><x-phosphor-warning class="size-4 shrink-0 text-amber-700" aria-hidden="true" /><span>{{ $errors->first('confirmar') }}</span></p>
+                                <div class="bg-amber-50 border border-amber-200 text-amber-900 dark:bg-amber-950/40 dark:border-amber-900/50 dark:text-amber-200 rounded-lg p-3 text-xs space-y-2 mt-2">
+                                    <p class="font-medium flex items-center gap-1.5"><x-phosphor-warning class="size-4 shrink-0 text-amber-700 dark:text-amber-400" aria-hidden="true" /><span>{{ $errors->first('confirmar') }}</span></p>
                                     <label class="flex items-center gap-2 cursor-pointer font-semibold pt-1">
                                         <input
                                             type="checkbox"

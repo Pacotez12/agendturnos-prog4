@@ -21,7 +21,7 @@
             <div class="flex flex-wrap items-center gap-2">
                 <a
                     href="{{ route('servicios.catalogo') }}"
-                    class="px-4 py-2 text-sm font-medium rounded-full min-h-11 inline-flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ is_null($especialidadSeleccionada) ? 'bg-brand-600 text-white font-semibold shadow-xs' : 'bg-white border border-line text-ink-900 hover:bg-cream-50' }}"
+                    class="px-4 py-2 text-sm font-medium rounded-full min-h-11 inline-flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ is_null($especialidadSeleccionada) ? 'bg-brand-600 text-white font-semibold shadow-xs' : 'bg-card border border-line text-ink-900 hover:bg-cream-50' }}"
                 >
                     Todos
                 </a>
@@ -29,7 +29,7 @@
                 @foreach ($especialidades as $esp)
                     <a
                         href="{{ route('servicios.catalogo', ['especialidad' => $esp->id]) }}"
-                        class="px-4 py-2 text-sm font-medium rounded-full min-h-11 inline-flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $especialidadSeleccionada === $esp->id ? 'bg-brand-600 text-white font-semibold shadow-xs' : 'bg-white border border-line text-ink-900 hover:bg-cream-50' }}"
+                        class="px-4 py-2 text-sm font-medium rounded-full min-h-11 inline-flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $especialidadSeleccionada === $esp->id ? 'bg-brand-600 text-white font-semibold shadow-xs' : 'bg-card border border-line text-ink-900 hover:bg-cream-50' }}"
                     >
                         {{ $esp->nombre }}
                     </a>

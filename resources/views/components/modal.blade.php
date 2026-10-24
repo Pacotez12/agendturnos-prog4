@@ -65,7 +65,7 @@
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             @click.outside="cerrar()"
-            class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all border border-line"
+            class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-card p-6 text-left align-middle shadow-xl transition-all border border-line"
         >
             <div class="flex items-center justify-between pb-3 border-b border-line">
                 <h3 id="modal-titulo-{{ $name }}" class="text-lg font-bold font-display text-ink-900">

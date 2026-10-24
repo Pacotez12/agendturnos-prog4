@@ -13,7 +13,7 @@
         </div>
 
         <!-- Tabla de profesionales -->
-        <div class="bg-white rounded-lg border border-line overflow-hidden shadow-2xs">
+        <div class="bg-card rounded-lg border border-line overflow-hidden shadow-2xs">
             @if ($profesionales->isEmpty())
                 <div class="p-8">
                     <x-empty-state
@@ -47,7 +47,7 @@
                                     <td class="px-4 py-3 text-right">
                                         <a
                                             href="{{ route('panel.profesionales.servicios', $prof) }}"
-                                            class="text-xs font-semibold text-brand-600 hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                                            class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
                                         >
                                             Servicios que ofrece
                                         </a>

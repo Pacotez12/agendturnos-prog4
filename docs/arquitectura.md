@@ -282,6 +282,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Modo oscuro: tokens de color redefinidos bajo `.dark` (variante `dark` de Tailwind 4), `bg-card` en lugar de `bg-white`, logo blanco en oscuro, script de tema en `partials/tema` (sigue al sistema y recuerda la elección), botón sol/luna en los 3 layouts y transición circular con View Transitions API (sin animación con `prefers-reduced-motion`). |
 | 2026-10-24 | Avisos por WhatsApp (HU-15, SCRUM-43): `WhatsAppService` envía la plantilla `aviso_turno` de la WhatsApp Cloud API desde el job `EnviarNotificacion`, después del correo. Solo se activa con `WHATSAPP_TOKEN` y `WHATSAPP_PHONE_ID`; normaliza el teléfono a 595...; si Meta falla, el correo queda enviado y se registra una advertencia en el log. |
 | 2026-10-23 | Reporte del Sprint 2 (`docs/sprints/sprint-2.md`) con la evidencia del Avance 3; módulos y rutas al día y reasignación de historias del Sprint 2. |
 | 2026-10-22 | Agenda de la profesional (HU-06, SCRUM-16): pantalla `/panel/agenda` con vistas Día (columnas por profesional) y Semana (columnas por día con selector de profesional para funcionario), grilla horaria dinámica según disponibilidad, filtros por estado, navegación por fechas, posicionamiento vertical por duración y cola lateral "Por confirmar". |

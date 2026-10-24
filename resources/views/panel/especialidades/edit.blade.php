@@ -3,7 +3,7 @@
         <div>
             <a
                 href="{{ route('panel.especialidades') }}"
-                class="text-xs font-semibold text-brand-600 hover:text-brand-700 inline-flex items-center gap-1 mb-2"
+                class="text-xs font-semibold text-brand-text hover:text-brand-700 inline-flex items-center gap-1 mb-2"
             >
                 &larr; Volver a especialidades
             </a>
@@ -15,7 +15,7 @@
             </p>
         </div>
 
-        <div class="bg-white p-6 rounded-lg border border-line shadow-2xs">
+        <div class="bg-card p-6 rounded-lg border border-line shadow-2xs">
             <form action="{{ route('panel.especialidades.update', $especialidad) }}" method="POST" class="space-y-5">
                 @csrf
                 @method('PUT')

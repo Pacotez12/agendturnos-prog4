@@ -13,6 +13,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $titulo ? "{$titulo} · " : '' }}Glow Dental Protect</title>
+    @include('partials.tema')
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -30,9 +31,10 @@
     class="min-h-screen bg-surface font-sans text-ink-900 antialiased flex flex-col lg:flex-row"
 >
     <!-- Header móvil con botón hamburguesa -->
-    <header class="lg:hidden bg-white border-b border-line px-4 h-16 flex items-center justify-between sticky top-0 z-30">
+    <header class="lg:hidden bg-card border-b border-line px-4 h-16 flex items-center justify-between sticky top-0 z-30">
         <a href="/" class="inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
-            <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-8 w-auto">
+            <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-8 w-auto dark:hidden">
+            <img src="{{ asset('images/glow-logo-blanco.svg') }}" alt="Glow Dental Protect" class="h-8 w-auto hidden dark:block">
         </a>
         <button
             type="button"
@@ -53,12 +55,13 @@
     <aside
         id="sidebar-panel"
         :class="menuAbierto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-        class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-line flex flex-col justify-between transition-transform duration-200 motion-reduce:transition-none lg:static lg:translate-x-0 lg:min-h-screen shrink-0"
+        class="fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-line flex flex-col justify-between transition-transform duration-200 motion-reduce:transition-none lg:static lg:translate-x-0 lg:min-h-screen shrink-0"
     >
         <div class="p-6">
             <div class="flex items-center justify-between pb-6 border-b border-line">
                 <a href="/" class="inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
-                    <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto">
+                    <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto dark:hidden">
+                    <img src="{{ asset('images/glow-logo-blanco.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto hidden dark:block">
                 </a>
                 <button
                     type="button"
@@ -80,7 +83,7 @@
                     @endphp
                     <a
                         href="{{ route($item['ruta']) }}"
-                        class="px-3 py-2 text-sm font-medium rounded-lg min-h-11 flex items-center justify-between transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isActive ? 'bg-brand-100 text-brand-600 font-semibold' : 'text-ink-500 hover:text-ink-900 hover:bg-surface' }}"
+                        class="px-3 py-2 text-sm font-medium rounded-lg min-h-11 flex items-center justify-between transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isActive ? 'bg-brand-100 text-brand-text font-semibold' : 'text-ink-500 hover:text-ink-900 hover:bg-surface' }}"
                     >
                         <span>{{ $item['etiqueta'] }}</span>
                         @if ($item['ruta'] === 'panel.solicitudes' && ! empty($solicitudesCount))
@@ -103,12 +106,24 @@
                     </p>
                 </div>
 
+                <button
+                    type="button"
+                    @click="window.toggleTema($event)"
+                    class="w-full mb-2 px-3 py-2 text-left text-xs font-medium text-ink-500 hover:text-ink-900 hover:bg-surface rounded-lg min-h-11 flex items-center gap-2.5 transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 cursor-pointer"
+                    aria-label="Cambiar tema de color"
+                >
+                    <x-phosphor-moon class="size-4 shrink-0 dark:hidden" aria-hidden="true" />
+                    <x-phosphor-sun class="size-4 shrink-0 hidden dark:inline" aria-hidden="true" />
+                    <span class="dark:hidden">Oscuro</span>
+                    <span class="hidden dark:inline">Claro</span>
+                </button>
+
                 @if (Route::has('logout'))
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button
                             type="submit"
-                            class="w-full px-3 py-2 text-left text-xs font-medium text-ink-500 hover:text-danger-700 hover:bg-red-50 rounded-lg min-h-11 flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-700 cursor-pointer"
+                            class="w-full px-3 py-2 text-left text-xs font-medium text-ink-500 hover:text-danger-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg min-h-11 flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-700 cursor-pointer"
                         >
                             Cerrar sesión
                         </button>

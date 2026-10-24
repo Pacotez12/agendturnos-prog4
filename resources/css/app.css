@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
@@ -8,11 +10,13 @@
     --color-brand-600: #995432;
     --color-brand-300: #D8B78A;
     --color-brand-100: #F3E6D3;
+    --color-brand-text: #995432;
     --color-cream-50: #FBF7F2;
     --color-ink-900: #1F1A17;
     --color-ink-500: #6B635D;
     --color-line: #E5E2DE;
     --color-surface: #F7F6F4;
+    --color-card: #FFFFFF;
     --color-danger-700: #B91C1C;
     --color-whatsapp: #25D366;
 
@@ -31,6 +35,43 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Quicksand', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+:root {
+    color-scheme: light;
+}
+
+.dark {
+    color-scheme: dark;
+
+    --color-surface: #171311;
+    --color-card: #221C19;
+    --color-line: #3A322D;
+    --color-ink-900: #F2ECE6;
+    --color-ink-500: #A89E96;
+    --color-cream-50: #1A1512;
+    --color-brand-100: #3A2A20;
+    --color-brand-700: #F0CFAE;
+    --color-brand-text: #E0A47C;
+    --color-danger-700: #F87171;
+
+    --color-estado-solicitado-bg: #3B2A0B;
+    --color-estado-solicitado-fg: #FCD34D;
+    --color-estado-confirmado-bg: #172554;
+    --color-estado-confirmado-fg: #BFDBFE;
+    --color-estado-atendido-bg: #0F2E1A;
+    --color-estado-atendido-fg: #86EFAC;
+    --color-estado-cancelado-bg: #3B1212;
+    --color-estado-cancelado-fg: #FCA5A5;
+    --color-estado-ausente-bg: #2A2725;
+    --color-estado-ausente-fg: #D6D3D1;
+}
+
+/* Transición animada de tema con View Transitions API */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
 }
 
 @utility estado-solicitado-bg {

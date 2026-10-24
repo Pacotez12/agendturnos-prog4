@@ -1,5 +1,5 @@
 <x-layouts.invitado titulo="Registro">
-    <div class="max-w-md mx-auto bg-white p-8 rounded-2xl border border-line shadow-xs">
+    <div class="max-w-md mx-auto bg-card p-8 rounded-2xl border border-line shadow-xs">
         <div class="text-center mb-6">
             <h1 class="text-2xl font-bold font-display text-ink-900">
                 Creá tu cuenta de paciente
@@ -111,7 +111,7 @@
             </div>
 
             <div class="text-center pt-2">
-                <a href="{{ route('login') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
+                <a href="{{ route('login') }}" class="text-sm font-semibold text-brand-text hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
                     ¿Ya tenés cuenta? Iniciá sesión
                 </a>
             </div>

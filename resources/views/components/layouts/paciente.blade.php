@@ -13,6 +13,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $titulo ? "{$titulo} · " : '' }}Glow Dental Protect</title>
+    @include('partials.tema')
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -37,53 +38,67 @@
     class="min-h-screen bg-cream-50 font-sans text-ink-900 antialiased flex flex-col"
 >
     <!-- Barra superior -->
-    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-xs border-b border-line">
+    <header class="sticky top-0 z-30 bg-card/90 backdrop-blur-xs border-b border-line">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <a href="/" class="inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
-                <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto">
+                <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto dark:hidden">
+                <img src="{{ asset('images/glow-logo-blanco.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto hidden dark:block">
             </a>
 
-            <!-- Navegación escritorio (lg:) -->
-            <nav class="hidden lg:flex items-center gap-1">
-                @foreach ($navItems as $item)
-                    @php
-                        $isActive = request()->routeIs($item['ruta'], $item['ruta'].'.*');
-                    @endphp
-                    <a
-                        href="{{ route($item['ruta']) }}"
-                        class="px-3 py-2 text-sm font-medium rounded-full transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isActive ? 'bg-brand-100 text-brand-700 font-semibold' : 'text-ink-500 hover:text-ink-900 hover:bg-cream-50' }}"
-                    >
-                        {{ $item['etiqueta'] }}
-                    </a>
-                @endforeach
-
-                @if (Route::has('logout') && $user)
-                    <form method="POST" action="{{ route('logout') }}" class="inline ml-2">
-                        @csrf
-                        <button
-                            type="submit"
-                            class="px-3 py-2 text-sm font-medium text-ink-500 hover:text-danger-700 rounded-full transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 cursor-pointer min-h-11 inline-flex items-center"
+            <div class="flex items-center gap-2">
+                <!-- Navegación escritorio (lg:) -->
+                <nav class="hidden lg:flex items-center gap-1">
+                    @foreach ($navItems as $item)
+                        @php
+                            $isActive = request()->routeIs($item['ruta'], $item['ruta'].'.*');
+                        @endphp
+                        <a
+                            href="{{ route($item['ruta']) }}"
+                            class="px-3 py-2 text-sm font-medium rounded-full transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isActive ? 'bg-brand-100 text-brand-700 font-semibold' : 'text-ink-500 hover:text-ink-900 hover:bg-cream-50' }}"
                         >
-                            Cerrar sesión
-                        </button>
-                    </form>
-                @endif
-            </nav>
+                            {{ $item['etiqueta'] }}
+                        </a>
+                    @endforeach
 
-            <!-- Botón menú hamburguesa celular -->
-            <button
-                type="button"
-                @click="toggleMenu($el)"
-                aria-expanded="false"
-                :aria-expanded="menuAbierto ? 'true' : 'false'"
-                aria-controls="menu-lateral-paciente"
-                aria-label="Abrir menú de navegación"
-                class="lg:hidden p-2 text-ink-900 hover:bg-cream-50 rounded-lg min-h-11 min-w-11 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 cursor-pointer"
-            >
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-            </button>
+                    @if (Route::has('logout') && $user)
+                        <form method="POST" action="{{ route('logout') }}" class="inline ml-2">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="px-3 py-2 text-sm font-medium text-ink-500 hover:text-danger-700 rounded-full transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 cursor-pointer min-h-11 inline-flex items-center"
+                            >
+                                Cerrar sesión
+                            </button>
+                        </form>
+                    @endif
+                </nav>
+
+                <!-- Botón tema -->
+                <button
+                    type="button"
+                    @click="window.toggleTema($event)"
+                    class="size-11 rounded-lg border border-line bg-card text-ink-900 hover:bg-cream-50 inline-flex items-center justify-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 cursor-pointer"
+                    aria-label="Cambiar tema de color"
+                >
+                    <x-phosphor-moon class="size-5 dark:hidden" aria-hidden="true" />
+                    <x-phosphor-sun class="size-5 hidden dark:inline" aria-hidden="true" />
+                </button>
+
+                <!-- Botón menú hamburguesa celular -->
+                <button
+                    type="button"
+                    @click="toggleMenu($el)"
+                    aria-expanded="false"
+                    :aria-expanded="menuAbierto ? 'true' : 'false'"
+                    aria-controls="menu-lateral-paciente"
+                    aria-label="Abrir menú de navegación"
+                    class="lg:hidden p-2 text-ink-900 hover:bg-cream-50 rounded-lg min-h-11 min-w-11 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 cursor-pointer"
+                >
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -121,11 +136,12 @@
             x-transition:leave="ease-in duration-150 motion-reduce:transition-none"
             x-transition:leave-start="translate-x-0"
             x-transition:leave-end="translate-x-full"
-            class="fixed inset-y-0 right-0 w-full max-w-xs bg-white p-6 shadow-xl flex flex-col justify-between border-l border-line"
+            class="fixed inset-y-0 right-0 w-full max-w-xs bg-card p-6 shadow-xl flex flex-col justify-between border-l border-line"
         >
             <div>
                 <div class="flex items-center justify-between pb-4 border-b border-line">
-                    <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-8 w-auto">
+                    <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-8 w-auto dark:hidden">
+                    <img src="{{ asset('images/glow-logo-blanco.svg') }}" alt="Glow Dental Protect" class="h-8 w-auto hidden dark:block">
                     <button
                         type="button"
                         @click="cerrarMenu()"
@@ -159,7 +175,7 @@
                         @csrf
                         <button
                             type="submit"
-                            class="w-full px-4 py-3 text-left text-base font-medium text-danger-700 hover:bg-red-50 rounded-full min-h-11 flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-700 cursor-pointer"
+                            class="w-full px-4 py-3 text-left text-base font-medium text-danger-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-full min-h-11 flex items-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-700 cursor-pointer"
                         >
                             Cerrar sesión
                         </button>

@@ -21,7 +21,7 @@
             @if(! $libre)
                 border-line bg-surface text-ink-500 line-through opacity-50 cursor-not-allowed
             @else
-                cursor-pointer border-line bg-white text-ink-900 hover:border-brand-600 hover:bg-cream-50 has-checked:border-brand-600 has-checked:bg-brand-100 has-checked:text-brand-700 has-checked:font-semibold has-focus-visible:ring-2 has-focus-visible:ring-brand-600 has-focus-visible:ring-offset-1
+                cursor-pointer border-line bg-card text-ink-900 hover:border-brand-600 hover:bg-cream-50 has-checked:border-brand-600 has-checked:bg-brand-100 has-checked:text-brand-700 has-checked:font-semibold has-focus-visible:ring-2 has-focus-visible:ring-brand-600 has-focus-visible:ring-offset-1
             @endif"
         >
             <input

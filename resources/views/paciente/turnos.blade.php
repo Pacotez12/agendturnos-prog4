@@ -13,13 +13,13 @@
         <div class="flex items-center gap-2">
             <a
                 href="{{ route('paciente.turnos') }}"
-                class="rounded-full px-4 py-1.5 text-xs font-semibold border transition-colors {{ $ver === 'proximos' ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-900 border-line hover:bg-cream-50' }}"
+                class="rounded-full px-4 py-1.5 text-xs font-semibold border transition-colors {{ $ver === 'proximos' ? 'bg-brand-600 text-white border-brand-600' : 'bg-card text-ink-900 border-line hover:bg-cream-50' }}"
             >
                 Próximos ({{ $proximosCount }})
             </a>
             <a
                 href="{{ route('paciente.turnos', ['ver' => 'historial']) }}"
-                class="rounded-full px-4 py-1.5 text-xs font-semibold border transition-colors {{ $ver === 'historial' ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-900 border-line hover:bg-cream-50' }}"
+                class="rounded-full px-4 py-1.5 text-xs font-semibold border transition-colors {{ $ver === 'historial' ? 'bg-brand-600 text-white border-brand-600' : 'bg-card text-ink-900 border-line hover:bg-cream-50' }}"
             >
                 Historial
             </a>
@@ -63,7 +63,7 @@
                         </div>
 
                         <div class="flex items-center justify-between pt-2 border-t border-line text-xs font-bold">
-                            <a href="{{ route('paciente.turnos.show', $turno) }}" class="text-brand-600 hover:text-brand-700">
+                            <a href="{{ route('paciente.turnos.show', $turno) }}" class="text-brand-text hover:text-brand-700">
                                 Ver detalle
                             </a>
 
@@ -82,7 +82,7 @@
                                         href="https://wa.me/{{ config('services.whatsapp.numero') }}?text={{ urlencode('Hola, necesito cancelar mi turno del ' . \App\Support\Fecha::corta($turno->inicio) . ' ' . $turno->inicio->format('H:i')) }}"
                                         target="_blank"
                                         rel="noopener"
-                                        class="text-ink-500 hover:text-brand-600 font-normal hover:underline inline-flex items-center gap-1"
+                                        class="text-ink-500 hover:text-brand-text font-normal hover:underline inline-flex items-center gap-1"
                                     >
                                         <x-phosphor-whatsapp-logo class="size-3.5 text-whatsapp" aria-hidden="true" />
                                         <span>Para cancelar, escribinos por WhatsApp</span>

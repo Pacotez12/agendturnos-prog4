@@ -53,7 +53,7 @@
 
             <div class="flex items-center gap-3 flex-wrap">
                 <!-- Segmentado Día / Semana -->
-                <div class="inline-flex rounded-lg border border-line bg-white p-0.5 text-xs font-semibold">
+                <div class="inline-flex rounded-lg border border-line bg-card p-0.5 text-xs font-semibold">
                     <a
                         href="{{ route('panel.agenda', array_filter(['vista' => 'dia', 'fecha' => $fecha->toDateString(), 'estado' => $estado?->value, 'profesional' => request('profesional')])) }}"
                         class="px-3 py-1.5 rounded-md transition-colors {{ $vista === 'dia' ? 'bg-brand-100 text-brand-700 font-bold' : 'text-ink-700 hover:bg-cream-50' }}"
@@ -69,7 +69,7 @@
                 </div>
 
                 <!-- Botones Anterior / Hoy / Siguiente -->
-                <div class="inline-flex rounded-lg border border-line bg-white text-xs font-semibold overflow-hidden">
+                <div class="inline-flex rounded-lg border border-line bg-card text-xs font-semibold overflow-hidden">
                     <a
                         href="{{ route('panel.agenda', array_filter(['vista' => $vista, 'fecha' => $fechaAnterior, 'estado' => $estado?->value, 'profesional' => request('profesional')])) }}"
                         class="px-3 py-1.5 hover:bg-cream-50 text-ink-900 border-r border-line"
@@ -97,14 +97,14 @@
             <span class="font-semibold text-ink-500 mr-1">Filtrar:</span>
             <a
                 href="{{ route('panel.agenda', array_filter(['vista' => $vista, 'fecha' => $fecha->toDateString(), 'profesional' => request('profesional')])) }}"
-                class="rounded-full px-3 py-1 font-semibold border transition-colors {{ is_null($estado) ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-700 border-line hover:bg-cream-50' }}"
+                class="rounded-full px-3 py-1 font-semibold border transition-colors {{ is_null($estado) ? 'bg-brand-600 text-white border-brand-600' : 'bg-card text-ink-700 border-line hover:bg-cream-50' }}"
             >
                 Todos
             </a>
             @foreach ($estados as $val => $nom)
                 <a
                     href="{{ route('panel.agenda', array_filter(['vista' => $vista, 'fecha' => $fecha->toDateString(), 'estado' => $val, 'profesional' => request('profesional')])) }}"
-                    class="rounded-full px-3 py-1 font-semibold border transition-colors {{ $estado?->value === $val ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-700 border-line hover:bg-cream-50' }}"
+                    class="rounded-full px-3 py-1 font-semibold border transition-colors {{ $estado?->value === $val ? 'bg-brand-600 text-white border-brand-600' : 'bg-card text-ink-700 border-line hover:bg-cream-50' }}"
                 >
                     {{ $nom }}
                 </a>
@@ -118,7 +118,7 @@
                 @foreach ($todosProfesionales as $p)
                     <a
                         href="{{ route('panel.agenda', array_filter(['vista' => 'semana', 'fecha' => $fecha->toDateString(), 'estado' => $estado?->value, 'profesional' => $p->id])) }}"
-                        class="rounded-full px-3 py-1 font-semibold border transition-colors {{ $profesional->id === $p->id ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-900 border-line hover:bg-cream-50' }}"
+                        class="rounded-full px-3 py-1 font-semibold border transition-colors {{ $profesional->id === $p->id ? 'bg-brand-600 text-white border-brand-600' : 'bg-card text-ink-900 border-line hover:bg-cream-50' }}"
                     >
                         {{ $p->nombre }} {{ $p->apellido }}
                     </a>
@@ -129,7 +129,7 @@
         <!-- Grilla y sidebar -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
             <!-- Grilla horaria -->
-            <div class="lg:col-span-3 bg-white rounded-lg border border-line p-4 shadow-2xs overflow-hidden">
+            <div class="lg:col-span-3 bg-card rounded-lg border border-line p-4 shadow-2xs overflow-hidden">
                 <div class="overflow-x-auto">
                     <div class="min-w-[600px]">
                         @if ($vista === 'dia')
@@ -205,7 +205,7 @@
                                     <div class="px-2 truncate">
                                         <a
                                             href="{{ route('panel.agenda', array_filter(['vista' => 'dia', 'fecha' => $dia->toDateString(), 'estado' => $estado?->value, 'profesional' => request('profesional')])) }}"
-                                            class="hover:text-brand-600 block"
+                                            class="hover:text-brand-text block"
                                         >
                                             {{ ucfirst($dia->translatedFormat('l j')) }}
                                         </a>
@@ -275,7 +275,7 @@
                             Por confirmar ({{ $conteoPendientes }})
                         </h2>
                         @if ($conteoPendientes > 0)
-                            <a href="{{ route('panel.solicitudes') }}" class="text-xs font-semibold text-brand-600 hover:underline">
+                            <a href="{{ route('panel.solicitudes') }}" class="text-xs font-semibold text-brand-text hover:underline">
                                 Ver todas
                             </a>
                         @endif
@@ -290,7 +290,7 @@
                             @foreach ($solicitudes as $sol)
                                 <div class="py-2.5 space-y-1.5">
                                     <div>
-                                        <a href="{{ route('panel.turnos.show', $sol) }}" class="font-bold text-ink-900 hover:text-brand-600 block">
+                                        <a href="{{ route('panel.turnos.show', $sol) }}" class="font-bold text-ink-900 hover:text-brand-text block">
                                             {{ $sol->paciente->nombre }} {{ $sol->paciente->apellido }}
                                         </a>
                                         <p class="text-ink-500">
