@@ -29,9 +29,17 @@ Glow Dental Protect es una clínica odontológica unipersonal. Ofrece consultas,
 - Agenda de la profesional: ver, confirmar, reprogramar y cancelar turnos; administrar el horario semanal y los bloqueos.
 - Seguimiento del estado del turno por parte del paciente.
 - Notificaciones (confirmación, cancelación, reprogramación) y recordatorios automáticos.
+- Varias profesionales, cada una con sus servicios, horario y agenda.
+- Recepción (rol funcionario): carga de turnos para pacientes que llaman o vienen al consultorio, incluso sin cuenta.
+- Familiares a cargo: un paciente pide turnos para menores o personas a su cargo.
+- Avisos de turno por WhatsApp, solo salientes y con plantilla aprobada (el correo sigue siendo el canal principal).
+- API REST v1 de consulta (ver [`api.md`](api.md)).
+- Panel del personal instalable como app (PWA), sin modo sin conexión.
 
 ### Fuera de alcance (versión inicial)
-Historia clínica, facturación y contabilidad, inventario, gestión de varias sucursales (el modelo de datos queda preparado), app móvil nativa, integración directa con redes sociales, pagos en línea, telemedicina, IA y marketing.
+Historia clínica, facturación y contabilidad, inventario, gestión de varias sucursales (el modelo de datos queda preparado), app móvil nativa, chat o bot por WhatsApp e integración con Instagram y Facebook, pagos en línea, telemedicina, IA y marketing.
+
+Cada cambio respecto de la Declaración de Alcance inicial, con su motivo y decisión, está en [`alcance-cambios.md`](alcance-cambios.md).
 
 ## 3. Stack tecnológico
 
@@ -294,6 +302,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Registro de cambios de alcance (`docs/alcance-cambios.md`, SCRUM-62), sección Alcance alineada con lo construido y reporte del Sprint 2 actualizado al 24/10. |
 | 2026-10-24 | Fixes generales tras auditoría: reprogramar sin fecha ya no falla; avisos en cola de turnos cancelados se descartan; recordatorios dicen "hoy", "mañana" o la fecha; el tutor reserva para sus familiares; cambio de estado con bloqueo de fila; semana con sábado/domingo si hay atención; "Volver" según origen; tablas del panel usables en celular; cabeceras de seguridad en Nginx (`server_tokens off`); detalle del turno del paciente según su estado; botones con separación entre ícono y texto; espacio para el botón de WhatsApp en celular; página sin conexión de la PWA más clara y con modo oscuro. |
 | 2026-10-24 | Estados vacíos más claros: inicio del panel muestra "Día libre" (sin turnos hoy) o "Listo por hoy" (ya pasaron todos); al reservar, "Agenda completa", "No quedan horarios hoy" o "No atiende este día". |
 | 2026-10-24 | Diccionario de datos completo (`docs/diccionario-datos.md`): MER con cardinalidades, todas las tablas y columnas generadas desde el esquema real, restricciones, índices y justificación de la 3FN. |

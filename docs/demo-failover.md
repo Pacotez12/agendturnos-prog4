@@ -68,6 +68,13 @@ Variante: hacer lo mismo con la arquitectura A (`docker stop agendturnos-web-1` 
 
 ## Registro de ensayos
 
+**24/10/2026**, Linux (Fedora) con el stack completo, sesión de recepción iniciada por HAProxy y un pedido a `/panel/servicios` cada medio segundo:
+
+- Caída de B (`docker stop agendturnos-apache-1`): DOWN a los 10 s, UP a los 7 s después de `docker start`. 37 pedidos, todos en 200, ninguno pidió login.
+- Caída de A (`docker stop agendturnos-web-1`): DOWN a los 12 s, UP a los 6 s. 32 pedidos, todos en 200, ninguno pidió login.
+- Si se usa el Stack de Portainer, antes de la demo correr `make portainer-build` (cambió la configuración de Nginx y de PHP-FPM) y `php artisan migrate`: desde el último despliegue se agregaron migraciones.
+
+
 **19/10/2026**, Windows 11 con Docker Desktop y el código montado desde el disco:
 
 - Caída de B (`docker stop agendturnos-apache-1`): DOWN a los 9 s, UP a los 17 s después de `docker start`. 0 errores en el loop.
