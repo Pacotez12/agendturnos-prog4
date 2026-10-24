@@ -95,7 +95,7 @@
                         <div>
                             <dt class="text-xs text-ink-500">Teléfono</dt>
                             <dd class="font-semibold text-ink-900 mt-0.5">
-                                {{ $turno->paciente->telefono ?? '—' }}
+                                {{ \App\Support\Telefono::legible($turno->paciente->telefono) ?? '—' }}
                             </dd>
                         </div>
                         <div>

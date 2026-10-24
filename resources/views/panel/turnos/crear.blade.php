@@ -34,7 +34,7 @@
                     <span class="text-sm text-ink-500">
                         <span class="hidden sm:inline">·</span> {{ $pacienteSeleccionado->tipo_documento }} {{ $pacienteSeleccionado->documento }}
                         @if ($pacienteSeleccionado->telefono)
-                            · {{ $pacienteSeleccionado->telefono }}
+                            · {{ \App\Support\Telefono::legible($pacienteSeleccionado->telefono) }}
                         @endif
                         @if ($pacienteSeleccionado->responsable)
                             · a cargo de {{ $pacienteSeleccionado->responsable->nombreVisible() }}
@@ -55,7 +55,7 @@
                             required
                         />
                         <x-input name="documento" label="Documento" required />
-                        <x-input name="telefono" label="Teléfono" />
+                        <x-input name="telefono" label="Teléfono" placeholder="0981 123 456" />
                         <x-date
                             name="fecha_nacimiento"
                             label="Fecha de nacimiento"
@@ -113,7 +113,7 @@
                                             </p>
                                             <p class="text-xs text-ink-500">
                                                 {{ $p->tipo_documento }} {{ $p->documento }}
-                                                @if ($p->telefono) · {{ $p->telefono }} @endif
+                                                @if ($p->telefono) · {{ \App\Support\Telefono::legible($p->telefono) }} @endif
                                                 @if ($p->responsable) · a cargo de {{ $p->responsable->nombreVisible() }} @endif
                                             </p>
                                         </div>
