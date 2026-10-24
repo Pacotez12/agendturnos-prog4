@@ -3,9 +3,11 @@
     descripcion="Clínica odontológica en San Pablo, Asunción. Odontopediatría y rehabilitación oral. Reservá tu turno online en menos de un minuto."
 >
     @php
-        $reservarUrl = auth()->check()
-            ? route(\App\Support\Navegacion::inicioPara(auth()->user()->rol))
-            : route('registro');
+        $reservarUrl = match (true) {
+            auth()->check() && auth()->user()->rol === \App\Enums\RolUsuario::Paciente => route('paciente.reservar'),
+            auth()->check() => route(\App\Support\Navegacion::inicioPara(auth()->user()->rol)),
+            default => route('registro'),
+        };
     @endphp
 
     <div class="space-y-12 sm:space-y-16">
@@ -28,6 +30,11 @@
                         </x-button>
                     @endif
                 </div>
+                @guest
+                    <p class="mt-3 text-sm text-ink-500">
+                        ¿Ya tenés cuenta? <a href="{{ route('login') }}" class="underline font-medium text-brand-text hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">Iniciá sesión</a>
+                    </p>
+                @endguest
             </div>
 
             <div class="bg-brand-300 rounded-3xl h-52 sm:h-60 flex items-center justify-center p-8 overflow-hidden shadow-xs">
