@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Notificacion;
 use App\Models\Turno;
+use App\Support\Telefono;
 use Illuminate\Support\Facades\Http;
 
 class WhatsAppService
@@ -68,24 +69,12 @@ class WhatsAppService
 
     public function normalizarTelefono(?string $telefono): ?string
     {
-        if ($telefono === null || trim($telefono) === '') {
+        $normalizado = Telefono::normalizar($telefono);
+        if (! $normalizado) {
             return null;
         }
 
-        $digits = preg_replace('/\D+/', '', $telefono);
-        if (empty($digits)) {
-            return null;
-        }
-
-        if (str_starts_with($digits, '595')) {
-            return $digits;
-        }
-
-        if (str_starts_with($digits, '0')) {
-            return '595'.substr($digits, 1);
-        }
-
-        return '595'.$digits;
+        return '595'.substr($normalizado, 1);
     }
 
     private function armarFrase(string $tipo, bool $esPropio, string $nombrePaciente, Turno $turno): string

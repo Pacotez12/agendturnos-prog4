@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\CelularParaguay;
+use App\Support\Telefono;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,7 +27,7 @@ class RegistroRequest extends FormRequest
                 Rule::unique('pacientes', 'documento')->where(fn ($query) => $query->where('tipo_documento', $this->tipo_documento)),
             ],
             'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today'],
-            'telefono' => ['nullable', 'string', 'max:30'],
+            'telefono' => ['nullable', 'string', new CelularParaguay],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
@@ -46,7 +48,6 @@ class RegistroRequest extends FormRequest
             'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
             'fecha_nacimiento.date' => 'La fecha de nacimiento debe ser una fecha válida.',
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser una fecha futura.',
-            'telefono.max' => 'El teléfono no puede tener más de 30 caracteres.',
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'El correo electrónico debe tener un formato válido.',
             'email.unique' => 'Este correo electrónico ya está registrado.',
@@ -54,5 +55,16 @@ class RegistroRequest extends FormRequest
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'La confirmación de la contraseña no coincide.',
         ];
+    }
+
+    public function validated($key = null, $default = null): mixed
+    {
+        $validated = parent::validated($key, $default);
+
+        if (is_array($validated) && ! empty($validated['telefono'])) {
+            $validated['telefono'] = Telefono::normalizar($validated['telefono']);
+        }
+
+        return $validated;
     }
 }

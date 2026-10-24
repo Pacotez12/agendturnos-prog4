@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Panel;
 
 use App\Models\Paciente;
+use App\Rules\CelularParaguay;
+use App\Support\Telefono;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -30,9 +32,20 @@ class GuardarPacienteOperadorRequest extends FormRequest
                 Rule::unique('pacientes', 'documento')->where(fn ($q) => $q->where('tipo_documento', $this->tipo_documento)),
             ],
             'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today'],
-            'telefono' => ['nullable', 'string', 'max:30'],
+            'telefono' => ['nullable', 'string', new CelularParaguay],
             'responsable_documento' => ['nullable', 'string', 'max:30'],
         ];
+    }
+
+    public function validated($key = null, $default = null): mixed
+    {
+        $validated = parent::validated($key, $default);
+
+        if (is_array($validated) && ! empty($validated['telefono'])) {
+            $validated['telefono'] = Telefono::normalizar($validated['telefono']);
+        }
+
+        return $validated;
     }
 
     /**

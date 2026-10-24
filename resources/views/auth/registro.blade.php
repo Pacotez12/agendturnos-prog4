@@ -67,6 +67,7 @@
                 name="telefono"
                 label="Teléfono (Opcional)"
                 type="text"
+                placeholder="0981 123 456"
                 :value="old('telefono')"
             />
 
