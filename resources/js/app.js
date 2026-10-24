@@ -51,3 +51,10 @@ window.toggleTema = function (event) {
 };
 
 Alpine.start();
+
+if ('serviceWorker' in navigator && document.querySelector('link[rel="manifest"]')) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+
