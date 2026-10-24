@@ -72,6 +72,13 @@ class PulidoSitioTest extends TestCase
         $respPaciente->assertOk();
         $respPaciente->assertSee('Reservar turno');
         $respPaciente->assertSee(route('paciente.reservar'));
+
+        // Personal logueado: va a cargar un turno desde el panel
+        foreach ([User::factory()->funcionario()->create(), User::factory()->profesional()->create()] as $personal) {
+            $this->actingAs($personal)->get('/')
+                ->assertOk()
+                ->assertSee(route('panel.turnos.crear'));
+        }
     }
 
     public function test_paginas_de_error_renderizan_su_texto_con_el_codigo_correcto(): void

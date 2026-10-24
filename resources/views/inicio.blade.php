@@ -5,7 +5,7 @@
     @php
         $reservarUrl = match (true) {
             auth()->check() && auth()->user()->rol === \App\Enums\RolUsuario::Paciente => route('paciente.reservar'),
-            auth()->check() => route(\App\Support\Navegacion::inicioPara(auth()->user()->rol)),
+            auth()->check() => route('panel.turnos.crear'),
             default => route('registro'),
         };
     @endphp
