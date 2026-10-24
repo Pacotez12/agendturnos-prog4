@@ -36,7 +36,7 @@
             <x-select
                 id="tipo_documento"
                 name="tipo_documento"
-                label="Tipo de Documento"
+                label="Tipo de documento"
                 required
                 :options="['CI' => 'CI', 'pasaporte' => 'Pasaporte']"
                 :value="old('tipo_documento')"
@@ -46,7 +46,7 @@
             <x-input
                 id="documento"
                 name="documento"
-                label="Número de Documento"
+                label="Número de documento"
                 type="text"
                 required
                 :value="old('documento')"
@@ -56,7 +56,7 @@
             <x-date
                 id="fecha_nacimiento"
                 name="fecha_nacimiento"
-                label="Fecha de Nacimiento"
+                label="Fecha de nacimiento"
                 required
                 :value="old('fecha_nacimiento')"
             />
@@ -65,7 +65,7 @@
             <x-input
                 id="telefono"
                 name="telefono"
-                label="Teléfono (Opcional)"
+                label="Teléfono (opcional)"
                 type="text"
                 placeholder="0981 123 456"
                 :value="old('telefono')"
@@ -75,7 +75,7 @@
             <x-input
                 id="email"
                 name="email"
-                label="Correo Electrónico"
+                label="Correo electrónico"
                 type="email"
                 required
                 :value="old('email')"
@@ -94,7 +94,7 @@
             <x-input
                 id="password_confirmation"
                 name="password_confirmation"
-                label="Confirmar Contraseña"
+                label="Confirmar contraseña"
                 type="password"
                 required
             />

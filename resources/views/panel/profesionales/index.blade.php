@@ -7,7 +7,7 @@
                     Profesionales
                 </h1>
                 <p class="text-sm text-ink-500 mt-1">
-                    Gestioná los odontólogos de la clínica y los tratamientos que ofrece cada uno.
+                    Gestioná las profesionales de la clínica y los tratamientos que ofrece cada una.
                 </p>
             </div>
         </div>
@@ -37,7 +37,7 @@
                             @foreach ($profesionales as $prof)
                                 <tr class="hover:bg-surface/50 transition-colors">
                                     <td class="px-4 py-3 font-semibold text-ink-900">
-                                        Dra. {{ $prof->nombre }} {{ $prof->apellido }}
+                                        {{ $prof->nombre }} {{ $prof->apellido }}
                                     </td>
                                     <td class="px-4 py-3 text-ink-500 font-mono text-xs">
                                         {{ $prof->matricula }}
@@ -66,7 +66,7 @@
                             <div class="flex items-start justify-between gap-3">
                                 <div>
                                     <p class="font-bold text-ink-900 text-base">
-                                        Dra. {{ $prof->nombre }} {{ $prof->apellido }}
+                                        {{ $prof->nombre }} {{ $prof->apellido }}
                                     </p>
                                     <p class="text-xs text-ink-500 font-mono mt-0.5">
                                         Matrícula: {{ $prof->matricula }}

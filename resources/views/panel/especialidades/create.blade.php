@@ -1,5 +1,5 @@
 <x-layouts.panel titulo="Nueva especialidad">
-    <div class="max-w-xl mx-auto space-y-6">
+    <div class="max-w-xl space-y-6">
         <div>
             <a
                 href="{{ route('panel.especialidades') }}"
@@ -8,7 +8,7 @@
                 &larr; Volver a especialidades
             </a>
             <h1 class="text-2xl font-bold font-display text-ink-900">
-                Nueva Especialidad
+                Nueva especialidad
             </h1>
             <p class="text-sm text-ink-500 mt-1">
                 Ingresá los datos para registrar una nueva especialidad odontológica.

@@ -1,6 +1,6 @@
 <x-layouts.panel :titulo="$paciente->nombreCompleto()">
     <div
-        class="space-y-6 max-w-5xl"
+        class="space-y-6"
         x-data
         @if ($errors->any()) x-init="$nextTick(() => $dispatch('abrir-modal', 'editar-contacto'))" @endif
     >
@@ -165,7 +165,7 @@
                     <span>Historial de turnos</span>
                 </h2>
                 <div class="text-xs font-medium text-ink-500">
-                    {{ $resumenTurnos['atendidos'] }} atendidos · {{ $resumenTurnos['ausentes'] }} ausentes · {{ $resumenTurnos['cancelados'] }} cancelados
+                    {{ $resumenTurnos['atendidos'] }} {{ $resumenTurnos['atendidos'] === 1 ? 'atendido' : 'atendidos' }} · {{ $resumenTurnos['ausentes'] }} {{ $resumenTurnos['ausentes'] === 1 ? 'ausente' : 'ausentes' }} · {{ $resumenTurnos['cancelados'] }} {{ $resumenTurnos['cancelados'] === 1 ? 'cancelado' : 'cancelados' }}
                 </div>
             </div>
 

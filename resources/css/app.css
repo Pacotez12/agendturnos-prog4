@@ -55,15 +55,15 @@
     --color-brand-text: #E0A47C;
     --color-danger-700: #F87171;
 
-    --color-estado-solicitado-bg: #3B2A0B;
+    --color-estado-solicitado-bg: #2B2113;
     --color-estado-solicitado-fg: #FCD34D;
-    --color-estado-confirmado-bg: #172554;
-    --color-estado-confirmado-fg: #BFDBFE;
-    --color-estado-atendido-bg: #0F2E1A;
+    --color-estado-confirmado-bg: #1B2433;
+    --color-estado-confirmado-fg: #93C5FD;
+    --color-estado-atendido-bg: #142419;
     --color-estado-atendido-fg: #86EFAC;
-    --color-estado-cancelado-bg: #3B1212;
+    --color-estado-cancelado-bg: #2A1616;
     --color-estado-cancelado-fg: #FCA5A5;
-    --color-estado-ausente-bg: #2A2725;
+    --color-estado-ausente-bg: #22201E;
     --color-estado-ausente-fg: #D6D3D1;
 }
 

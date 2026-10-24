@@ -32,7 +32,7 @@
                     texto="Reservá tu próxima consulta en la clínica."
                 >
                     <x-button :href="route('paciente.reservar')" :pill="true">
-                        Reservar un turno
+                        Reservar turno
                     </x-button>
                 </x-empty-state>
             </x-card>
@@ -127,7 +127,7 @@
 
         <div class="pt-2">
             <x-button :href="route('paciente.reservar')" :pill="true" class="w-full">
-                Reservar un turno
+                Reservar turno
             </x-button>
         </div>
     </div>

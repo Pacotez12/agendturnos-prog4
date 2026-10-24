@@ -68,18 +68,6 @@ class ReservaService
         CarbonInterface $inicio,
         User $usuario,
     ): Turno {
-        $max = (int) config('agenda.max_solicitudes_pendientes', 2);
-        $solicitudesFuturas = Turno::whereIn('paciente_id', $usuario->pacientesIds())
-            ->where('estado', EstadoTurno::Solicitado)
-            ->where('inicio', '>', now())
-            ->count();
-
-        if ($solicitudesFuturas >= $max) {
-            throw ValidationException::withMessages([
-                'solicitud' => "Ya tenés {$max} solicitudes esperando confirmación. Cuando la clínica las confirme vas a poder pedir otra.",
-            ]);
-        }
-
         return $this->crearTurno(
             $profesional,
             $servicio,
@@ -87,7 +75,8 @@ class ReservaService
             $inicio,
             $usuario,
             EstadoTurno::Solicitado,
-            null
+            null,
+            validarLimiteSolicitudes: true
         );
     }
 
@@ -120,14 +109,31 @@ class ReservaService
         CarbonInterface $inicio,
         User $usuario,
         EstadoTurno $estado,
-        ?string $detalleHistorial
+        ?string $detalleHistorial,
+        bool $validarLimiteSolicitudes = false
     ): Turno {
         $tz = config('app.timezone', 'America/Asuncion');
         $inicioCarbon = Carbon::parse($inicio)->setTimezone($tz);
         $finCarbon = $inicioCarbon->copy()->addMinutes((int) $servicio->duracion_min);
 
         try {
-            return DB::transaction(function () use ($profesional, $servicio, $paciente, $inicioCarbon, $finCarbon, $usuario, $estado, $detalleHistorial) {
+            return DB::transaction(function () use ($profesional, $servicio, $paciente, $inicioCarbon, $finCarbon, $usuario, $estado, $detalleHistorial, $validarLimiteSolicitudes) {
+                if ($validarLimiteSolicitudes) {
+                    User::where('id', $usuario->id)->lockForUpdate()->first();
+
+                    $max = (int) config('agenda.max_solicitudes_pendientes', 2);
+                    $solicitudesFuturas = Turno::whereIn('paciente_id', $usuario->pacientesIds())
+                        ->where('estado', EstadoTurno::Solicitado)
+                        ->where('inicio', '>', now())
+                        ->count();
+
+                    if ($solicitudesFuturas >= $max) {
+                        throw ValidationException::withMessages([
+                            'solicitud' => "Ya tenés {$max} solicitudes esperando confirmación. Cuando la clínica las confirme vas a poder pedir otra.",
+                        ]);
+                    }
+                }
+
                 if (! $this->disponibilidad->estaLibre($profesional, $servicio, $inicioCarbon)) {
                     throw new HorarioNoDisponible('El horario seleccionado no está disponible.');
                 }
@@ -154,8 +160,8 @@ class ReservaService
                 return $turno;
             });
         } catch (QueryException $e) {
-            if ($e->getCode() === '23P01' || str_contains($e->getMessage(), '23P01') || str_contains($e->getMessage(), 'turnos_sin_solapamiento')) {
-                throw new HorarioNoDisponible('El horario seleccionado no está disponible.', 0, $e);
+            if ($horario = HorarioNoDisponible::siSolapamiento($e)) {
+                throw $horario;
             }
 
             throw $e;

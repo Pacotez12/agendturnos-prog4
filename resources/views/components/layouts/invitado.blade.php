@@ -41,8 +41,8 @@
     @keydown.escape.window="cerrarMenu()"
     class="min-h-screen bg-cream-50 font-sans text-ink-900 antialiased flex flex-col"
 >
-    <header class="py-6 px-4 sm:px-6 lg:px-8 border-b border-line bg-card/80 backdrop-blur-xs">
-        <div class="max-w-5xl mx-auto flex items-center justify-between">
+    <header class="py-6 border-b border-line bg-card/80 backdrop-blur-xs">
+        <div class="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <a href="/" class="inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
                 <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto dark:hidden">
                 <img src="{{ asset('images/glow-logo-blanco.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto hidden dark:block">
@@ -198,8 +198,8 @@
         {{ $slot }}
     </main>
 
-    <footer class="py-6 pb-24 sm:pb-8 border-t border-line text-xs text-ink-500">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 sm:pr-48 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+    <footer class="border-t border-line text-xs text-ink-500">
+        <div class="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 sm:pb-8 sm:pr-48 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
             <span>&copy; {{ date('Y') }} Glow Dental Protect. Todos los derechos reservados.</span>
             @if (Route::has('privacidad'))
                 <a href="{{ route('privacidad') }}" class="hover:text-ink-900 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">

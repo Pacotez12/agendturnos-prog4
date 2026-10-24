@@ -37,7 +37,7 @@
                 @endguest
             </div>
 
-            <div class="bg-brand-300 rounded-3xl h-52 sm:h-60 flex items-center justify-center p-8 overflow-hidden shadow-xs">
+            <div class="bg-brand-300 dark:bg-card dark:border dark:border-line rounded-3xl h-52 sm:h-60 flex items-center justify-center p-8 overflow-hidden shadow-xs">
                 <img src="{{ asset('images/glow-logo-blanco.svg') }}" alt="Glow Dental Protect" class="max-h-24 sm:max-h-28 w-auto">
             </div>
         </section>
@@ -113,7 +113,7 @@
                             {{ $iniciales }}
                         </div>
                         <h3 class="font-bold text-ink-900 text-base sm:text-lg">
-                            Dra. {{ $profesional->nombre }} {{ $profesional->apellido }}
+                            {{ $profesional->nombre }} {{ $profesional->apellido }}
                         </h3>
                         @if (! empty($detalles))
                             <p class="mt-1 text-sm text-ink-500">

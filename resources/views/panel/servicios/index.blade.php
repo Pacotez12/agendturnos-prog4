@@ -4,7 +4,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold font-display text-ink-900">
-                    Administración de Servicios
+                    Servicios
                 </h1>
                 <p class="text-sm text-ink-500 mt-1">
                     Gestioná los tratamientos, duraciones, precios y estados del catálogo.
