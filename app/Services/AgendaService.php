@@ -214,7 +214,7 @@ class AgendaService
 
         $profesionales = $user->rol === RolUsuario::Profesional && $user->profesional
             ? collect([$user->profesional])
-            : Profesional::orderBy('nombre')->get();
+            : Profesional::ordenados()->get();
 
         $profesionalesIds = $profesionales->pluck('id')->all();
 
@@ -268,7 +268,7 @@ class AgendaService
 
         $profesionalSeleccionado = $user->rol === RolUsuario::Profesional && $user->profesional
             ? $user->profesional
-            : ($profesional ?? Profesional::orderBy('nombre')->first());
+            : ($profesional ?? Profesional::ordenados()->first());
 
         $dias = [];
         for ($i = 0; $i < 5; $i++) {
@@ -297,7 +297,7 @@ class AgendaService
         [$horaMin, $horaMax] = $this->calcularRangoHoras($disponibilidades, $turnos);
         $franjas = $this->generarFranjasHorarias($lunes, $horaMin, $horaMax);
 
-        $todosProfesionales = Profesional::orderBy('nombre')->get();
+        $todosProfesionales = Profesional::ordenados()->get();
 
         return [
             'profesional' => $profesionalSeleccionado,

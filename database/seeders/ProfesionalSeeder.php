@@ -21,6 +21,7 @@ class ProfesionalSeeder extends Seeder
                 'nombre' => 'Ana',
                 'apellido' => 'González',
                 'matricula' => '1234',
+                'orden' => 2,
                 'servicios' => [
                     'Consulta general',
                     'Limpieza dental',
@@ -35,6 +36,7 @@ class ProfesionalSeeder extends Seeder
                 'nombre' => 'Gloria',
                 'apellido' => 'Godoy',
                 'matricula' => '1824',
+                'orden' => 1,
                 'servicios' => [
                     'Consulta general',
                     'Blanqueamiento',
@@ -52,6 +54,7 @@ class ProfesionalSeeder extends Seeder
                 'nombre' => $p['nombre'],
                 'apellido' => $p['apellido'],
                 'matricula' => $p['matricula'],
+                'orden' => $p['orden'],
                 'created_at' => $ahora,
                 'updated_at' => $ahora,
             ]);

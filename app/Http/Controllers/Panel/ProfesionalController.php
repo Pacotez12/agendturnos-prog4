@@ -17,7 +17,7 @@ class ProfesionalController extends Controller
     public function index(): View
     {
         $profesionales = Profesional::withCount('servicios')
-            ->orderBy('nombre')
+            ->ordenados()
             ->get();
 
         return view('panel.profesionales.index', [

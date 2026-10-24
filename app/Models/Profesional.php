@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,15 @@ class Profesional extends Model
         'nombre',
         'apellido',
         'matricula',
+        'orden',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'orden' => 'integer',
+        ];
+    }
 
     public function user(): BelongsTo
     {
@@ -49,5 +58,16 @@ class Profesional extends Model
     public function nombreCompleto(): string
     {
         return trim("{$this->nombre} {$this->apellido}");
+    }
+
+    /**
+     * @param  Builder<Profesional>  $query
+     * @return Builder<Profesional>
+     */
+    public function scopeOrdenados(Builder $query): Builder
+    {
+        return $query->orderBy('orden')
+            ->orderBy('apellido')
+            ->orderBy('nombre');
     }
 }
