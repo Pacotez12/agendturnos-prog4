@@ -14,6 +14,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $titulo ? "{$titulo} · " : '' }}Glow Dental Protect</title>
     @include('partials.tema')
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBF7F2">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171311">
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -202,8 +207,8 @@
         {{ $slot }}
     </main>
 
-    <footer class="py-6 pb-24 sm:pb-6 border-t border-line text-xs text-ink-500">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+    <footer class="py-6 pb-24 sm:pb-8 border-t border-line text-xs text-ink-500">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 sm:pr-48 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
             <span>&copy; {{ date('Y') }} Glow Dental Protect. Todos los derechos reservados.</span>
             @if (Route::has('privacidad'))
                 <a href="{{ route('privacidad') }}" class="hover:text-ink-900 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded">

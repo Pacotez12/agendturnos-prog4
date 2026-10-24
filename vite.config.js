@@ -11,9 +11,13 @@ export default defineConfig({
             fonts: [
                 bunny('Open Sans', {
                     weights: [400, 600, 700],
+                    subsets: ['latin'],
+                    preload: [{ weight: 400, style: 'normal' }],
                 }),
                 bunny('Quicksand', {
                     weights: [600, 700],
+                    subsets: ['latin'],
+                    preload: false,
                 }),
             ],
         }),
