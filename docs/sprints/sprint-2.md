@@ -6,7 +6,7 @@
 | **Objetivo** | Gestión de agenda de la profesional, seguimiento del paciente, arquitectura B, HAProxy con health checks y failover en vivo; entrega del Avance 3 (30/10). |
 | **Equipo** | Marco Brizuela (Scrum Master), Juan Morán (backend), Enzo Ferrari (frontend), Julio Ybañez (DevOps), Félix Villasanti (QA) |
 
-> Estado al 24/10/2026. Se completa al cierre del sprint (30/10).
+> Estado al 24/10/2026 (tarde). Se completa al cierre del sprint (30/10).
 
 ## 1. Resultado
 
@@ -48,9 +48,11 @@
 | SCRUM-54 | Favicon, páginas de error, navegación y rendimiento | Marco Brizuela | PR #36, #39 |
 | SCRUM-46 | HU-18 Pacientes en el panel | Marco Brizuela | PR #37 |
 | SCRUM-51 | HU-23 Panel instalable (PWA) | Marco Brizuela | PR #38 |
-| SCRUM-61 | API REST v1 | Marco Brizuela | PR #42 |
+| SCRUM-61 | API REST v1 y documentación interactiva | Marco Brizuela | PR #42, #44 |
 | SCRUM-33, SCRUM-35 | Benchmark A contra B y HAProxy Stats (adelantado del Sprint 3) | Marco Brizuela; revisa Félix Villasanti | PR #43 |
 | — | Modo oscuro | Marco Brizuela | PR #28 |
+| — | Diccionario de datos, MER y 3FN | Marco Brizuela | PR #45 |
+| — | Correcciones tras la auditoría (16 puntos) | Marco Brizuela | commit `acdb389` |
 
 **Descartado:** SCRUM-47 Estadísticas del consultorio (ver `docs/alcance-cambios.md`, CA-06).
 
@@ -92,8 +94,8 @@
 | Tickets comprometidos al inicio | 20 |
 | Completados del compromiso inicial al 24/10 | 17 (85 %) |
 | Tickets agregados durante el sprint | 16 (13 completados, 1 descartado, 2 en curso) |
-| Pull Requests integrados (#12 a #43) | 31 |
-| Tests automatizados | 339, todos en verde (129 al cierre del Sprint 1) |
+| Pull Requests integrados (#12 a #46) | 34 |
+| Tests automatizados | 360, todos en verde (129 al cierre del Sprint 1) |
 | Migraciones | 20 |
 
 ## 5. Impedimentos
