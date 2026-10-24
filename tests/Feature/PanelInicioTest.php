@@ -174,8 +174,19 @@ class PanelInicioTest extends TestCase
         // Sin turnos para hoy
         $response = $this->actingAs($this->funcionario)->get('/panel');
         $response->assertOk();
-        $response->assertSee('No quedan turnos para hoy');
+        $response->assertSee('Día libre');
+        $response->assertSee('No hay turnos agendados para hoy.');
         $response->assertSee(route('panel.turnos.crear'));
+    }
+
+    public function test_con_turnos_de_hoy_ya_pasados_muestra_jornada_terminada(): void
+    {
+        $this->crearTurno('2026-10-23 08:00:00', '2026-10-23 08:30:00', EstadoTurno::Atendido);
+
+        $response = $this->actingAs($this->funcionario)->get('/panel');
+        $response->assertOk();
+        $response->assertSee('Listo por hoy');
+        $response->assertDontSee('Día libre');
     }
 
     public function test_pendientes_muestra_solicitudes_y_turnos_pasados_sin_marcar(): void

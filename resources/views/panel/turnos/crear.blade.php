@@ -259,8 +259,8 @@
                             </form>
                         @else
                             <x-empty-state
-                                titulo="No hay horarios para este día"
-                                texto="Probá con otra fecha u otra profesional."
+                                :titulo="filled($horarios) ? 'Agenda completa' : ($fecha->isToday() ? 'No quedan horarios hoy' : 'No atiende este día')"
+                                :texto="filled($horarios) ? 'Todos los horarios de este día ya están reservados. Probá con otra fecha u otra profesional.' : 'Probá con otra fecha u otra profesional.'"
                             />
                         @endif
                     </div>

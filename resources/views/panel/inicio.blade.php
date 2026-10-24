@@ -107,8 +107,8 @@
                 @if ($proximosDeHoy->isEmpty())
                     <x-card class="p-6">
                         <x-empty-state
-                            titulo="No quedan turnos para hoy"
-                            texto="No hay turnos pendientes para lo que resta de la jornada."
+                            :titulo="$indicadores['turnosHoy'] > 0 ? 'Listo por hoy' : 'Día libre'"
+                            :texto="$indicadores['turnosHoy'] > 0 ? 'Ya pasaron todos los turnos de hoy.' : 'No hay turnos agendados para hoy.'"
                         >
                             <x-slot:accion>
                                 <x-button :href="route('panel.turnos.crear')">

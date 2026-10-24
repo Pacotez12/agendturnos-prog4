@@ -201,7 +201,8 @@ class ReservarTurnoTest extends TestCase
         ]));
 
         $response->assertOk();
-        $response->assertSee('No hay horarios');
+        $response->assertSee('No atiende este día');
+        $response->assertDontSee('Agenda completa');
     }
 
     private function consultarLunes(Servicio $servicio): TestResponse
@@ -231,5 +232,20 @@ class ReservarTurnoTest extends TestCase
             'fin' => Carbon::parse('2026-10-19 '.$hasta, config('app.timezone')),
             'estado' => $estado,
         ]);
+    }
+
+    public function test_dia_sin_horarios_libres_muestra_agenda_completa(): void
+    {
+        Bloqueo::factory()->create([
+            'profesional_id' => $this->profesional->id,
+            'consultorio_id' => null,
+            'inicio' => Carbon::parse('2026-10-19 08:00', config('app.timezone')),
+            'fin' => Carbon::parse('2026-10-19 12:00', config('app.timezone')),
+        ]);
+
+        $this->actingAs($this->paciente)
+            ->get("/turnos/nuevo?profesional={$this->profesional->id}&servicio={$this->servicio30->id}&fecha=2026-10-19")
+            ->assertOk()
+            ->assertSee('Agenda completa');
     }
 }

@@ -143,8 +143,8 @@
                     </h2>
 
                     <x-empty-state
-                        titulo="No hay horarios para este día"
-                        texto="Probá con otra fecha."
+                        :titulo="filled($horarios) ? 'Agenda completa' : ($fecha->isToday() ? 'No quedan horarios hoy' : 'No atiende este día')"
+                        :texto="filled($horarios) ? 'Todos los horarios de este día ya están reservados. Probá con otra fecha.' : 'Probá con otra fecha.'"
                     />
                 </x-card>
             @endif
