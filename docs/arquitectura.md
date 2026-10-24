@@ -188,6 +188,7 @@ erDiagram
 | Agenda de la profesional | HU-06, HU-07, HU-11, HU-12 | `/panel/agenda`, `/panel/solicitudes`, `/panel/turnos/{id}` (confirmar, reprogramar, cancelar, atendido, ausente), `/panel/disponibilidad` | ✅ |
 | Seguimiento | HU-08 | `/mis-turnos`, `/turnos/{id}/cancelar` | ✅ |
 | Notificaciones | HU-09, HU-10 | — (colas y scheduler) | ✅ |
+| Avisos por WhatsApp | HU-15 | — (mismo job de notificaciones) | ✅ |
 | Salud | — | `/health` (de Laravel; verifica PostgreSQL y Redis; health check de HAProxy) | ✅ |
 
 **Transiciones de estado de un turno:**
@@ -281,6 +282,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Avisos por WhatsApp (HU-15, SCRUM-43): `WhatsAppService` envía la plantilla `aviso_turno` de la WhatsApp Cloud API desde el job `EnviarNotificacion`, después del correo. Solo se activa con `WHATSAPP_TOKEN` y `WHATSAPP_PHONE_ID`; normaliza el teléfono a 595...; si Meta falla, el correo queda enviado y se registra una advertencia en el log. |
 | 2026-10-23 | Reporte del Sprint 2 (`docs/sprints/sprint-2.md`) con la evidencia del Avance 3; módulos y rutas al día y reasignación de historias del Sprint 2. |
 | 2026-10-22 | Agenda de la profesional (HU-06, SCRUM-16): pantalla `/panel/agenda` con vistas Día (columnas por profesional) y Semana (columnas por día con selector de profesional para funcionario), grilla horaria dinámica según disponibilidad, filtros por estado, navegación por fechas, posicionamiento vertical por duración y cola lateral "Por confirmar". |
 | 2026-10-22 | Mis turnos (HU-08, SCRUM-20): pantalla `/mis-turnos` con pestañas Próximos e Historial (con motivo de cancelación y paginación), visualización de turnos propios y de dependientes, cancelación por el paciente con antelación mínima configurable (`AGENDA_CANCELACION_HORAS`), enlace alternativo a WhatsApp y modal de confirmación. |
