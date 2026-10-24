@@ -188,8 +188,8 @@ class PanelInicioTest extends TestCase
 
         $response = $this->actingAs($this->funcionario)->get('/panel');
         $response->assertOk();
-        $response->assertSee('solicitudes por confirmar');
-        $response->assertSee('turnos pasados sin marcar');
+        $response->assertSee('1 solicitud por confirmar');
+        $response->assertSee('1 turno pasado sin marcar');
     }
 
     public function test_reenviar_recordatorio_exitoso_y_registra_historial(): void
