@@ -39,7 +39,7 @@ class DisponibilidadController extends Controller
                 return Profesional::findOrFail($request->input('profesional_id'));
             }
 
-            return Profesional::orderBy('id')->firstOrFail();
+            return Profesional::ordenados()->firstOrFail();
         }
 
         abort(403);
@@ -50,7 +50,7 @@ class DisponibilidadController extends Controller
         $profesional = $this->resolverProfesional($request);
 
         $profesionales = ($request->user()->rol === RolUsuario::Funcionario)
-            ? Profesional::orderBy('nombre')->get()
+            ? Profesional::ordenados()->get()
             : collect([$profesional]);
 
         $disponibilidades = $profesional->disponibilidades()

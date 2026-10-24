@@ -39,7 +39,11 @@ class Servicio extends Model
 
     public function profesionales(): BelongsToMany
     {
-        return $this->belongsToMany(Profesional::class, 'profesional_servicio')->withTimestamps();
+        return $this->belongsToMany(Profesional::class, 'profesional_servicio')
+            ->withTimestamps()
+            ->orderBy('profesionales.orden')
+            ->orderBy('profesionales.apellido')
+            ->orderBy('profesionales.nombre');
     }
 
     public function turnos(): HasMany

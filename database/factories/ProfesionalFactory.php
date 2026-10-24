@@ -20,6 +20,7 @@ class ProfesionalFactory extends Factory
             'nombre' => fake()->firstName(),
             'apellido' => fake()->lastName(),
             'matricula' => (string) fake()->unique()->numerify('MAT-#####'),
+            'orden' => 100,
         ];
     }
 }

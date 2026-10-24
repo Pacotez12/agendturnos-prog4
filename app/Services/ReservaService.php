@@ -36,7 +36,7 @@ class ReservaService
      */
     public function opciones(?int $profesionalId, ?int $servicioId, ?string $fecha): array
     {
-        $profesionales = Profesional::orderBy('apellido')->orderBy('nombre')->get();
+        $profesionales = Profesional::ordenados()->get();
         $profesional = $profesionalId ? $profesionales->firstWhere('id', $profesionalId) : null;
 
         $servicios = $profesional

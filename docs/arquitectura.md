@@ -153,7 +153,7 @@ erDiagram
 |---|---|---|
 | `users` | Login: `email`, `password`, `rol` (`paciente`, `profesional`, `funcionario`) | `email` único; `CHECK` de rol |
 | `pacientes` | `nombre`, `apellido`, `tipo_documento`, `documento`, `telefono`, `fecha_nacimiento`, `user_id` (nullable), `responsable_id` (nullable) | Único `(tipo_documento, documento)`; `user_id` único |
-| `profesionales` | `nombre`, `apellido`, `matricula`, `user_id` | `user_id` único |
+| `profesionales` | `nombre`, `apellido`, `matricula`, `user_id`, `orden` (smallint, default 100) | `user_id` único |
 | `especialidades` | `nombre`, `activa` | `nombre` único |
 | `servicios` | `nombre`, `descripcion`, `duracion_min`, `precio` (entero, guaraníes), `activo`, `especialidad_id` | `duracion_min > 0`; `precio >= 0` |
 | `profesional_servicio` | Qué servicios ofrece cada profesional | Clave compuesta `(profesional_id, servicio_id)` |
@@ -283,6 +283,8 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Orden configurable de profesionales (SCRUM-60): columna `orden`, scope `ordenados()` y ordenamiento en todas las listas (reserva, agenda, disponibilidad, panel, portada y catálogo). |
+| 2026-10-24 | Inicio del panel (HU-16, SCRUM-44) con KPIs del día y la semana, próximos turnos y pendientes; reenvío de recordatorios (HU-22, SCRUM-50) con cooldown de 15 min y registro en historial; inicio del paciente (HU-17, SCRUM-45) con próximo turno propio y de familiares. |
 | 2026-10-24 | Modo oscuro: tokens de color redefinidos bajo `.dark` (variante `dark` de Tailwind 4), `bg-card` en lugar de `bg-white`, logo blanco en oscuro, script de tema en `partials/tema` (sigue al sistema y recuerda la elección), botón sol/luna en los 3 layouts y transición circular con View Transitions API (sin animación con `prefers-reduced-motion`). |
 | 2026-10-24 | Avisos por WhatsApp (HU-15, SCRUM-43): `WhatsAppService` envía la plantilla `aviso_turno` de la WhatsApp Cloud API desde el job `EnviarNotificacion`, después del correo. Solo se activa con `WHATSAPP_TOKEN` y `WHATSAPP_PHONE_ID`; normaliza el teléfono a 595...; si Meta falla, el correo queda enviado y se registra una advertencia en el log. |
 | 2026-10-23 | Reporte del Sprint 2 (`docs/sprints/sprint-2.md`) con la evidencia del Avance 3; módulos y rutas al día y reasignación de historias del Sprint 2. |
@@ -303,7 +305,6 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
 | 2026-10-18 | Estándar de diseño de interfaz aprobado (`docs/diseno-ui.md`): marca de la clínica, estilo cálido para el paciente y clínico para el panel, agenda por profesional, agendamiento por operador (HU-13) y familiares a cargo. |
 | 2026-10-18 | Modelos Eloquent, Enums y factories para todas las tablas (SCRUM-40). |
-| 2026-10-24 | Inicio del panel (HU-16, SCRUM-44) con KPIs del día y la semana, próximos turnos y pendientes; reenvío de recordatorios (HU-22, SCRUM-50) con cooldown de 15 min y registro en historial; inicio del paciente (HU-17, SCRUM-45) con próximo turno propio y de familiares. |
 | 2026-10-19 | Página de inicio pública (`/`) con la información de la clínica y sus profesionales; íconos Phosphor (`codeat3/blade-phosphor-icons`) y regla de no usar emojis en la interfaz (verificada por un test); integración continua con GitHub Actions; matrículas reales en los datos de ejemplo. |
 | 2026-10-19 | Recuperación de contraseña por correo (enlace de 60 minutos, sin revelar qué cuentas existen), correos en español con la marca, `make portainer` y número de WhatsApp de la clínica. |
 | 2026-10-19 | Especialidades y servicios por profesional (SCRUM-39): alta, edición y desactivación de especialidades; asignación de servicios a cada profesional, conservando los que tienen turnos y los inactivos. |

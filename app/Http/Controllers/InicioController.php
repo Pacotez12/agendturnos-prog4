@@ -10,7 +10,7 @@ class InicioController extends Controller
     public function __invoke(): View
     {
         $profesionales = Profesional::with(['servicios.especialidad'])
-            ->orderBy('nombre')
+            ->ordenados()
             ->get();
 
         return view('inicio', [
