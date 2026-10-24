@@ -54,10 +54,10 @@
     <!-- Barra lateral de escritorio y drawer móvil -->
     <aside
         id="sidebar-panel"
-        :class="menuAbierto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-        class="fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-line flex flex-col justify-between transition-transform duration-200 motion-reduce:transition-none lg:static lg:translate-x-0 lg:min-h-screen shrink-0"
+        :class="menuAbierto && 'translate-x-0!'"
+        class="fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-line flex flex-col justify-between transition-transform duration-200 motion-reduce:transition-none -translate-x-full lg:sticky lg:top-0 lg:translate-x-0 lg:h-screen shrink-0"
     >
-        <div class="p-6">
+        <div class="p-6 min-h-0 overflow-y-auto">
             <div class="flex items-center justify-between pb-6 border-b border-line">
                 <a href="/" class="inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
                     <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-10 w-auto dark:hidden">
@@ -96,7 +96,7 @@
 
         <!-- Pie de la barra lateral con email y rol -->
         @if ($user)
-            <div class="p-4 border-t border-line bg-surface/50">
+            <div class="shrink-0 p-4 border-t border-line bg-surface/50">
                 <div class="mb-3 px-2">
                     <p class="text-sm font-semibold text-ink-900 truncate" title="{{ $user->email }}">
                         {{ $user->email }}

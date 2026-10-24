@@ -64,4 +64,42 @@ class Turno extends Model
     {
         return $this->hasMany(Notificacion::class);
     }
+
+    public function ultimoRecordatorio(): ?Notificacion
+    {
+        if ($this->relationLoaded('notificaciones')) {
+            return $this->notificaciones
+                ->where('tipo', 'recordatorio')
+                ->whereNotNull('enviado_at')
+                ->sortByDesc('enviado_at')
+                ->first();
+        }
+
+        return $this->notificaciones()
+            ->where('tipo', 'recordatorio')
+            ->whereNotNull('enviado_at')
+            ->latest('enviado_at')
+            ->first();
+    }
+
+    public function minutosDesdeUltimoRecordatorio(): ?int
+    {
+        $ultimo = $this->ultimoRecordatorio();
+        if (! $ultimo || ! $ultimo->enviado_at) {
+            return null;
+        }
+
+        return (int) $ultimo->enviado_at->diffInMinutes(now());
+    }
+
+    public function puedeReenviarRecordatorio(): bool
+    {
+        if ($this->estado !== EstadoTurno::Confirmado || $this->inicio->isPast()) {
+            return false;
+        }
+
+        $minutos = $this->minutosDesdeUltimoRecordatorio();
+
+        return $minutos === null || $minutos >= 15;
+    }
 }

@@ -6,6 +6,7 @@ use App\Enums\EstadoNotificacion;
 use App\Jobs\EnviarNotificacion;
 use App\Models\Notificacion;
 use App\Models\Turno;
+use App\Models\User;
 
 class NotificacionService
 {
@@ -34,6 +35,20 @@ class NotificacionService
         );
 
         EnviarNotificacion::dispatch($notificacion, $datos)->afterCommit();
+
+        return $notificacion;
+    }
+
+    public function reenviarRecordatorio(Turno $turno, User $usuario): ?Notificacion
+    {
+        $notificacion = $this->programar($turno, 'recordatorio');
+
+        $turno->historial()->create([
+            'estado_anterior' => $turno->estado,
+            'estado_nuevo' => $turno->estado,
+            'usuario_id' => $usuario->id,
+            'detalle' => 'Recordatorio reenviado',
+        ]);
 
         return $notificacion;
     }

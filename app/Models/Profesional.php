@@ -45,4 +45,9 @@ class Profesional extends Model
     {
         return $this->hasMany(Turno::class);
     }
+
+    public function nombreCompleto(): string
+    {
+        return trim("{$this->nombre} {$this->apellido}");
+    }
 }

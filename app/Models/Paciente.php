@@ -47,6 +47,11 @@ class Paciente extends Model
         return $this->hasMany(Turno::class);
     }
 
+    public function nombreCompleto(): string
+    {
+        return trim("{$this->nombre} {$this->apellido}");
+    }
+
     /**
      * @param  Builder<Paciente>  $query
      * @return Builder<Paciente>

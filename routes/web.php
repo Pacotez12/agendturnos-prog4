@@ -6,11 +6,13 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\Paciente\InicioController as PacienteInicioController;
 use App\Http\Controllers\Paciente\ReservaController;
 use App\Http\Controllers\Paciente\TurnoController;
 use App\Http\Controllers\Panel\AgendaController;
 use App\Http\Controllers\Panel\DisponibilidadController;
 use App\Http\Controllers\Panel\EspecialidadController;
+use App\Http\Controllers\Panel\InicioController as PanelInicioController;
 use App\Http\Controllers\Panel\PacienteController as PanelPacienteController;
 use App\Http\Controllers\Panel\ProfesionalController;
 use App\Http\Controllers\Panel\ServicioController;
@@ -36,9 +38,7 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
 Route::middleware(['auth', 'rol:paciente'])->group(function () {
-    Route::get('/inicio', function () {
-        return view('paciente.inicio');
-    })->name('paciente.inicio');
+    Route::get('/inicio', PacienteInicioController::class)->name('paciente.inicio');
 
     Route::get('/turnos/nuevo', [ReservaController::class, 'create'])->name('paciente.reservar');
     Route::post('/turnos', [TurnoController::class, 'store'])->name('paciente.turnos.store');
@@ -74,9 +74,7 @@ Route::middleware(['auth', 'rol:funcionario'])->group(function () {
 });
 
 Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
-    Route::get('/panel', function () {
-        return view('panel.inicio');
-    })->name('panel.inicio');
+    Route::get('/panel', PanelInicioController::class)->name('panel.inicio');
 
     Route::get('/panel/agenda', AgendaController::class)->name('panel.agenda');
 
@@ -94,6 +92,7 @@ Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
     Route::post('/panel/turnos/{turno}/cancelar', [PanelTurnoController::class, 'cancelar'])->name('panel.turnos.cancelar');
     Route::post('/panel/turnos/{turno}/atendido', [PanelTurnoController::class, 'atendido'])->name('panel.turnos.atendido');
     Route::post('/panel/turnos/{turno}/ausente', [PanelTurnoController::class, 'ausente'])->name('panel.turnos.ausente');
+    Route::post('/panel/turnos/{turno}/recordatorio', [PanelTurnoController::class, 'recordatorio'])->name('panel.turnos.recordatorio');
     Route::get('/panel/turnos/{turno}/reprogramar', [PanelTurnoController::class, 'reprogramar'])->name('panel.turnos.reprogramar');
     Route::put('/panel/turnos/{turno}/reprogramar', [PanelTurnoController::class, 'updateReprogramar'])->name('panel.turnos.reprogramar.update');
 });
