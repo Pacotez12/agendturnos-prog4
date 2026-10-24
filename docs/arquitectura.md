@@ -305,6 +305,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 | 2026-10-13 | Modelo de datos actualizado: pacientes, especialidades, `profesional_servicio`, consultorios, responsable de menores, FK compuesta y reglas de integridad. Estilo de arquitectura documentado (monolito MVC en capas). |
 | 2026-10-18 | Estándar de diseño de interfaz aprobado (`docs/diseno-ui.md`): marca de la clínica, estilo cálido para el paciente y clínico para el panel, agenda por profesional, agendamiento por operador (HU-13) y familiares a cargo. |
 | 2026-10-18 | Modelos Eloquent, Enums y factories para todas las tablas (SCRUM-40). |
+| 2026-10-24 | Carga de datos de demostración (SCRUM-55): comando `php artisan demo:cargar` con fechas relativas, pacientes ficticios, historial coherente y target `make demo`. |
 | 2026-10-19 | Página de inicio pública (`/`) con la información de la clínica y sus profesionales; íconos Phosphor (`codeat3/blade-phosphor-icons`) y regla de no usar emojis en la interfaz (verificada por un test); integración continua con GitHub Actions; matrículas reales en los datos de ejemplo. |
 | 2026-10-19 | Recuperación de contraseña por correo (enlace de 60 minutos, sin revelar qué cuentas existen), correos en español con la marca, `make portainer` y número de WhatsApp de la clínica. |
 | 2026-10-19 | Especialidades y servicios por profesional (SCRUM-39): alta, edición y desactivación de especialidades; asignación de servicios a cada profesional, conservando los que tienen turnos y los inactivos. |
