@@ -56,5 +56,15 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('solicitar-turno', function (Request $request) {
             return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
+
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('api-token', function (Request $request) {
+            $email = (string) $request->input('email');
+
+            return Limit::perMinute(5)->by(strtolower(trim($email)).'|'.$request->ip());
+        });
     }
 }
