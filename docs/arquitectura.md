@@ -187,7 +187,7 @@ erDiagram
 | Agendamiento por operador | HU-13 | `/panel/turnos/nuevo`, `/panel/pacientes` (alta sin cuenta) | ✅ |
 | Agenda de la profesional | HU-06, HU-07, HU-11, HU-12 | `/panel/agenda`, `/panel/solicitudes`, `/panel/turnos/{id}` (confirmar, reprogramar, cancelar, atendido, ausente), `/panel/disponibilidad` | ✅ |
 | Seguimiento | HU-08 | `/mis-turnos`, `/turnos/{id}/cancelar` | ✅ |
-| Notificaciones | HU-09, HU-10 | — (colas y scheduler) | ✅ |
+| Notificaciones | HU-09, HU-10, HU-25 | — (colas, scheduler y horario silencioso) | ✅ |
 | Inicio del panel y del paciente | HU-16, HU-17, HU-22 | `/panel`, `/inicio`, POST `/panel/turnos/{turno}/recordatorio` | ✅ |
 | Avisos por WhatsApp | HU-15 | — (mismo job de notificaciones) | ✅ |
 | Salud | — | `/health` (de Laravel; verifica PostgreSQL y Redis; health check de HAProxy) | ✅ |
@@ -283,6 +283,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Horario silencioso para avisos automáticos (HU-25, SCRUM-56): `NotificacionService::programar()` despacha jobs con delay hasta la hora de fin silenciosa (configurable con `AVISOS_SILENCIO_DESDE` y `AVISOS_SILENCIO_HASTA`, por defecto 21:00 a 08:00) si cae en el rango silencioso que cruza medianoche; reenvío manual (`reenviarRecordatorio`) con parámetro `$inmediato = true` sin delay; método auxiliar testeable `momentoDeEnvio()`. |
 | 2026-10-24 | Carga de datos de demostración (SCRUM-55): comando `php artisan demo:cargar` con fechas relativas, pacientes ficticios, historial coherente y target `make demo`. |
 | 2026-10-24 | Orden configurable de profesionales (SCRUM-60): columna `orden`, scope `ordenados()` y ordenamiento en todas las listas (reserva, agenda, disponibilidad, panel, portada y catálogo). |
 | 2026-10-24 | Inicio del panel (HU-16, SCRUM-44) con KPIs del día y la semana, próximos turnos y pendientes; reenvío de recordatorios (HU-22, SCRUM-50) con cooldown de 15 min y registro en historial; inicio del paciente (HU-17, SCRUM-45) con próximo turno propio y de familiares. |
