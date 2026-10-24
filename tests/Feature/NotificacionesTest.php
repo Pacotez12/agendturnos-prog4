@@ -143,7 +143,7 @@ class NotificacionesTest extends TestCase
         ]);
 
         $job = new EnviarNotificacion($notificacion);
-        $job->handle();
+        app()->call([$job, 'handle']);
 
         Notification::assertSentTo(
             $this->pacienteUser,
@@ -173,7 +173,7 @@ class NotificacionesTest extends TestCase
         ]);
 
         $job = new EnviarNotificacion($notificacion);
-        $job->handle();
+        app()->call([$job, 'handle']);
 
         Notification::assertNothingSent();
     }

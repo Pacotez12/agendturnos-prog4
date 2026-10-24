@@ -37,6 +37,9 @@ return [
 
     'whatsapp' => [
         'numero' => env('WHATSAPP_NUMERO'),
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_id' => env('WHATSAPP_PHONE_ID'),
+        'plantilla' => env('WHATSAPP_PLANTILLA', 'aviso_turno'),
     ],
 
 ];
