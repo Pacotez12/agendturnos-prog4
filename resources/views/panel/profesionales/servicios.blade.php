@@ -1,5 +1,5 @@
-<x-layouts.panel :titulo="'Servicios de Dra. ' . $profesional->nombre . ' ' . $profesional->apellido">
-    <div class="max-w-3xl mx-auto space-y-6">
+<x-layouts.panel :titulo="'Servicios de ' . $profesional->nombre . ' ' . $profesional->apellido">
+    <div class="max-w-3xl space-y-6">
         <div>
             <a
                 href="{{ route('panel.profesionales') }}"
@@ -8,7 +8,7 @@
                 &larr; Volver a profesionales
             </a>
             <h1 class="text-2xl font-bold font-display text-ink-900">
-                Dra. {{ $profesional->nombre }} {{ $profesional->apellido }} · servicios que ofrece
+                {{ $profesional->nombre }} {{ $profesional->apellido }} · servicios que ofrece
             </h1>
             <p class="text-sm text-ink-500 mt-1">
                 Marcá los tratamientos que realiza esta profesional. Los servicios con turnos históricos o activos están protegidos y no pueden quitarse.
@@ -35,16 +35,22 @@
                             <div class="flex items-start justify-between gap-3 py-1">
                                 <label
                                     for="servicio-{{ $servicio->id }}"
-                                    class="flex items-center gap-3 cursor-pointer select-none text-sm text-ink-900 font-medium @if($tieneTurnos) cursor-not-allowed opacity-90 @endif"
+                                    class="flex items-center gap-3 select-none text-sm text-ink-900 font-medium @if($tieneTurnos) cursor-not-allowed opacity-80 @else cursor-pointer @endif"
                                 >
+                                    @if ($tieneTurnos)
+                                        <input type="hidden" name="servicios[]" value="{{ $servicio->id }}">
+                                    @endif
                                     <input
                                         type="checkbox"
                                         id="servicio-{{ $servicio->id }}"
-                                        name="servicios[]"
+                                        @if (! $tieneTurnos) name="servicios[]" @endif
                                         value="{{ $servicio->id }}"
                                         @checked($estaMarcado)
-                                        @disabled($tieneTurnos)
-                                        class="rounded border-line text-brand-600 focus:ring-brand-600 h-4 w-4 disabled:opacity-50"
+                                        @if ($tieneTurnos)
+                                            {{-- No usar disabled: el navegador lo pinta gris y parece desmarcado. El valor lo manda el hidden. --}}
+                                            aria-disabled="true" onclick="return false"
+                                        @endif
+                                        class="rounded border-line text-brand-600 focus:ring-brand-600 h-4 w-4 accent-brand-600 @if($tieneTurnos) cursor-not-allowed opacity-75 @endif"
                                     />
                                     <span>{{ $servicio->nombre }}</span>
                                     <span class="text-xs text-ink-500 font-normal">({{ $servicio->duracion_min }} min)</span>
@@ -52,9 +58,7 @@
 
                                 @if ($tieneTurnos)
                                     <span class="inline-flex items-center gap-1.5 text-xs text-ink-500 bg-surface px-2.5 py-1 rounded-md border border-line">
-                                        <svg class="w-3.5 h-3.5 text-ink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
+                                        <x-phosphor-lock class="size-3.5 text-ink-500" aria-hidden="true" />
                                         <span>Tiene turnos registrados: no se puede quitar</span>
                                     </span>
                                 @endif

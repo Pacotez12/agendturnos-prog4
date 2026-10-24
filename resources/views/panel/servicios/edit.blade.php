@@ -1,5 +1,5 @@
 <x-layouts.panel titulo="Editar servicio">
-    <div class="max-w-2xl mx-auto space-y-6">
+    <div class="max-w-2xl space-y-6">
         <div>
             <a
                 href="{{ route('panel.servicios') }}"
@@ -8,7 +8,7 @@
                 &larr; Volver a servicios
             </a>
             <h1 class="text-2xl font-bold font-display text-ink-900">
-                Editar Servicio
+                Editar servicio
             </h1>
             <p class="text-sm text-ink-500 mt-1">
                 Modificá los datos de {{ $servicio->nombre }}.

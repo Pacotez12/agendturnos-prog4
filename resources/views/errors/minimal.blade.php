@@ -10,63 +10,219 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBF7F2">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171311">
-    @fonts
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        :root {
+            --bg-surface: #F7F6F4;
+            --text-ink-900: #1F1A17;
+            --text-ink-500: #6B635D;
+            --border-line: #E5E2DE;
+            --brand-600: #995432;
+            --brand-700: #7A3F22;
+            --brand-100: #F3E6D3;
+            --brand-text: #995432;
+            --whatsapp: #25D366;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-surface: #171311;
+                --text-ink-900: #F2ECE6;
+                --text-ink-500: #A89E96;
+                --border-line: #3A322D;
+                --brand-600: #995432;
+                --brand-700: #F0CFAE;
+                --brand-100: #3A2A20;
+                --brand-text: #E0A47C;
+            }
+        }
+        html.dark {
+            --bg-surface: #171311;
+            --text-ink-900: #F2ECE6;
+            --text-ink-500: #A89E96;
+            --border-line: #3A322D;
+            --brand-600: #995432;
+            --brand-700: #F0CFAE;
+            --brand-100: #3A2A20;
+            --brand-text: #E0A47C;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-surface);
+            color: var(--text-ink-900);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            line-height: 1.5;
+        }
+        header, footer {
+            max-width: 64rem;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-ink-500);
+            border-top: 1px solid var(--border-line);
+        }
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+        }
+        .container {
+            max-width: 28rem;
+            width: 100%;
+            text-align: center;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 9999px;
+            background-color: var(--brand-100);
+            color: var(--brand-text);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-ink-900);
+            letter-spacing: -0.025em;
+        }
+        p {
+            margin-top: 0.75rem;
+            font-size: 1rem;
+            color: var(--text-ink-500);
+        }
+        .extra {
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-ink-500);
+        }
+        .actions {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        @media (min-width: 640px) {
+            .actions {
+                flex-direction: row;
+            }
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            border-radius: 9999px;
+            background-color: var(--brand-600);
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-decoration: none;
+            min-height: 2.75rem;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .btn {
+                width: auto;
+            }
+        }
+        .btn:hover {
+            background-color: var(--brand-700);
+        }
+        .whatsapp {
+            margin-top: 1.5rem;
+        }
+        .whatsapp a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--brand-text);
+            text-decoration: none;
+        }
+        .whatsapp a:hover {
+            text-decoration: underline;
+        }
+        .whatsapp svg {
+            width: 1rem;
+            height: 1rem;
+            vertical-align: middle;
+        }
+        .logo {
+            height: 2.25rem;
+            width: auto;
+            display: block;
+        }
+        html.dark .logo {
+            filter: brightness(0) invert(1);
+        }
+        @media (prefers-color-scheme: dark) {
+            html:not(.light) .logo {
+                filter: brightness(0) invert(1);
+            }
+        }
+    </style>
 </head>
-<body class="bg-surface text-ink-900 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-brand-100 selection:text-brand-700">
-    <header class="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
-        <a href="{{ route('inicio') }}" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-lg">
-            <img src="{{ asset('images/glow-logo.svg') }}" alt="Glow Dental Protect" class="h-9 w-auto dark:hidden">
-            <img src="{{ asset('images/glow-logo-blanco.svg') }}" alt="Glow Dental Protect" class="h-9 w-auto hidden dark:block">
+<body>
+    <header>
+        <a href="{{ route('inicio') }}" style="display: inline-block;">
+            <img src="/images/glow-logo.svg" alt="Glow Dental Protect" class="logo">
         </a>
     </header>
 
-    <main class="flex-1 flex items-center justify-center px-4 py-12">
-        <div class="max-w-md w-full text-center">
-            <div class="inline-flex items-center justify-center size-16 rounded-full bg-brand-100 text-brand-text font-display font-bold text-xl mb-4">
+    <main>
+        <div class="container">
+            <div class="badge">
                 @yield('code')
             </div>
 
-            <h1 class="font-display font-bold text-2xl sm:text-3xl text-ink-900 tracking-tight">
+            <h1>
                 @yield('heading', View::yieldContent('title'))
             </h1>
 
-            <p class="mt-3 text-base text-ink-500 leading-relaxed">
+            <p>
                 @yield('message')
             </p>
 
             @hasSection('extra')
-                <div class="mt-3 text-sm text-ink-500">
+                <div class="extra">
                     @yield('extra')
                 </div>
             @endif
 
-            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div class="actions">
                 @yield('actions')
-                <a
-                    href="{{ route('inicio') }}"
-                    class="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm transition-colors duration-150 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 min-h-11 w-full sm:w-auto"
-                >
+                <a href="{{ route('inicio') }}" class="btn">
                     Ir al inicio
                 </a>
             </div>
 
-            <div class="mt-6">
-                <a
-                    href="https://wa.me/595982774586"
-                    target="_blank"
-                    rel="noopener"
-                    class="inline-flex items-center gap-1.5 text-sm font-medium text-brand-text hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded"
-                >
-                    <x-phosphor-whatsapp-logo class="size-4 shrink-0 text-whatsapp" aria-hidden="true" />
+            <div class="whatsapp">
+                <a href="https://wa.me/595982774586" target="_blank" rel="noopener">
+                    <x-phosphor-whatsapp-logo style="color: var(--whatsapp);" aria-hidden="true" />
                     <span>Escribinos por WhatsApp</span>
-                    <x-phosphor-arrow-up-right class="size-3.5 shrink-0" aria-hidden="true" />
+                    <x-phosphor-arrow-up-right aria-hidden="true" />
                 </a>
             </div>
         </div>
     </main>
 
-    <footer class="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-ink-500 border-t border-line">
+    <footer>
         &copy; {{ date('Y') }} Glow Dental Protect. Todos los derechos reservados.
     </footer>
 </body>

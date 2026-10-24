@@ -588,8 +588,8 @@ class AgendaService
                 return $turno;
             });
         } catch (QueryException $e) {
-            if ($e->getCode() === '23P01' || str_contains($e->getMessage(), '23P01') || str_contains($e->getMessage(), 'turnos_sin_solapamiento')) {
-                throw new HorarioNoDisponible('El horario seleccionado no está disponible.', 0, $e);
+            if ($horario = HorarioNoDisponible::siSolapamiento($e)) {
+                throw $horario;
             }
 
             throw $e;

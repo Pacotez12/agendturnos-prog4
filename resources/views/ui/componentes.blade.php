@@ -108,7 +108,7 @@
                     texto="No tenés turnos programados para esta fecha."
                 >
                     <x-button variant="primary" :pill="true">
-                        Reservar un turno
+                        Reservar turno
                     </x-button>
                 </x-empty-state>
             </div>

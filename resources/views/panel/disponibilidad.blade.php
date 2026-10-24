@@ -22,7 +22,7 @@
                     >
                         @foreach($profesionales as $p)
                             <option value="{{ $p->id }}" @selected($profesional->id === $p->id)>
-                                Dra. {{ $p->nombre }} {{ $p->apellido }}
+                                {{ $p->nombre }} {{ $p->apellido }}
                             </option>
                         @endforeach
                     </select>
@@ -32,7 +32,7 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span>Dra. {{ $profesional->nombre }} {{ $profesional->apellido }}</span>
+                    <span>{{ $profesional->nombre }} {{ $profesional->apellido }}</span>
                 </div>
             @endif
         </div>
@@ -290,12 +290,16 @@
                     </form>
 
                     <div class="mt-4 pt-3 border-t border-line">
-                        @if(!empty($horariosPreview))
+                        @php
+                            $hayLibresPreview = collect($horariosPreview)->contains('libre', true);
+                        @endphp
+                        @if(!empty($horariosPreview) && $hayLibresPreview)
                             <x-slot-picker name="slot_preview" :horarios="$horariosPreview" />
                         @else
-                            <p class="text-xs text-ink-500 italic py-2">
-                                No hay horarios disponibles para esta fecha o la profesional no atiende este día.
-                            </p>
+                            <x-empty-state
+                                :titulo="filled($horariosPreview) ? 'Agenda completa' : ($fechaInput->isToday() ? 'No quedan horarios hoy' : 'No atiende este día')"
+                                :texto="filled($horariosPreview) ? 'Todos los horarios de este día ya están reservados.' : 'Probá con otra fecha.'"
+                            />
                         @endif
                     </div>
                 </x-card>

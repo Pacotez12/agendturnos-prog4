@@ -171,8 +171,8 @@ class PanelPacientesTest extends TestCase
         $response->assertSee('titular@test.com');
         $response->assertSee('Joaquín');
         $response->assertSee('5 años');
-        $response->assertSee('1 atendidos');
-        $response->assertSee('1 ausentes');
+        $response->assertSee('1 atendido');
+        $response->assertSee('1 ausente');
         $response->assertSee('0 cancelados');
 
         // Ver ficha del hijo: debe decir "A cargo de María Pérez"

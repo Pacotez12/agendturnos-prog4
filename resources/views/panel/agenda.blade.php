@@ -1,10 +1,10 @@
 @php
     $coloresTurno = [
-        'solicitado' => 'estado-solicitado-bg estado-solicitado-fg border-l-amber-600',
-        'confirmado' => 'estado-confirmado-bg estado-confirmado-fg border-l-blue-800',
-        'atendido' => 'estado-atendido-bg estado-atendido-fg border-l-green-800',
-        'cancelado' => 'estado-cancelado-bg estado-cancelado-fg border-l-red-800',
-        'ausente' => 'estado-ausente-bg estado-ausente-fg border-l-gray-600',
+        'solicitado' => 'estado-solicitado-bg estado-solicitado-fg border-l-amber-500 dark:border-l-amber-400',
+        'confirmado' => 'estado-confirmado-bg estado-confirmado-fg border-l-blue-600 dark:border-l-blue-400',
+        'atendido' => 'estado-atendido-bg estado-atendido-fg border-l-emerald-600 dark:border-l-emerald-400',
+        'cancelado' => 'estado-cancelado-bg estado-cancelado-fg border-l-red-600 dark:border-l-red-400',
+        'ausente' => 'estado-ausente-bg estado-ausente-fg border-l-stone-400 dark:border-l-stone-500',
     ];
 
     $slotHeight = 44;

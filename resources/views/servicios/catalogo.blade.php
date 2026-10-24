@@ -5,7 +5,7 @@
 @endphp
 
 <x-dynamic-component :component="$layout" titulo="Nuestros servicios">
-    <div class="space-y-8">
+    <div class="max-w-3xl mx-auto space-y-8">
         <!-- Encabezado -->
         <div>
             <h1 class="text-3xl font-bold font-display text-ink-900">
