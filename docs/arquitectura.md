@@ -269,14 +269,13 @@ El compose actual es de desarrollo: monta el código desde el disco y construye 
 
 ## 9. Gestión del proyecto
 
-Scrum con sprints de 2 semanas en Jira (proyecto `SCRUM`).
+Scrum con sprints de 2 semanas en Jira (proyecto `SCRUM`). Roles, tablero, definición de terminado y ceremonias en [`metodologia.md`](metodologia.md).
 
 | Sprint | Fechas | Objetivo |
 |---|---|---|
 | Sprint 1 | 2–16/10 | Entorno, modelo de datos, autenticación, servicios, disponibilidad y solicitud de turnos; sesiones en Redis; Portainer |
-| Sprint 2 | 16–30/10 | Agenda de la profesional, seguimiento, arquitectura B, HAProxy y failover |
-| Sprint 3 | 30/10–13/11 | Notificaciones y recordatorios; scripts de benchmark |
-| Sprint 4 | 13–27/11 | Benchmark A vs B, Stats con tráfico real, documentación final |
+| Sprint 2 | 19–30/10 | Flujo completo del turno, agenda, arquitectura B, HAProxy y failover; benchmark adelantado |
+| Sprint 3 | 30/10–13/11 | Mi familia, plan y ejecución de pruebas, despliegue final, cierre metodológico y documentación (entrega 13/11) |
 
 | Rol | Responsable | Tickets |
 |---|---|---|
@@ -302,6 +301,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Documento metodológico (`docs/metodologia.md`, SCRUM-36): marco Scrum, roles, artefactos, columnas del tablero, definición de terminado, flujo de ramas y commits, ceremonias y sprints; fechas de sprints actualizadas. |
 | 2026-10-24 | Reloj en vivo en la barra lateral del panel (`<x-reloj/>`): hora HH:mm:ss (`tabular-nums`) y fecha corta en una sola línea en el pie de la barra lateral sobre los datos de usuario; render inicial desde el servidor con `now()` en zona horaria de la clínica sin desajustes sin JS; actualización en vivo cada 1s con Alpine.js mediante cálculo de desfase y formateo `Intl.DateTimeFormat` en `es-PY`. |
 | 2026-10-24 | Plantillas fijas de WhatsApp (SCRUM-43): migración de plantilla genérica `aviso_turno` a 4 plantillas de texto fijo en Meta (`turno_confirmado`, `turno_cancelado`, `turno_reprogramado`, `turno_recordatorio`) con 5 parámetros de body (destinatario, paciente, fecha/hora, profesional, servicio); eliminación de texto libre y motivo de cancelación en WhatsApp; configuración en `services.whatsapp.plantillas`. |
 | 2026-10-24 | Deuda técnica (SCRUM-64): tope de solicitudes dentro de la transacción con bloqueo por usuario, manejo único del error de superposición (`HorarioNoDisponible::siSolapamiento`), tests sin escribir en `laravel.log`, páginas de error sin depender de Vite. Pulido visual (SCRUM-65): textos consistentes, sin "Dra." antepuesto, servicio protegido visible como marcado, anchos de contenedor unificados y colores de agenda y portada en modo oscuro. |
