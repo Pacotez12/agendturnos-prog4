@@ -27,6 +27,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 # Configuración personalizada de PHP
 COPY docker/php-fpm/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/php-fpm/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
 WORKDIR /var/www/html
 

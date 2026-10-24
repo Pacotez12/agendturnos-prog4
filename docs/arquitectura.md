@@ -115,6 +115,12 @@ flowchart LR
     B1 --> R
 ```
 
+### 4.3 Benchmark de rendimiento (SCRUM-33 / SCRUM-35) ✅
+
+Se realizó una comparativa de rendimiento entre la **Arquitectura A** (Nginx + PHP-FPM), la **Arquitectura B** (Apache + mod_php) y el balanceador **HAProxy** bajo diferentes niveles de concurrencia (10, 50 y 100 conexiones).
+
+Los resultados empíricos, metodología, análisis de paridad e interpretación técnica se encuentran documentados en [`docs/benchmark.md`](benchmark.md). Para reproducir las mediciones: `make bench`.
+
 - Las dos arquitecturas corren el mismo código y comparten la base de datos y Redis.
 - Como la sesión vive en Redis, el usuario no pierde la sesión cuando HAProxy lo cambia de nodo.
 - **Entrada:** http://localhost:8000 (HAProxy). Las arquitecturas siguen accesibles directo en 8080 (A) y 8081 (B) para compararlas. Stats en http://localhost:8404. La cabecera `X-Servidor` de cada respuesta dice qué nodo la atendió (`a_nginx` o `b_apache`).
@@ -288,6 +294,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-24 | Benchmark comparativo de arquitecturas (SCRUM-33 / SCRUM-35): script ejecutable `scripts/benchmark.sh` y target `make bench` con herramienta `hey` (`williamyeh/hey --network host`); paridad verificada y ajustada entre A (Nginx + PHP-FPM) y B (Apache + mod_php) con 150 workers concurrentes y OPcache idéntico; modo producción temporal con `php artisan optimize` sin tocar `.env`; pruebas en `/health`, portada `/` y API `/api/v1/servicios` a concurrencias 10, 50 y 100 con 3 repeticiones (mediana); captura del dashboard de HAProxy (`docs/img/haproxy-stats.png`) y reporte completo en `docs/benchmark.md` con resumen en `docs/benchmark-resumen.csv`. |
 | 2026-10-24 | API REST v1 (SCRUM-61): endpoints públicos (`/api/v1/servicios`, `/api/v1/profesionales` sin datos privados, `/api/v1/disponibilidad` en ISO 8601, sin fechas pasadas), autenticación por token Sanctum (`/api/v1/token` emisión con throttle 5/min y revocación 204), consulta paginada de turnos propios y dependientes (`/api/v1/mis-turnos` con filtro de historial y control de rol paciente 403), rate limiting global de 60/min, respuestas con API Resources y documentación completa en `docs/api.md`. |
 | 2026-10-24 | Portada: con sesión del personal, "Reservar turno" lleva a Nuevo turno del panel en vez del inicio del panel. |
 | 2026-10-24 | Favicon con más contraste: isotipo en crema sobre cuadrado redondeado marrón, sin destellos (ilegibles a 16 px); regenerados `favicon.ico` (16/32/48), íconos PWA 192/512, maskable y `apple-touch-icon.png` a sangre. |
