@@ -32,8 +32,10 @@ class LoginController extends Controller
         $throttleKey = Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
             throw ValidationException::withMessages([
-                'email' => 'Demasiados intentos. Probá de nuevo en un minuto.',
+                'email' => "Demasiados intentos. Probá de nuevo en {$seconds} segundos.",
             ]);
         }
 

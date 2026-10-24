@@ -4,9 +4,12 @@ namespace App\Providers;
 
 use App\Enums\RolUsuario;
 use App\Services\AgendaService;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Events\DiagnosingHealth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -40,6 +43,18 @@ class AppServiceProvider extends ServiceProvider
                 $solicitudesCount = app(AgendaService::class)->solicitudesPendientes($user)->count();
             }
             $view->with('solicitudesCount', $solicitudesCount);
+        });
+
+        RateLimiter::for('registro', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip());
+        });
+
+        RateLimiter::for('recuperar-contrasena', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip());
+        });
+
+        RateLimiter::for('solicitar-turno', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
     }
 }

@@ -7,6 +7,17 @@
             </p>
         </div>
 
+        @error('solicitud')
+            <x-alert type="error">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <span>{{ $message }}</span>
+                    <a href="{{ route('paciente.turnos') }}" class="font-semibold underline hover:no-underline whitespace-nowrap">
+                        Mis turnos
+                    </a>
+                </div>
+            </x-alert>
+        @enderror
+
         <x-card :paciente="true">
             <form method="GET" action="{{ route('paciente.reservar') }}" class="space-y-5">
                 <x-select

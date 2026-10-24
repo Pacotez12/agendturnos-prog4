@@ -14,6 +14,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ReservaService
 {
@@ -67,6 +68,18 @@ class ReservaService
         CarbonInterface $inicio,
         User $usuario,
     ): Turno {
+        $max = (int) config('agenda.max_solicitudes_pendientes', 2);
+        $solicitudesFuturas = Turno::whereIn('paciente_id', $usuario->pacientesIds())
+            ->where('estado', EstadoTurno::Solicitado)
+            ->where('inicio', '>', now())
+            ->count();
+
+        if ($solicitudesFuturas >= $max) {
+            throw ValidationException::withMessages([
+                'solicitud' => "Ya tenés {$max} solicitudes esperando confirmación. Cuando la clínica las confirme vas a poder pedir otra.",
+            ]);
+        }
+
         return $this->crearTurno(
             $profesional,
             $servicio,
