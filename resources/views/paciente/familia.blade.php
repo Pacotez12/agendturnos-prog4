@@ -28,11 +28,9 @@
             form: @js($formInicial),
             agregar() {
                 this.form = @js($vacio);
-                this.$dispatch('abrir-modal', 'familiar');
             },
             editar(familiar) {
                 this.form = { ...familiar };
-                this.$dispatch('abrir-modal', 'familiar');
             },
             accion() {
                 return this.form.id ? @js($urlEditar).replace('__ID__', this.form.id) : @js(route('paciente.familia.store'));
@@ -51,7 +49,7 @@
             </div>
             @if ($familiares->isNotEmpty())
                 <div class="sm:shrink-0">
-                    <x-button :pill="true" variant="primary" class="w-full sm:w-auto" x-on:click="agregar()">
+                    <x-button :pill="true" variant="primary" class="w-full sm:w-auto" x-on:click="agregar(); $dispatch('abrir-modal', 'familiar')">
                         <x-phosphor-plus class="w-4 h-4" aria-hidden="true" />
                         Agregar familiar
                     </x-button>
@@ -67,7 +65,7 @@
                 <x-slot:icono>
                     <x-phosphor-users class="size-8" />
                 </x-slot:icono>
-                <x-button :pill="true" variant="primary" x-on:click="agregar()">
+                <x-button :pill="true" variant="primary" x-on:click="agregar(); $dispatch('abrir-modal', 'familiar')">
                     Agregar familiar
                 </x-button>
             </x-empty-state>
@@ -122,7 +120,7 @@
                                         'tipo_documento' => $familiar->tipo_documento,
                                         'documento' => $familiar->documento,
                                         'fecha_nacimiento' => $familiar->fecha_nacimiento->toDateString(),
-                                    ]) }})"
+                                    ]) }}); $dispatch('abrir-modal', 'familiar')"
                                 >
                                     Editar
                                 </x-button>
