@@ -22,10 +22,12 @@ class NavegacionTest extends TestCase
             ['etiqueta' => 'Servicios', 'ruta' => 'servicios.catalogo'],
             ['etiqueta' => 'Reservar turno', 'ruta' => 'paciente.reservar'],
             ['etiqueta' => 'Mis turnos', 'ruta' => 'paciente.turnos'],
+            ['etiqueta' => 'Mi familia', 'ruta' => 'paciente.familia'],
         ], $items);
 
+        // "Mi perfil" todavía no tiene ruta, así que no aparece
         $etiquetas = array_column($items, 'etiqueta');
-        $this->assertSame(['Inicio', 'Servicios', 'Reservar turno', 'Mis turnos'], $etiquetas);
+        $this->assertSame(['Inicio', 'Servicios', 'Reservar turno', 'Mis turnos', 'Mi familia'], $etiquetas);
     }
 
     public function test_funcionario_incluye_servicios_especialidades_y_profesionales(): void

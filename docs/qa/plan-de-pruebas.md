@@ -33,7 +33,7 @@ Tests automáticos: archivos de `tests/Feature/` (entre paréntesis, cantidad de
 | HU-11 | Disponibilidad horaria | DisponibilidadPanelTest (11) | M-27 | Pasa |
 | HU-12 | Datos del turno y del paciente | DetalleTurnoTest (3) | M-19 | Pasa |
 | HU-13 | Turno cargado por recepción | TurnoOperadorTest (13) | M-25 | Pasa |
-| HU-14 | Familiares a cargo | SolicitarTurnoTest (casos de familiar) | M-13 | **Parcial**: se reserva para un familiar; falta el alta y la edición de familiares (SCRUM-42) |
+| HU-14 | Familiares a cargo | SolicitarTurnoTest (casos de familiar), MiFamiliaTest (18) | M-13 | Pasa |
 | HU-15 | Avisos por WhatsApp | WhatsAppTest (10) | Envío real a un número verificado | **Parcial**: plantillas pendientes de aprobación en Meta (SCRUM-67) |
 | HU-16 | Inicio del panel | PanelInicioTest (10) | M-26 | Pasa |
 | HU-17 | Inicio del paciente | PacienteInicioTest (4) | M-03 | Pasa |
@@ -96,5 +96,4 @@ Defectos de la auditoría del 24/10 (16 puntos, entre ellos reprogramar sin fech
 ## 5. Pruebas pendientes
 
 - Prueba real de los avisos por WhatsApp desde la aplicación, cuando Meta apruebe las plantillas (SCRUM-67).
-- HU-14 completa, cuando esté el alta y la edición de familiares (SCRUM-42).
 - Instalación de la PWA en un celular real con HTTPS.

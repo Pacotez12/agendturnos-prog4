@@ -104,7 +104,7 @@ Blade Components en `resources/views/components/`. Ninguna vista repite estilos 
 | `<x-estado-turno>` | Recibe un `EstadoTurno` y pinta la etiqueta con los colores de la sección 3.2 |
 | `<x-alert>` | `success`, `error`, `info`; los mensajes flash de la sesión se muestran con este componente |
 | `<x-card>` | Contenedor con borde; variante del paciente con más radio |
-| `<x-empty-state>` | Título, texto y una acción principal |
+| `<x-empty-state>` | Título, texto y una acción principal; ícono opcional en el slot `icono` |
 | `<x-modal>` | Confirmaciones destructivas (cancelar turno); se cierra con Escape y devuelve el foco |
 | `<x-slot-picker>` | Grilla de horarios libres y ocupados (Alpine.js); usada por paciente y operador |
 | `<x-whatsapp-button>` | Botón flotante del lado del paciente |

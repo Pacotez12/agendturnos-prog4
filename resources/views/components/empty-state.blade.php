@@ -4,6 +4,9 @@
 ])
 
 <div {{ $attributes->merge(['class' => 'flex flex-col items-center justify-center p-8 text-center rounded-lg border border-dashed border-line bg-card']) }}>
+    @isset($icono)
+        <div class="mb-3 text-brand-text" aria-hidden="true">{{ $icono }}</div>
+    @endisset
     <h3 class="font-display font-bold text-lg text-ink-900">{{ $titulo }}</h3>
     @if($texto)
         <p class="mt-1 text-sm text-ink-500 max-w-sm">{{ $texto }}</p>

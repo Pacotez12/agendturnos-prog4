@@ -301,6 +301,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-25 | Mi familia (HU-14, SCRUM-42): el paciente da de alta y edita a sus familiares a cargo (pacientes sin cuenta con `responsable_id`) desde `/mi-familia`, con su próximo turno y "Pedir turno", que abre Reservar con el familiar ya elegido (`?para=`). Documento repetido: no se duplica ni se vincula, se pide escribir por WhatsApp. Sin baja desde la web para conservar el historial. Solo el responsable puede editar (403). `FamiliaService`, `GuardarFamiliarRequest` y `FamiliaController`; `<x-empty-state>` admite un ícono opcional. |
 | 2026-10-25 | `make demo-listo` (SCRUM-68): deja el entorno listo para presentar con los assets compilados una vez y `node` detenido, migraciones y datos de demo; evita los 500 mientras Vite recompila. Guion de la demo actualizado. |
 | 2026-10-25 | Plan y resultados de pruebas (`docs/qa/plan-de-pruebas.md`, SCRUM-37): matriz de cobertura por historia (tests automáticos y casos manuales), 29 casos manuales ejecutados por rol y defecto D-01 del entorno de desarrollo. |
 | 2026-10-24 | Documento metodológico (`docs/metodologia.md`, SCRUM-36): marco Scrum, roles, artefactos, columnas del tablero, definición de terminado, flujo de ramas y commits, ceremonias y sprints; fechas de sprints actualizadas. |

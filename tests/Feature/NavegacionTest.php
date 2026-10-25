@@ -120,6 +120,7 @@ class NavegacionTest extends TestCase
             'servicios.catalogo',
             'paciente.reservar',
             'paciente.turnos',
+            'paciente.familia',
             'privacidad',
         ];
 
@@ -141,6 +142,7 @@ class NavegacionTest extends TestCase
             'servicios.catalogo',
             'paciente.reservar',
             'paciente.turnos',
+            'paciente.familia',
             'privacidad',
         ];
 
