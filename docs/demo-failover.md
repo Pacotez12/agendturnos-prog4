@@ -13,11 +13,11 @@ Guion para mostrar la tolerancia a fallos: HAProxy reparte el tráfico entre la 
 
 ## Preparación (10 minutos antes)
 
-1. Levantar todo y esperar a que `node` termine de compilar los assets (`docker compose logs node` muestra `built in ...`):
+1. Dejar todo listo con un solo comando. Levanta el stack, compila los assets **una vez** y frena el contenedor `node` (en modo `--watch`, cada recompilación deja el panel en error 500 unos segundos), aplica migraciones y carga los datos de demo con turnos de ese día:
    ```bash
-   docker compose up -d
+   make demo-listo
    ```
-2. Si la base está vacía: `docker compose exec -T -u 1000 app php artisan migrate --seed`.
+   Termina con "Listo: A, B y HAProxy responden". Durante la demo **no** reiniciar `node` ni todo el stack: solo `docker stop`/`docker start` del nodo que se quiere tirar.
 3. Abrir **Stats** en http://localhost:8404: `a_nginx` y `b_apache` en verde (UP).
 4. Abrir la app en http://localhost:8000/login e iniciar sesión con `funcionario@glowdental.test` / `password`. Dejar abierto **Servicios** del panel. Si cambiaste `HAPROXY_PORT_FORWARD` en `.env`, usá ese puerto en lugar del 8000 (también en el loop).
 5. Abrir una terminal con el **loop de tráfico** (una petición por segundo; muestra hora, código y nodo que respondió):

@@ -301,6 +301,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-25 | `make demo-listo` (SCRUM-68): deja el entorno listo para presentar con los assets compilados una vez y `node` detenido, migraciones y datos de demo; evita los 500 mientras Vite recompila. Guion de la demo actualizado. |
 | 2026-10-25 | Plan y resultados de pruebas (`docs/qa/plan-de-pruebas.md`, SCRUM-37): matriz de cobertura por historia (tests automáticos y casos manuales), 29 casos manuales ejecutados por rol y defecto D-01 del entorno de desarrollo. |
 | 2026-10-24 | Documento metodológico (`docs/metodologia.md`, SCRUM-36): marco Scrum, roles, artefactos, columnas del tablero, definición de terminado, flujo de ramas y commits, ceremonias y sprints; fechas de sprints actualizadas. |
 | 2026-10-24 | Reloj en vivo en la barra lateral del panel (`<x-reloj/>`): hora HH:mm:ss (`tabular-nums`) y fecha corta en una sola línea en el pie de la barra lateral sobre los datos de usuario; render inicial desde el servidor con `now()` en zona horaria de la clínica sin desajustes sin JS; actualización en vivo cada 1s con Alpine.js mediante cálculo de desfase y formateo `Intl.DateTimeFormat` en `es-PY`. |
