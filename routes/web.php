@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegistroController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\Paciente\FamiliaController;
 use App\Http\Controllers\Paciente\InicioController as PacienteInicioController;
 use App\Http\Controllers\Paciente\ReservaController;
 use App\Http\Controllers\Paciente\TurnoController;
@@ -46,6 +47,10 @@ Route::middleware(['auth', 'rol:paciente'])->group(function () {
     Route::get('/mis-turnos', [TurnoController::class, 'index'])->name('paciente.turnos');
     Route::get('/turnos/{turno}', [TurnoController::class, 'show'])->name('paciente.turnos.show');
     Route::post('/turnos/{turno}/cancelar', [TurnoController::class, 'cancelar'])->name('paciente.turnos.cancelar');
+
+    Route::get('/mi-familia', [FamiliaController::class, 'index'])->name('paciente.familia');
+    Route::post('/mi-familia', [FamiliaController::class, 'store'])->name('paciente.familia.store');
+    Route::put('/mi-familia/{paciente}', [FamiliaController::class, 'update'])->name('paciente.familia.update');
 });
 
 Route::get('/servicios', [CatalogoController::class, 'index'])->name('servicios.catalogo');

@@ -20,6 +20,9 @@
 
         <x-card :paciente="true">
             <form method="GET" action="{{ route('paciente.reservar') }}" class="space-y-5">
+                @if ($para ?? null)
+                    <input type="hidden" name="para" value="{{ $para->id }}">
+                @endif
                 <x-select
                     name="profesional"
                     label="Profesional"
@@ -106,7 +109,7 @@
                                             type="radio"
                                             name="paciente_id"
                                             value="{{ $pacienteActual->id }}"
-                                            {{ old('paciente_id', (string) $pacienteActual->id) == $pacienteActual->id ? 'checked' : '' }}
+                                            {{ old('paciente_id', (string) ($preseleccionado ?? $pacienteActual->id)) == $pacienteActual->id ? 'checked' : '' }}
                                             class="size-4 text-brand-600 focus:ring-brand-600 border-line"
                                         >
                                         <div>
@@ -122,7 +125,7 @@
                                             type="radio"
                                             name="paciente_id"
                                             value="{{ $familiar->id }}"
-                                            {{ old('paciente_id', ! $pacienteActual && $loop->first ? (string) $familiar->id : '') == $familiar->id ? 'checked' : '' }}
+                                            {{ old('paciente_id', (string) ($preseleccionado ?? '')) == $familiar->id ? 'checked' : '' }}
                                             class="size-4 text-brand-600 focus:ring-brand-600 border-line"
                                         >
                                         <div>

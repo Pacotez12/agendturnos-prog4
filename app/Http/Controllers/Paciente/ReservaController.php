@@ -19,9 +19,17 @@ class ReservaController extends Controller
             $request->input('fecha'),
         );
 
+        $pacienteActual = $user?->paciente;
+        $familiares = $user ? $user->dependientes()->orderBy('nombre')->get() : collect();
+
+        // "Pedir turno" desde Mi familia llega con ?para=<id>; solo vale si es un familiar propio.
+        $para = $familiares->firstWhere('id', $request->integer('para'));
+
         return view('paciente.reservar', array_merge($datos, [
-            'pacienteActual' => $user?->paciente,
-            'familiares' => $user ? $user->dependientes()->orderBy('nombre')->get() : collect(),
+            'pacienteActual' => $pacienteActual,
+            'familiares' => $familiares,
+            'para' => $para,
+            'preseleccionado' => $para?->id ?? $pacienteActual?->id ?? $familiares->first()?->id,
         ]));
     }
 }

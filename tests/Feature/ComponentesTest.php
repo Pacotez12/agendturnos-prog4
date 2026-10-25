@@ -149,4 +149,23 @@ class ComponentesTest extends TestCase
         $view->assertSee('Reservar turno');
         $view->assertSee('bg-brand-600');
     }
+
+    public function test_empty_state_con_icono(): void
+    {
+        $view = $this->blade(
+            '<x-empty-state titulo="Sin familiares"><x-slot:icono><x-phosphor-users class="size-8" /></x-slot:icono></x-empty-state>'
+        );
+
+        $view->assertSee('Sin familiares');
+        $view->assertSee('<svg', false);
+        $view->assertSee('text-brand-text', false);
+    }
+
+    public function test_empty_state_sin_icono_no_agrega_contenedor(): void
+    {
+        $view = $this->blade('<x-empty-state titulo="Sin turnos" />');
+
+        $view->assertDontSee('<svg', false);
+        $view->assertDontSee('text-brand-text', false);
+    }
 }
