@@ -46,6 +46,13 @@ return [
             'reprogramacion' => 'turno_reprogramado',
             'recordatorio' => 'turno_recordatorio',
         ],
+        // Plantillas de 4 parámetros para turnos propios del titular
+        'plantillas_propio' => [
+            'confirmacion' => 'turno_confirmado_propio',
+            'cancelacion' => 'turno_cancelado_propio',
+            'reprogramacion' => 'turno_reprogramado_propio',
+            'recordatorio' => 'turno_recordatorio_propio',
+        ],
     ],
 
 ];
