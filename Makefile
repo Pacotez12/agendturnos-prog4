@@ -1,4 +1,4 @@
-.PHONY: up scale down build sh artisan migrate fresh demo logs assets portainer portainer-build bench
+.PHONY: up scale down build sh artisan migrate fresh demo demo-listo logs assets portainer portainer-build bench
 
 up:
 	docker compose up -d
@@ -31,6 +31,16 @@ fresh:
 
 demo:
 	docker compose exec -u www-data app php artisan demo:cargar --fresh
+
+# Deja todo listo para presentar: assets compilados una sola vez (sin --watch, que deja
+# el panel en 500 mientras recompila), migraciones al día y datos de demo frescos
+demo-listo:
+	docker compose up -d
+	docker compose stop node
+	$(MAKE) assets
+	docker compose exec -u www-data app php artisan migrate --force
+	$(MAKE) demo
+	@curl -fsS -o /dev/null http://localhost:8080/login && curl -fsS -o /dev/null http://localhost:8081/login && curl -fsS -o /dev/null http://localhost:$$(grep -s "^HAPROXY_PORT_FORWARD=" .env | cut -d= -f2 | grep . || echo 8000)/login && echo "Listo: A, B y HAProxy responden"
 
 logs:
 	docker compose logs -f
