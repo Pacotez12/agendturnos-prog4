@@ -101,6 +101,12 @@ class WhatsAppTest extends TestCase
                 'reprogramacion' => 'turno_reprogramado',
                 'recordatorio' => 'turno_recordatorio',
             ],
+            'services.whatsapp.plantillas_propio' => [
+                'confirmacion' => 'turno_confirmado_propio',
+                'cancelacion' => 'turno_cancelado_propio',
+                'reprogramacion' => 'turno_reprogramado_propio',
+                'recordatorio' => 'turno_recordatorio_propio',
+            ],
         ]);
     }
 
@@ -164,7 +170,10 @@ class WhatsAppTest extends TestCase
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
-        config()->set(['services.whatsapp.plantillas' => []]);
+        config()->set([
+            'services.whatsapp.plantillas' => [],
+            'services.whatsapp.plantillas_propio' => [],
+        ]);
 
         $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
         $notificacion = Notificacion::create([
@@ -179,7 +188,7 @@ class WhatsAppTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_envio_confirmacion_usa_plantilla_turno_confirmado_y_parametros_en_orden(): void
+    public function test_envio_confirmacion_turno_propio_usa_plantilla_propia_con_4_parametros(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -200,23 +209,24 @@ class WhatsAppTest extends TestCase
 
         Http::assertSent(function (Request $request) use ($turno) {
             $data = $request->data();
+            $params = $data['template']['components'][0]['parameters'];
 
             return $request->url() === 'https://graph.facebook.com/v25.0/10987654321/messages'
                 && $request->hasHeader('Authorization', 'Bearer meta-secret-token')
                 && $data['messaging_product'] === 'whatsapp'
                 && $data['to'] === '595981123456'
                 && $data['type'] === 'template'
-                && $data['template']['name'] === 'turno_confirmado'
+                && $data['template']['name'] === 'turno_confirmado_propio'
                 && $data['template']['language']['code'] === 'es'
-                && $data['template']['components'][0]['parameters'][0]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][1]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
-                && $data['template']['components'][0]['parameters'][3]['text'] === 'Ana González'
-                && $data['template']['components'][0]['parameters'][4]['text'] === 'Limpieza dental';
+                && count($params) === 4
+                && $params[0]['text'] === 'Carlos'
+                && $params[1]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
+                && $params[2]['text'] === 'Ana González'
+                && $params[3]['text'] === 'Limpieza dental';
         });
     }
 
-    public function test_envio_cancelacion_usa_plantilla_turno_cancelado(): void
+    public function test_envio_cancelacion_turno_propio_usa_plantilla_propia(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -237,17 +247,18 @@ class WhatsAppTest extends TestCase
 
         Http::assertSent(function (Request $request) use ($turno) {
             $data = $request->data();
+            $params = $data['template']['components'][0]['parameters'];
 
-            return $data['template']['name'] === 'turno_cancelado'
-                && $data['template']['components'][0]['parameters'][0]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][1]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
-                && $data['template']['components'][0]['parameters'][3]['text'] === 'Ana González'
-                && $data['template']['components'][0]['parameters'][4]['text'] === 'Limpieza dental';
+            return $data['template']['name'] === 'turno_cancelado_propio'
+                && count($params) === 4
+                && $params[0]['text'] === 'Carlos'
+                && $params[1]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
+                && $params[2]['text'] === 'Ana González'
+                && $params[3]['text'] === 'Limpieza dental';
         });
     }
 
-    public function test_envio_reprogramacion_usa_plantilla_turno_reprogramado(): void
+    public function test_envio_reprogramacion_turno_propio_usa_plantilla_propia(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -268,17 +279,18 @@ class WhatsAppTest extends TestCase
 
         Http::assertSent(function (Request $request) use ($turno) {
             $data = $request->data();
+            $params = $data['template']['components'][0]['parameters'];
 
-            return $data['template']['name'] === 'turno_reprogramado'
-                && $data['template']['components'][0]['parameters'][0]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][1]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
-                && $data['template']['components'][0]['parameters'][3]['text'] === 'Ana González'
-                && $data['template']['components'][0]['parameters'][4]['text'] === 'Limpieza dental';
+            return $data['template']['name'] === 'turno_reprogramado_propio'
+                && count($params) === 4
+                && $params[0]['text'] === 'Carlos'
+                && $params[1]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
+                && $params[2]['text'] === 'Ana González'
+                && $params[3]['text'] === 'Limpieza dental';
         });
     }
 
-    public function test_envio_recordatorio_usa_plantilla_turno_recordatorio(): void
+    public function test_envio_recordatorio_turno_propio_usa_plantilla_propia(): void
     {
         Http::preventStrayRequests();
         $this->configurarCredencialesWhatsApp();
@@ -299,13 +311,48 @@ class WhatsAppTest extends TestCase
 
         Http::assertSent(function (Request $request) use ($turno) {
             $data = $request->data();
+            $params = $data['template']['components'][0]['parameters'];
 
-            return $data['template']['name'] === 'turno_recordatorio'
-                && $data['template']['components'][0]['parameters'][0]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][1]['text'] === 'Carlos Gómez'
-                && $data['template']['components'][0]['parameters'][2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
-                && $data['template']['components'][0]['parameters'][3]['text'] === 'Ana González'
-                && $data['template']['components'][0]['parameters'][4]['text'] === 'Limpieza dental';
+            return $data['template']['name'] === 'turno_recordatorio_propio'
+                && count($params) === 4
+                && $params[0]['text'] === 'Carlos'
+                && $params[1]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
+                && $params[2]['text'] === 'Ana González'
+                && $params[3]['text'] === 'Limpieza dental';
+        });
+    }
+
+    public function test_turno_propio_sin_plantilla_propia_usa_plantilla_comun_como_fallback_con_5_parametros(): void
+    {
+        Http::preventStrayRequests();
+        $this->configurarCredencialesWhatsApp();
+        config()->set(['services.whatsapp.plantillas_propio' => []]);
+
+        Http::fake([
+            'https://graph.facebook.com/v25.0/10987654321/messages' => Http::response(['messages' => [['id' => 'wamid.123']]], 200),
+        ]);
+
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'destinatario_id' => $this->pacienteUser->id,
+            'tipo' => 'confirmacion',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        app(WhatsAppService::class)->enviarAviso($notificacion);
+
+        Http::assertSent(function (Request $request) use ($turno) {
+            $data = $request->data();
+            $params = $data['template']['components'][0]['parameters'];
+
+            return $data['template']['name'] === 'turno_confirmado'
+                && count($params) === 5
+                && $params[0]['text'] === 'Carlos'
+                && $params[1]['text'] === 'Carlos Gómez'
+                && $params[2]['text'] === ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'))
+                && $params[3]['text'] === 'Ana González'
+                && $params[4]['text'] === 'Limpieza dental';
         });
     }
 
@@ -342,10 +389,88 @@ class WhatsAppTest extends TestCase
 
             return $data['to'] === '595981123456'
                 && $data['template']['name'] === 'turno_confirmado'
-                && $params[0]['text'] === 'Carlos Gómez'
+                && $params[0]['text'] === 'Carlos'
                 && $params[1]['text'] === 'Sofía Gómez'
                 && $params[3]['text'] === 'Ana González'
                 && $params[4]['text'] === 'Limpieza dental';
+        });
+    }
+
+    public function test_destinatario_titular_usa_primer_nombre_de_pila(): void
+    {
+        Http::preventStrayRequests();
+        $this->configurarCredencialesWhatsApp();
+
+        Http::fake([
+            'https://graph.facebook.com/v25.0/10987654321/messages' => Http::response(['messages' => [['id' => 'wamid.123']]], 200),
+        ]);
+
+        $user = User::factory()->paciente()->create(['email' => 'maria@paciente.test']);
+        $paciente = Paciente::factory()->create([
+            'user_id' => $user->id,
+            'nombre' => 'María',
+            'apellido' => 'Ortiz',
+            'telefono' => '0981 111 222',
+        ]);
+
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado, $paciente);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'destinatario_id' => $user->id,
+            'tipo' => 'confirmacion',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        app(WhatsAppService::class)->enviarAviso($notificacion);
+
+        Http::assertSent(function (Request $request) {
+            $data = $request->data();
+            $params = $data['template']['components'][0]['parameters'];
+
+            return $params[0]['text'] === 'María';
+        });
+    }
+
+    public function test_destinatario_responsable_con_nombre_compuesto_usa_primer_nombre(): void
+    {
+        Http::preventStrayRequests();
+        $this->configurarCredencialesWhatsApp();
+
+        Http::fake([
+            'https://graph.facebook.com/v25.0/10987654321/messages' => Http::response(['messages' => [['id' => 'wamid.123']]], 200),
+        ]);
+
+        $responsableUser = User::factory()->paciente()->create(['email' => 'carlos.andres@paciente.test']);
+        Paciente::factory()->create([
+            'user_id' => $responsableUser->id,
+            'nombre' => 'Carlos Andrés',
+            'apellido' => 'Pérez',
+            'telefono' => '0981 333 444',
+        ]);
+
+        $familiar = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $responsableUser->id,
+            'nombre' => 'Sofía',
+            'apellido' => 'Pérez',
+            'telefono' => null,
+        ]);
+
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado, $familiar);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'destinatario_id' => $responsableUser->id,
+            'tipo' => 'confirmacion',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        app(WhatsAppService::class)->enviarAviso($notificacion);
+
+        Http::assertSent(function (Request $request) {
+            $data = $request->data();
+            $params = $data['template']['components'][0]['parameters'];
+
+            return $params[0]['text'] === 'Carlos';
         });
     }
 

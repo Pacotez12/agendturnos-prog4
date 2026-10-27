@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Notificacion;
+use App\Models\User;
 use App\Support\Telefono;
 use Illuminate\Support\Facades\Http;
 
@@ -15,10 +16,8 @@ class WhatsAppService
     {
         $token = config('services.whatsapp.token');
         $phoneId = config('services.whatsapp.phone_id');
-        $plantillas = config('services.whatsapp.plantillas', []);
-        $plantilla = $plantillas[$notificacion->tipo] ?? null;
 
-        if (empty($token) || empty($phoneId) || empty($plantilla)) {
+        if (empty($token) || empty($phoneId)) {
             return;
         }
 
@@ -32,11 +31,43 @@ class WhatsAppService
 
         $turno = $notificacion->turno;
 
-        $param1 = $destinatario->nombreVisible();
-        $param2 = trim("{$turno->paciente->nombre} {$turno->paciente->apellido}");
-        $param3 = ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'));
-        $param4 = "{$turno->profesional->nombre} {$turno->profesional->apellido}";
-        $param5 = $turno->servicio->nombre;
+        $plantillasComunes = config('services.whatsapp.plantillas', []);
+        $plantillasPropio = config('services.whatsapp.plantillas_propio', []);
+
+        $esPropio = $destinatario !== null
+            && $turno->paciente?->user_id !== null
+            && $turno->paciente->user_id === $destinatario->id;
+
+        $plantillaPropio = $esPropio ? ($plantillasPropio[$notificacion->tipo] ?? null) : null;
+
+        $primerNombre = $this->primerNombreDestinatario($destinatario);
+        $fechaHora = ucfirst($turno->inicio->translatedFormat('l j \d\e F, H:i'));
+        $profesional = "{$turno->profesional->nombre} {$turno->profesional->apellido}";
+        $servicio = $turno->servicio->nombre;
+
+        if (! empty($plantillaPropio)) {
+            $plantilla = $plantillaPropio;
+            $parameters = [
+                ['type' => 'text', 'text' => $primerNombre],
+                ['type' => 'text', 'text' => $fechaHora],
+                ['type' => 'text', 'text' => $profesional],
+                ['type' => 'text', 'text' => $servicio],
+            ];
+        } else {
+            $plantilla = $plantillasComunes[$notificacion->tipo] ?? null;
+            if (empty($plantilla)) {
+                return;
+            }
+
+            $nombrePaciente = trim("{$turno->paciente->nombre} {$turno->paciente->apellido}");
+            $parameters = [
+                ['type' => 'text', 'text' => $primerNombre],
+                ['type' => 'text', 'text' => $nombrePaciente],
+                ['type' => 'text', 'text' => $fechaHora],
+                ['type' => 'text', 'text' => $profesional],
+                ['type' => 'text', 'text' => $servicio],
+            ];
+        }
 
         $payload = [
             'messaging_product' => 'whatsapp',
@@ -48,13 +79,7 @@ class WhatsAppService
                 'components' => [
                     [
                         'type' => 'body',
-                        'parameters' => [
-                            ['type' => 'text', 'text' => $param1],
-                            ['type' => 'text', 'text' => $param2],
-                            ['type' => 'text', 'text' => $param3],
-                            ['type' => 'text', 'text' => $param4],
-                            ['type' => 'text', 'text' => $param5],
-                        ],
+                        'parameters' => $parameters,
                     ],
                 ],
             ],
@@ -63,6 +88,13 @@ class WhatsAppService
         Http::withToken($token)
             ->post("https://graph.facebook.com/v25.0/{$phoneId}/messages", $payload)
             ->throw();
+    }
+
+    public function primerNombreDestinatario(?User $destinatario): string
+    {
+        $base = $destinatario?->paciente?->nombre ?: ($destinatario?->nombreVisible() ?? '');
+
+        return preg_split('/\s+/u', trim($base))[0] ?? '';
     }
 
     public function normalizarTelefono(?string $telefono): ?string
