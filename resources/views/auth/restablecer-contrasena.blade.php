@@ -9,11 +9,12 @@
             </p>
         </div>
 
-        @if ($errors->any())
+        {{-- Los errores de cada campo se muestran debajo del campo; el token no tiene campo visible --}}
+        @error('token')
             <x-alert type="error" class="mb-4">
-                {{ $errors->first('email') ?: ($errors->first('password') ?: 'Revisá los datos ingresados.') }}
+                El enlace no es válido o ya venció. Pedí uno nuevo.
             </x-alert>
-        @endif
+        @enderror
 
         <form action="{{ route('password.update') }}" method="POST" class="space-y-4">
             @csrf
