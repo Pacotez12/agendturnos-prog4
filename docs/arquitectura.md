@@ -3,7 +3,7 @@
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect**, Asunción, Paraguay.
 
 > Documento vivo: se actualiza a medida que avanza el desarrollo. Cada sección indica su estado: ✅ hecho · 🚧 en curso · ⏳ pendiente.
-> Última actualización: 2026-10-22.
+> Última actualización: 2026-10-28.
 > Diseño de interfaz (colores, layouts y componentes): [`docs/diseno-ui.md`](diseno-ui.md).
 
 ---
@@ -302,6 +302,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-28 | Formulario de reserva (SCRUM-69): al rechazar una solicitud por solapamiento de horario (`PacienteConTurnoEnHorario`) u horario ocupado, la redirección de vuelta a la selección de horario conserva al paciente preseleccionado (familiar o titular) mediante el parámetro `para`. |
 | 2026-10-28 | Correcciones del informe de QA del 28/10 (SCRUM-69): un paciente ya no puede tener dos turnos superpuestos (restricción `turnos_paciente_sin_solapamiento` y validación en reservar y reprogramar; la migración se detiene y lista los pares si encuentra datos en conflicto). `demo:cargar` saltea pacientes ocupados al repartir turnos. Reprogramar a la misma hora se rechaza sin historial ni aviso, y la pantalla muestra ese horario como "Actual" (`<x-slot-picker>` acepta `actual`). Botón principal en modo oscuro: el hover usa el token nuevo `brand-hover` en lugar de `brand-700`, con contraste AA medido por un test. Detalles: singular en los indicadores del panel ("1 ya atendido"); el error de login, recuperar y restablecer contraseña aparece una sola vez, debajo del campo; las páginas de error cargan Open Sans y Quicksand con `@fonts` (sin depender del build); el botón "Solicitar turno" va a la derecha como en el panel. Los tests compilan las vistas en `storage/framework/testing/views` (`VIEW_COMPILED_PATH` en `phpunit.xml`) para no chocar con las de la app, que son de `www-data`. |
 | 2026-10-25 | Plantillas de WhatsApp para turnos propios (SCRUM-43): primer nombre de pila en el saludo para evitar redundancias ("Hola María, confirmamos..."); plantillas específicas de 4 parámetros (`turno_confirmado_propio`, `turno_cancelado_propio`, `turno_reprogramado_propio`, `turno_recordatorio_propio`) cuando el turno pertenece al titular, manteniendo las plantillas de 5 parámetros para familiares o ante ausencia de plantilla propia en configuración. |
 | 2026-10-25 | Mi familia (HU-14, SCRUM-42): el paciente da de alta y edita a sus familiares a cargo (pacientes sin cuenta con `responsable_id`) desde `/mi-familia`, con su próximo turno y "Pedir turno", que abre Reservar con el familiar ya elegido (`?para=`). Documento repetido: no se duplica ni se vincula, se pide escribir por WhatsApp. Sin baja desde la web para conservar el historial. Solo el responsable puede editar (403). `FamiliaService`, `GuardarFamiliarRequest` y `FamiliaController`; `<x-empty-state>` admite un ícono opcional. |

@@ -177,9 +177,57 @@ class TurnoPacienteSinSolapamientoTest extends TestCase
             'profesional' => $this->gloria->id,
             'servicio' => $this->servicio->id,
             'fecha' => '2026-10-19',
+            'para' => $this->paciente->id,
         ]));
         $response->assertSessionHas('error', self::MENSAJE);
         $this->assertSame(1, Turno::count());
+
+        $follow = $this->get($response->headers->get('Location'));
+        $follow->assertOk();
+        $follow->assertViewHas('preseleccionado', $this->paciente->id);
+        $this->assertMatchesRegularExpression('/value="'.$this->paciente->id.'"[^>]*checked/', $follow->getContent());
+    }
+
+    public function test_al_rechazar_solicitud_por_solapamiento_conserva_el_familiar_seleccionado(): void
+    {
+        $familiar = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $this->tutor->id,
+            'nombre' => 'Lucía',
+            'apellido' => 'Gómez',
+        ]);
+
+        $inicio = Carbon::parse('2026-10-19 09:00', config('app.timezone'));
+        Turno::factory()->create([
+            'paciente_id' => $familiar->id,
+            'profesional_id' => $this->ana->id,
+            'servicio_id' => $this->servicio->id,
+            'consultorio_id' => $this->consultorio->id,
+            'inicio' => $inicio,
+            'fin' => $inicio->copy()->addMinutes(30),
+            'estado' => EstadoTurno::Confirmado,
+        ]);
+
+        $response = $this->actingAs($this->tutor)->post(route('paciente.turnos.store'), [
+            'profesional' => $this->gloria->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-19',
+            'hora' => '09:15',
+            'paciente_id' => $familiar->id,
+        ]);
+
+        $response->assertRedirect(route('paciente.reservar', [
+            'profesional' => $this->gloria->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-19',
+            'para' => $familiar->id,
+        ]));
+        $response->assertSessionHas('error', 'Lucía Gómez ya tiene otro turno en ese horario. Elegí otro.');
+
+        $follow = $this->get($response->headers->get('Location'));
+        $follow->assertOk();
+        $follow->assertViewHas('preseleccionado', $familiar->id);
+        $this->assertMatchesRegularExpression('/value="'.$familiar->id.'"[^>]*checked/', $follow->getContent());
     }
 
     public function test_no_se_puede_reprogramar_encima_de_otro_turno_del_mismo_paciente(): void

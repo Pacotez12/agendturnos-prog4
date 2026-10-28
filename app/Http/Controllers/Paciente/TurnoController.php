@@ -62,6 +62,7 @@ class TurnoController extends Controller
                 'profesional' => $profesional->id,
                 'servicio' => $servicio->id,
                 'fecha' => $request->input('fecha'),
+                'para' => $paciente->id,
             ])->with('error', $e instanceof PacienteConTurnoEnHorario
                 ? $e->getMessage()
                 : 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');

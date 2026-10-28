@@ -305,6 +305,7 @@ class SolicitarTurnoTest extends TestCase
             'profesional' => $this->profesional->id,
             'servicio' => $this->servicio->id,
             'fecha' => '2026-10-19',
+            'para' => $this->paciente->id,
         ]));
         $response->assertSessionHas('error', 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
 
@@ -325,6 +326,7 @@ class SolicitarTurnoTest extends TestCase
             'profesional' => $this->profesional->id,
             'servicio' => $this->servicio->id,
             'fecha' => '2026-10-19',
+            'para' => $this->paciente->id,
         ]));
         $response->assertSessionHas('error', 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
 
