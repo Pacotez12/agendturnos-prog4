@@ -16,7 +16,11 @@ class AgendarTurnoOperadorRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $user = $this->user();
-        if ($user?->rol === RolUsuario::Profesional && $user->profesional) {
+        if ($user?->rol === RolUsuario::Profesional) {
+            if (! $user->profesional) {
+                abort(403);
+            }
+
             $this->merge([
                 'profesional' => $user->profesional->id,
             ]);

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Notifications\RestablecerContrasena;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -15,6 +16,13 @@ use Tests\TestCase;
 class RestablecerContrasenaTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+    }
 
     public function test_pantalla_de_pedido_de_enlace_responde_ok(): void
     {
@@ -39,6 +47,25 @@ class RestablecerContrasenaTest extends TestCase
         $response->assertSessionHas('status', 'Si el correo está registrado, te enviamos el enlace. Revisá tu bandeja.');
 
         Notification::assertSentTo($user, RestablecerContrasena::class);
+    }
+
+    public function test_correo_de_recuperacion_usa_app_url_configurada_y_no_el_header_host(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create(['email' => 'maria@ejemplo.com']);
+
+        $response = $this->post('http://atacante.example/olvide-mi-contrasena', [
+            'email' => 'maria@ejemplo.com',
+        ]);
+
+        Notification::assertSentTo($user, RestablecerContrasena::class, function (RestablecerContrasena $notification) use ($user) {
+            $mail = $notification->toMail($user);
+            $expectedBase = rtrim(config('app.url'), '/');
+
+            return str_starts_with($mail->actionUrl, $expectedBase)
+                && ! str_contains($mail->actionUrl, 'atacante.example');
+        });
     }
 
     public function test_pedido_con_email_inexistente_no_envia_notificacion_y_muestra_mismo_mensaje(): void
