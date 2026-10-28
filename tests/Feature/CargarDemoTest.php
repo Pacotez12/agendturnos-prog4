@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\EstadoTurno;
+use App\Models\Disponibilidad;
 use App\Models\Notificacion;
 use App\Models\Turno;
 use App\Models\User;
@@ -23,6 +24,14 @@ class CargarDemoTest extends TestCase
         $this->seed(DatabaseSeeder::class);
     }
 
+    protected function tearDown(): void
+    {
+        putenv('APP_ENV=testing');
+        $_ENV['APP_ENV'] = 'testing';
+        $_SERVER['APP_ENV'] = 'testing';
+        parent::tearDown();
+    }
+
     public function test_se_niega_a_correr_en_produccion_sin_force(): void
     {
         $turnosAntes = Turno::count();
@@ -30,7 +39,23 @@ class CargarDemoTest extends TestCase
         $this->app->detectEnvironment(fn () => 'production');
 
         $this->artisan('demo:cargar')
-            ->expectsOutputToContain('producción')
+            ->assertExitCode(1);
+
+        $this->assertSame($turnosAntes, Turno::count());
+
+        $this->artisan('demo:cargar', ['--force' => true])
+            ->assertSuccessful();
+
+        $this->assertGreaterThan($turnosAntes, Turno::count());
+    }
+
+    public function test_se_niega_a_correr_en_staging_u_otro_entorno_sin_force(): void
+    {
+        $turnosAntes = Turno::count();
+
+        $this->app->detectEnvironment(fn () => 'staging');
+
+        $this->artisan('demo:cargar')
             ->assertExitCode(1);
 
         $this->assertSame($turnosAntes, Turno::count());
@@ -108,6 +133,42 @@ class CargarDemoTest extends TestCase
 
         $this->assertGreaterThan(50, Turno::count());
         $this->assertSame(0, Notificacion::count());
+    }
+
+    public function test_correr_dos_veces_sin_fresh_falla_limpio_con_mensaje(): void
+    {
+        $this->artisan('demo:cargar')->assertSuccessful();
+
+        $turnosAntes = Turno::count();
+
+        $this->artisan('demo:cargar')
+            ->expectsOutputToContain('Ya existen turnos en la base de datos')
+            ->assertExitCode(1);
+
+        $this->assertSame($turnosAntes, Turno::count());
+    }
+
+    public function test_siguiente_dia_con_disponibilidad_aborta_si_no_hay_en_365_dias(): void
+    {
+        Disponibilidad::query()->delete();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('No se encontró disponibilidad en los próximos 365 días.');
+
+        $this->artisan('demo:cargar');
+    }
+
+    public function test_proximos_turnos_aborta_si_no_puede_colocar_en_365_dias(): void
+    {
+        // Franjas de 20 minutos donde ningún servicio de 30 minutos cabe
+        Disponibilidad::query()->update([
+            'hora_inicio' => '08:00',
+            'hora_fin' => '08:20',
+        ]);
+
+        $this->artisan('demo:cargar')
+            ->expectsOutputToContain('No fue posible colocar los turnos próximos deseados en 365 días.')
+            ->assertExitCode(1);
     }
 
     public function test_miercoles_a_las_07_00_sin_atendidos_hoy_y_futuros_correctos(): void

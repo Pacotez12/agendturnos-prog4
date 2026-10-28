@@ -304,6 +304,27 @@ class TurnoOperadorTest extends TestCase
         Queue::assertPushed(EnviarNotificacion::class);
     }
 
+    public function test_hora_desalineada_del_intervalo_falla_en_panel(): void
+    {
+        $response = $this->actingAs($this->funcionario)
+            ->post(route('panel.turnos.store'), [
+                'paciente_id' => $this->paciente->id,
+                'profesional' => $this->profesional2->id,
+                'servicio' => $this->servicio->id,
+                'fecha' => '2026-10-23',
+                'hora' => '09:07',
+            ]);
+
+        $response->assertRedirect(route('panel.turnos.crear', [
+            'paciente' => $this->paciente->id,
+            'profesional' => $this->profesional2->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-23',
+        ]));
+        $response->assertSessionHas('error', 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
+        $this->assertSame(0, Turno::count());
+    }
+
     public function test_profesional_no_puede_agendar_para_otra_profesional_se_fuerza_la_suya(): void
     {
         Queue::fake();

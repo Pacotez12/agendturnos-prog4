@@ -43,8 +43,8 @@ class ConsultarDisponibilidadRequest extends FormRequest
                     $validator->errors()->add('fecha', 'La fecha seleccionada no puede ser en el pasado.');
                 }
 
-                $servicio = Servicio::find($this->input('servicio_id'));
-                if ($servicio && ! $servicio->activo) {
+                $servicio = Servicio::with('especialidad')->find($this->input('servicio_id'));
+                if ($servicio && (! $servicio->activo || ! $servicio->especialidad?->activa)) {
                     $validator->errors()->add('servicio_id', 'El servicio seleccionado no está disponible.');
                 }
 

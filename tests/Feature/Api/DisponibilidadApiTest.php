@@ -56,6 +56,22 @@ class DisponibilidadApiTest extends TestCase
         $response->assertJsonValidationErrors(['servicio_id']);
     }
 
+    public function test_disponibilidad_rechaza_servicio_con_especialidad_inactiva(): void
+    {
+        $user = User::factory()->profesional()->create();
+        $profesional = Profesional::factory()->create(['user_id' => $user->id]);
+        $espInactiva = Especialidad::factory()->create(['activa' => false]);
+        $servicio = Servicio::factory()->create(['especialidad_id' => $espInactiva->id, 'activo' => true]);
+        $profesional->servicios()->attach($servicio->id);
+
+        $fecha = Carbon::tomorrow('America/Asuncion')->toDateString();
+
+        $response = $this->getJson("/api/v1/disponibilidad?profesional_id={$profesional->id}&servicio_id={$servicio->id}&fecha={$fecha}");
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['servicio_id']);
+    }
+
     public function test_disponibilidad_devuelve_franjas_libres_en_iso_8601(): void
     {
         $user = User::factory()->profesional()->create();

@@ -270,4 +270,84 @@ class DisponibilidadServiceTest extends TestCase
         $this->assertNotContains('08:15', $horas);
         $this->assertNotContains('08:45', $horas);
     }
+
+    public function test_esta_libre_rechaza_horario_no_alineado_al_intervalo(): void
+    {
+        Disponibilidad::factory()->create([
+            'profesional_id' => $this->profesional->id,
+            'consultorio_id' => $this->consultorio->id,
+            'dia_semana' => 1,
+            'hora_inicio' => '08:00',
+            'hora_fin' => '12:00',
+        ]);
+
+        $inicioDesalineado = Carbon::parse('2026-10-19 09:07:00', config('app.timezone'));
+        $this->assertFalse($this->service->estaLibre($this->profesional, $this->servicio45, $inicioDesalineado));
+    }
+
+    public function test_servicio_con_especialidad_inactiva_retorna_vacio_y_esta_libre_false(): void
+    {
+        $espInactiva = Especialidad::factory()->create(['activa' => false]);
+        $servicioInactivo = Servicio::factory()->create([
+            'especialidad_id' => $espInactiva->id,
+            'duracion_min' => 30,
+            'activo' => true,
+        ]);
+        $this->profesional->servicios()->attach($servicioInactivo->id);
+
+        Disponibilidad::factory()->create([
+            'profesional_id' => $this->profesional->id,
+            'consultorio_id' => $this->consultorio->id,
+            'dia_semana' => 1,
+            'hora_inicio' => '08:00',
+            'hora_fin' => '12:00',
+        ]);
+
+        $fechaLunes = Carbon::parse('2026-10-19', config('app.timezone'));
+        $this->assertSame([], $this->service->franjasLibres($this->profesional, $servicioInactivo, $fechaLunes));
+        $this->assertFalse($this->service->estaLibre($this->profesional, $servicioInactivo, Carbon::parse('2026-10-19 09:00:00', config('app.timezone'))));
+    }
+
+    public function test_alineacion_respeta_inicio_de_franja_y_franjas_libres_pasan_esta_libre(): void
+    {
+        $esp = Especialidad::factory()->create(['activa' => true]);
+        $servicio15 = Servicio::factory()->create([
+            'especialidad_id' => $esp->id,
+            'nombre' => 'Control breve',
+            'duracion_min' => 15,
+            'activo' => true,
+        ]);
+        $this->profesional->servicios()->attach($servicio15->id);
+
+        Disponibilidad::factory()->create([
+            'profesional_id' => $this->profesional->id,
+            'consultorio_id' => $this->consultorio->id,
+            'dia_semana' => 1,
+            'hora_inicio' => '08:10',
+            'hora_fin' => '10:00',
+        ]);
+
+        $tz = config('app.timezone');
+        $inicio0810 = Carbon::parse('2026-10-19 08:10:00', $tz);
+        $inicio0825 = Carbon::parse('2026-10-19 08:25:00', $tz);
+        $inicio0815 = Carbon::parse('2026-10-19 08:15:00', $tz);
+
+        $this->assertTrue($this->service->estaLibre($this->profesional, $servicio15, $inicio0810));
+        $this->assertTrue($this->service->estaLibre($this->profesional, $servicio15, $inicio0825));
+        $this->assertFalse($this->service->estaLibre($this->profesional, $servicio15, $inicio0815));
+
+        $fechaLunes = Carbon::parse('2026-10-19', $tz);
+        $franjas = $this->service->franjasLibres($this->profesional, $servicio15, $fechaLunes);
+        $this->assertNotEmpty($franjas);
+
+        foreach ($franjas as $franja) {
+            if ($franja['libre']) {
+                $inicioFranja = Carbon::parse('2026-10-19 '.$franja['hora'].':00', $tz);
+                $this->assertTrue(
+                    $this->service->estaLibre($this->profesional, $servicio15, $inicioFranja),
+                    "El horario {$franja['hora']} devuelto por franjasLibres debería ser aceptado por estaLibre."
+                );
+            }
+        }
+    }
 }

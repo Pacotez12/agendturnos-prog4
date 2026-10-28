@@ -147,18 +147,23 @@ class CargarDemo extends Command
 
     public function handle(): int
     {
-        if ($this->laravel->environment('production') && ! $this->option('force')) {
-            $this->error('Este comando no puede ejecutarse en el entorno de producción sin la opción --force.');
+        if (! $this->laravel->environment(['local', 'testing']) && ! $this->option('force')) {
+            $this->error('Este comando solo puede ejecutarse en entornos locales o de prueba sin la opción --force.');
 
             return self::FAILURE;
         }
 
         if ($this->option('fresh')) {
             $this->info('Reiniciando base de datos y ejecutando seeders base...');
-            $this->call('migrate:fresh', [
-                '--seed' => true,
-                '--force' => true,
-            ]);
+            $params = ['--seed' => true];
+            if ($this->option('force')) {
+                $params['--force'] = true;
+            }
+            $this->call('migrate:fresh', $params);
+        } elseif (Turno::exists()) {
+            $this->error('Ya existen turnos en la base de datos. Para recargar la demo usá la opción --fresh.');
+
+            return self::FAILURE;
         }
 
         $profesionales = Profesional::ordenados()->get();
@@ -379,7 +384,15 @@ class CargarDemo extends Command
         $pacientesObligatorios = [$pacienteMaria, $pacienteCarlos, $pacienteSofia];
 
         $cursorDiaFuturo = $diaPrincipal->copy()->addDay();
+        $diasBuscadosProximos = 0;
         while ($proximosColocados < $turnosProximosDeseados) {
+            $diasBuscadosProximos++;
+            if ($diasBuscadosProximos >= 365) {
+                $this->error('No fue posible colocar los turnos próximos deseados en 365 días.');
+
+                return self::FAILURE;
+            }
+
             if (Disponibilidad::where('dia_semana', $cursorDiaFuturo->dayOfWeekIso)->exists()) {
                 $bloquesDia = $this->bloquesDisponiblesParaDia($profesionales, $cursorDiaFuturo);
                 $bloquesFuturos = array_filter(
@@ -618,8 +631,13 @@ class CargarDemo extends Command
     private function siguienteDiaConDisponibilidad(Carbon $fecha): Carbon
     {
         $cursor = $fecha->copy()->addDay();
+        $dias = 0;
         while (! Disponibilidad::where('dia_semana', $cursor->dayOfWeekIso)->exists()) {
             $cursor->addDay();
+            $dias++;
+            if ($dias >= 365) {
+                throw new \RuntimeException('No se encontró disponibilidad en los próximos 365 días.');
+            }
         }
 
         return $cursor;

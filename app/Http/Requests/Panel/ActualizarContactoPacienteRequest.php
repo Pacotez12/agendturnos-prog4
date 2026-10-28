@@ -22,7 +22,7 @@ class ActualizarContactoPacienteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'telefono' => ['nullable', 'string', new CelularParaguay],
+            'telefono' => ['sometimes', 'nullable', 'string', new CelularParaguay],
         ];
     }
 }

@@ -103,6 +103,10 @@ class PacienteService
      */
     public function actualizarContacto(Paciente $paciente, array $datos): void
     {
+        if (! array_key_exists('telefono', $datos)) {
+            return;
+        }
+
         $telefono = isset($datos['telefono']) && trim((string) $datos['telefono']) !== ''
             ? (Telefono::normalizar($datos['telefono']) ?? $datos['telefono'])
             : null;
