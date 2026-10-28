@@ -333,6 +333,27 @@ class SolicitarTurnoTest extends TestCase
         $this->assertSame(0, Turno::count());
     }
 
+    public function test_hora_desalineada_del_intervalo_falla_con_error(): void
+    {
+        $response = $this->actingAs($this->pacienteUser)->post('/turnos', [
+            'profesional' => $this->profesional->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-19',
+            'hora' => '09:07',
+            'paciente_id' => $this->paciente->id,
+        ]);
+
+        $response->assertRedirect(route('paciente.reservar', [
+            'profesional' => $this->profesional->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-19',
+            'para' => $this->paciente->id,
+        ]));
+        $response->assertSessionHas('error', 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
+
+        $this->assertSame(0, Turno::count());
+    }
+
     public function test_paciente_id_de_otro_paciente_falla_validacion(): void
     {
         $otroPaciente = Paciente::factory()->create();

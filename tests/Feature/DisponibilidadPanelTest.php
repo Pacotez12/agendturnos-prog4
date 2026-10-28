@@ -181,6 +181,41 @@ class DisponibilidadPanelTest extends TestCase
         $responseFinInvalido->assertSessionHasErrors();
     }
 
+    public function test_guardar_horario_con_hora_malformada_devuelve_error_de_validacion_no_500(): void
+    {
+        $profesionalUser = User::factory()->profesional()->create();
+        Profesional::factory()->create(['user_id' => $profesionalUser->id]);
+
+        $response = $this->actingAs($profesionalUser)->put(route('panel.disponibilidad.horario'), [
+            'franjas' => [
+                [
+                    'dia_semana' => 1,
+                    'hora_inicio' => '08:00',
+                    'hora_fin' => 'hora-invalida',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasErrors('franjas.0.hora_fin');
+    }
+
+    public function test_guardar_horario_con_franjas_contiguas_pasa_validacion(): void
+    {
+        Consultorio::factory()->create(['activo' => true]);
+        $profesionalUser = User::factory()->profesional()->create();
+        Profesional::factory()->create(['user_id' => $profesionalUser->id]);
+
+        $response = $this->actingAs($profesionalUser)->put(route('panel.disponibilidad.horario'), [
+            'franjas' => [
+                ['dia_semana' => 1, 'hora_inicio' => '08:00', 'hora_fin' => '12:00'],
+                ['dia_semana' => 1, 'hora_inicio' => '12:00', 'hora_fin' => '16:00'],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect(route('panel.disponibilidad'));
+    }
+
     public function test_crear_bloqueo_sin_turnos_lo_persiste(): void
     {
         $profesionalUser = User::factory()->profesional()->create();
@@ -198,6 +233,33 @@ class DisponibilidadPanelTest extends TestCase
         $this->assertDatabaseHas('bloqueos', [
             'profesional_id' => $profesional->id,
             'motivo' => 'Vacaciones de noviembre',
+        ]);
+    }
+
+    public function test_funcionario_debe_especificar_profesional_al_crear_bloqueo(): void
+    {
+        $funcionarioUser = User::factory()->funcionario()->create();
+        $profesional = Profesional::factory()->create();
+
+        // Sin profesional_id falla validación
+        $responseSinProf = $this->actingAs($funcionarioUser)->post(route('panel.disponibilidad.bloqueos.store'), [
+            'desde' => '2026-11-10 08:00',
+            'hasta' => '2026-11-12 18:00',
+            'motivo' => 'Capacitación',
+        ]);
+        $responseSinProf->assertSessionHasErrors('profesional_id');
+
+        // Con profesional_id válido pasa y crea el bloqueo
+        $responseConProf = $this->actingAs($funcionarioUser)->post(route('panel.disponibilidad.bloqueos.store'), [
+            'profesional_id' => $profesional->id,
+            'desde' => '2026-11-10 08:00',
+            'hasta' => '2026-11-12 18:00',
+            'motivo' => 'Capacitación',
+        ]);
+        $responseConProf->assertRedirect(route('panel.disponibilidad', ['profesional_id' => $profesional->id]));
+        $this->assertDatabaseHas('bloqueos', [
+            'profesional_id' => $profesional->id,
+            'motivo' => 'Capacitación',
         ]);
     }
 

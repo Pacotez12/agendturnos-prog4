@@ -146,6 +146,12 @@ class DisponibilidadService
             return false;
         }
 
+        $inicioFranja = Carbon::parse($inicioCarbon->toDateString().' '.$disp->hora_inicio, $tz);
+        $intervalo = (int) config('agenda.intervalo_minutos', 15);
+        if ($intervalo > 0 && ($inicioFranja->diffInMinutes($inicioCarbon) % $intervalo !== 0 || $inicioCarbon->second !== 0)) {
+            return false;
+        }
+
         $chocaTurnoQuery = $profesional->turnos()
             ->where('estado', '!=', EstadoTurno::Cancelado)
             ->where('inicio', '<', $finCarbon)
@@ -208,6 +214,8 @@ class DisponibilidadService
     {
         return $profesional->servicios()
             ->where('servicios.id', $servicio->id)
+            ->where('servicios.activo', true)
+            ->whereHas('especialidad', fn ($q) => $q->where('activa', true))
             ->exists();
     }
 }

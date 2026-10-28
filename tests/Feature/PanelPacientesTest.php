@@ -235,6 +235,21 @@ class PanelPacientesTest extends TestCase
         $respInvalido->assertSessionHasErrors('telefono');
     }
 
+    public function test_actualizar_contacto_sin_campo_telefono_no_borra_el_telefono_existente(): void
+    {
+        $paciente = Paciente::factory()->create([
+            'user_id' => null,
+            'documento' => '1234567',
+            'telefono' => '0981000000',
+        ]);
+
+        $response = $this->actingAs($this->funcionario)
+            ->put(route('panel.pacientes.contacto.update', $paciente), []);
+
+        $response->assertRedirect(route('panel.pacientes.show', $paciente));
+        $this->assertSame('0981000000', $paciente->fresh()->telefono);
+    }
+
     public function test_boton_nuevo_turno_preselecciona_el_paciente(): void
     {
         $paciente = Paciente::factory()->create([

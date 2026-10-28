@@ -51,11 +51,22 @@ class HorarioSemanalRequest extends FormRequest
                     continue;
                 }
 
-                $inicio = $franja['hora_inicio'];
-                $fin = $franja['hora_fin'];
+                if (! is_string($franja['hora_inicio']) || ! is_string($franja['hora_fin'])) {
+                    continue;
+                }
+
+                $inicioStr = $franja['hora_inicio'];
+                $finStr = $franja['hora_fin'];
                 $dia = (int) $franja['dia_semana'];
 
-                if ($fin <= $inicio) {
+                try {
+                    $inicio = Carbon::createFromFormat('!H:i', $inicioStr);
+                    $fin = Carbon::createFromFormat('!H:i', $finStr);
+                } catch (\Throwable) {
+                    continue;
+                }
+
+                if ($fin->lte($inicio)) {
                     $v->errors()->add("franjas.{$i}.hora_fin", 'La hora de fin debe ser posterior a la de inicio.');
 
                     continue;
@@ -63,8 +74,8 @@ class HorarioSemanalRequest extends FormRequest
 
                 $porDia[$dia][] = [
                     'indice' => $i,
-                    'inicio' => Carbon::createFromFormat('H:i', $inicio),
-                    'fin' => Carbon::createFromFormat('H:i', $fin),
+                    'inicio' => $inicio,
+                    'fin' => $fin,
                 ];
             }
 
