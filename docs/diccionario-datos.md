@@ -231,6 +231,7 @@ Tokens de la API REST (Laravel Sanctum).
 | `bloqueos`, `turnos` | `CHECK fin > inicio` | Rangos coherentes |
 | `turnos` | `CHECK estado IN (...)` y lo mismo en `historial_turnos` | Solo estados válidos |
 | `turnos` | `EXCLUDE USING gist (profesional_id WITH =, tstzrange(inicio, fin, '[)') WITH &&) WHERE estado <> 'cancelado'` | **Una profesional no puede tener dos turnos superpuestos**, aunque dos personas reserven a la vez. Los cancelados liberan el horario. Requiere la extensión `btree_gist` |
+| `turnos` | `EXCLUDE USING gist (paciente_id WITH =, tstzrange(inicio, fin, '[)') WITH &&) WHERE estado <> 'cancelado'` | **Un paciente no puede tener dos turnos superpuestos**, aunque sean con profesionales distintas. Los cancelados no cuentan. Restricción `turnos_paciente_sin_solapamiento` |
 | `turnos` | FK compuesta `(profesional_id, servicio_id)` → `profesional_servicio` | Solo se reserva un servicio que esa profesional realiza |
 | `notificaciones` | `CHECK tipo IN (...)`, `CHECK estado IN (...)` | Valores válidos |
 | `notificaciones` | `UNIQUE (turno_id, tipo, destinatario_id) WHERE turno_id IS NOT NULL` | El mismo aviso no se manda dos veces |

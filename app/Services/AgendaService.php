@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\EstadoTurno;
 use App\Enums\RolUsuario;
 use App\Exceptions\HorarioNoDisponible;
+use App\Exceptions\PacienteConTurnoEnHorario;
 use App\Exceptions\TransicionInvalida;
 use App\Models\Disponibilidad;
 use App\Models\Notificacion;
@@ -559,6 +560,10 @@ class AgendaService
                     throw new HorarioNoDisponible('El horario seleccionado no está disponible.');
                 }
 
+                if (! $this->disponibilidad->pacienteLibre($turno->paciente, $inicioCarbon, $finCarbon, $turno)) {
+                    throw PacienteConTurnoEnHorario::para($turno->paciente);
+                }
+
                 $consultorioId = $this->disponibilidad->consultorioPara($turno->profesional, $inicioCarbon);
 
                 $inicioAnterior = Carbon::parse($turno->inicio)->setTimezone($tz);
@@ -588,6 +593,10 @@ class AgendaService
                 return $turno;
             });
         } catch (QueryException $e) {
+            if ($choque = PacienteConTurnoEnHorario::siSolapamiento($e, $turno->paciente)) {
+                throw $choque;
+            }
+
             if ($horario = HorarioNoDisponible::siSolapamiento($e)) {
                 throw $horario;
             }

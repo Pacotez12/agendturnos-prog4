@@ -231,11 +231,27 @@ class CargarDemo extends Command
 
         $todosPacientes = collect([$pacienteMaria, $pacienteCarlos, $pacienteSofia, ...$pacientesCreados]);
         $pacienteIndex = 0;
-        $siguientePaciente = function () use (&$pacienteIndex, $todosPacientes): Paciente {
-            $p = $todosPacientes[$pacienteIndex % $todosPacientes->count()];
-            $pacienteIndex++;
+        // Rota los pacientes, salteando a los que ya tienen un turno en ese rango
+        // (la base no permite que un paciente tenga dos turnos superpuestos).
+        $siguientePaciente = function (Carbon $inicio, Carbon $fin) use (&$pacienteIndex, $todosPacientes): Paciente {
+            $total = $todosPacientes->count();
 
-            return $p;
+            for ($intento = 0; $intento < $total; $intento++) {
+                $p = $todosPacientes[$pacienteIndex % $total];
+                $pacienteIndex++;
+
+                $ocupado = Turno::where('paciente_id', $p->id)
+                    ->where('estado', '!=', EstadoTurno::Cancelado)
+                    ->where('inicio', '<', $fin)
+                    ->where('fin', '>', $inicio)
+                    ->exists();
+
+                if (! $ocupado) {
+                    return $p;
+                }
+            }
+
+            throw new \RuntimeException('No hay pacientes libres para el bloque de las '.$inicio->format('d/m H:i').'.');
         };
 
         $tz = config('app.timezone', 'America/Asuncion');
@@ -286,7 +302,7 @@ class CargarDemo extends Command
             $prof = $bloque['profesional'];
             $servicio = ($prof->id === $prof1->id) ? $servicioGeneral : $servicioOrtodoncia;
 
-            $this->crearTurno($siguientePaciente(), $prof, $servicio, $consultorio, $bloque['inicio'], $bloque['fin'], $estado, $funcionarioUser);
+            $this->crearTurno($siguientePaciente($bloque['inicio'], $bloque['fin']), $prof, $servicio, $consultorio, $bloque['inicio'], $bloque['fin'], $estado, $funcionarioUser);
             $clave = "{$prof->id}_{$bloque['inicio']->toIso8601String()}";
             $bloquesUsados[$clave] = true;
         }
@@ -317,7 +333,7 @@ class CargarDemo extends Command
             $prof = $bloque['profesional'];
             $servicio = ($prof->id === $prof1->id) ? $servicioGeneral : $servicioOrtodoncia;
 
-            $this->crearTurno($siguientePaciente(), $prof, $servicio, $consultorio, $bloque['inicio'], $bloque['fin'], $estado, $funcionarioUser);
+            $this->crearTurno($siguientePaciente($bloque['inicio'], $bloque['fin']), $prof, $servicio, $consultorio, $bloque['inicio'], $bloque['fin'], $estado, $funcionarioUser);
             $clave = "{$prof->id}_{$bloque['inicio']->toIso8601String()}";
             $bloquesUsados[$clave] = true;
             $futurosColocados++;
@@ -342,7 +358,7 @@ class CargarDemo extends Command
                 $prof = $bloque['profesional'];
                 $servicio = ($prof->id === $prof1->id) ? $servicioGeneral : $servicioOrtodoncia;
 
-                $this->crearTurno($siguientePaciente(), $prof, $servicio, $consultorio, $bloque['inicio'], $bloque['fin'], $estado, $funcionarioUser);
+                $this->crearTurno($siguientePaciente($bloque['inicio'], $bloque['fin']), $prof, $servicio, $consultorio, $bloque['inicio'], $bloque['fin'], $estado, $funcionarioUser);
                 $bloquesUsados[$clave] = true;
                 $futurosColocados++;
             }
@@ -387,7 +403,7 @@ class CargarDemo extends Command
                     if (! empty($pacientesObligatorios)) {
                         $pacienteTurno = array_shift($pacientesObligatorios);
                     } else {
-                        $pacienteTurno = $siguientePaciente();
+                        $pacienteTurno = $siguientePaciente($bloque['inicio'], $bloque['fin']);
                     }
 
                     // Determinar estado: asegurar al menos 3 solicitados
@@ -474,7 +490,7 @@ class CargarDemo extends Command
                         $motivoIndex++;
                     }
 
-                    $this->crearTurno($siguientePaciente(), $prof, $servicio, $consultorio, $bloque['inicio'], $bloque['fin'], $estado, $funcionarioUser, $motivo);
+                    $this->crearTurno($siguientePaciente($bloque['inicio'], $bloque['fin']), $prof, $servicio, $consultorio, $bloque['inicio'], $bloque['fin'], $estado, $funcionarioUser, $motivo);
                     $bloquesUsados[$clave] = true;
                 }
             }

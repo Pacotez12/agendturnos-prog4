@@ -10,6 +10,11 @@ class HorarioNoDisponible extends RuntimeException
 {
     public static function siSolapamiento(Throwable $e): ?self
     {
+        // El choque por paciente usa el mismo código 23P01, pero tiene su propio mensaje.
+        if (PacienteConTurnoEnHorario::siSolapamiento($e)) {
+            return null;
+        }
+
         if ($e instanceof QueryException && (
             $e->getCode() === '23P01'
             || str_contains($e->getMessage(), '23P01')

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Panel;
 use App\Enums\EstadoTurno;
 use App\Enums\RolUsuario;
 use App\Exceptions\HorarioNoDisponible;
+use App\Exceptions\PacienteConTurnoEnHorario;
 use App\Exceptions\TransicionInvalida;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Panel\AgendarTurnoOperadorRequest;
@@ -88,7 +89,7 @@ class TurnoController extends Controller
             return redirect()
                 ->route('panel.turnos.show', $turno)
                 ->with('success', 'Turno agendado y confirmado.');
-        } catch (HorarioNoDisponible) {
+        } catch (HorarioNoDisponible|PacienteConTurnoEnHorario $e) {
             return redirect()
                 ->route('panel.turnos.crear', [
                     'paciente' => $paciente->id,
@@ -96,7 +97,9 @@ class TurnoController extends Controller
                     'servicio' => $servicio->id,
                     'fecha' => $data['fecha'],
                 ])
-                ->with('error', 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
+                ->with('error', $e instanceof PacienteConTurnoEnHorario
+                    ? $e->getMessage()
+                    : 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
         }
     }
 
@@ -218,11 +221,13 @@ class TurnoController extends Controller
             $agenda->reprogramar($turno, $nuevoInicio, auth()->user());
 
             return redirect()->route('panel.turnos.show', $turno)->with('success', 'Turno reprogramado.');
-        } catch (HorarioNoDisponible) {
+        } catch (HorarioNoDisponible|PacienteConTurnoEnHorario $e) {
             return redirect()->route('panel.turnos.reprogramar', [
                 $turno,
                 'fecha' => $validated['fecha'],
-            ])->with('error', 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
+            ])->with('error', $e instanceof PacienteConTurnoEnHorario
+                ? $e->getMessage()
+                : 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
         } catch (TransicionInvalida $e) {
             return back()->with('error', $e->getMessage());
         }

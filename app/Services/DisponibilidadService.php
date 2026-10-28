@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\EstadoTurno;
 use App\Models\Disponibilidad;
+use App\Models\Paciente;
 use App\Models\Profesional;
 use App\Models\Servicio;
 use App\Models\Turno;
@@ -170,6 +171,19 @@ class DisponibilidadService
             ->exists();
 
         return ! $chocaBloqueo;
+    }
+
+    /**
+     * Indica si el paciente no tiene otro turno vigente que se superponga con el rango dado.
+     */
+    public function pacienteLibre(Paciente $paciente, CarbonInterface $inicio, CarbonInterface $fin, ?Turno $ignorar = null): bool
+    {
+        return ! Turno::where('paciente_id', $paciente->id)
+            ->where('estado', '!=', EstadoTurno::Cancelado)
+            ->where('inicio', '<', $fin)
+            ->where('fin', '>', $inicio)
+            ->when($ignorar, fn ($q) => $q->where('id', '!=', $ignorar->id))
+            ->exists();
     }
 
     /**
