@@ -24,6 +24,42 @@ class ComponentesTest extends TestCase
         $viewLink->assertSee('Ir a X');
     }
 
+    public function test_boton_primario_usa_el_token_de_hover_y_no_brand_700(): void
+    {
+        $html = (string) $this->blade('<x-button>Guardar</x-button>');
+
+        $this->assertStringContainsString('hover:bg-brand-hover', $html);
+        $this->assertStringNotContainsString('bg-brand-700', $html);
+    }
+
+    /**
+     * En modo oscuro brand-700 es un color claro (se usa como texto), así que
+     * el hover del botón principal tiene su propio token. Con texto blanco tiene
+     * que cumplir contraste AA (4.5:1) en los dos temas.
+     */
+    public function test_el_hover_del_boton_principal_cumple_contraste_con_texto_blanco(): void
+    {
+        $css = file_get_contents(resource_path('css/app.css'));
+
+        preg_match_all('/--color-brand-hover:\s*#([0-9A-Fa-f]{6})/', $css, $coincidencias);
+        $this->assertCount(2, $coincidencias[1], 'brand-hover tiene que estar definido en el tema claro y en .dark');
+
+        $luminancia = function (string $hex): float {
+            $canales = array_map(function (string $par) {
+                $c = hexdec($par) / 255;
+
+                return $c <= 0.03928 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4;
+            }, str_split($hex, 2));
+
+            return 0.2126 * $canales[0] + 0.7152 * $canales[1] + 0.0722 * $canales[2];
+        };
+
+        foreach ($coincidencias[1] as $hex) {
+            $contraste = 1.05 / ($luminancia($hex) + 0.05);
+            $this->assertGreaterThanOrEqual(4.5, $contraste, "#{$hex} con texto blanco tiene contraste {$contraste}:1");
+        }
+    }
+
     public function test_boton_variantes_y_pill(): void
     {
         $viewSecondary = $this->blade('<x-button variant="secondary">Cancelar</x-button>');
