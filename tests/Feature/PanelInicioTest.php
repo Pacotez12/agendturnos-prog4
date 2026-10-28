@@ -133,6 +133,23 @@ class PanelInicioTest extends TestCase
         $responseProf1->assertSee('Buen día, Ana González');
     }
 
+    public function test_los_indicadores_usan_singular_cuando_el_conteo_es_uno(): void
+    {
+        // Un solo turno en la semana, atendido hoy
+        $this->crearTurno('2026-10-23 08:00:00', '2026-10-23 08:30:00', EstadoTurno::Atendido);
+
+        $html = $this->actingAs($this->profesionalUser1)->get('/panel')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('/\b1 ya atendido\b(?!s)/', $html);
+        $this->assertDoesNotMatchRegularExpression('/\b1 ya atendidos\b/', $html);
+        $this->assertDoesNotMatchRegularExpression('/de 1 confirmados\b/', $html);
+
+        // Con dos se mantiene el plural
+        $this->crearTurno('2026-10-23 08:30:00', '2026-10-23 09:00:00', EstadoTurno::Atendido);
+
+        $this->actingAs($this->profesionalUser1)->get('/panel')->assertSee('2 ya atendidos');
+    }
+
     public function test_saludos_segun_la_hora(): void
     {
         // 09:00 -> Buen día

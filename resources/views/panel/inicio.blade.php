@@ -33,7 +33,7 @@
                     {{ $indicadores['turnosHoy'] }}
                 </p>
                 <p class="text-xs text-ink-500 mt-1">
-                    {{ $indicadores['atendidosHoy'] }} ya atendidos
+                    {{ $indicadores['atendidosHoy'] }} ya {{ $indicadores['atendidosHoy'] === 1 ? 'atendido' : 'atendidos' }}
                 </p>
             </x-card>
 
@@ -73,7 +73,7 @@
                     {{ $indicadores['atendidosSemana'] }}
                 </p>
                 <p class="text-xs text-ink-500 mt-1">
-                    de {{ $indicadores['confirmadosSemana'] }} confirmados
+                    de {{ $indicadores['confirmadosSemana'] }} {{ $indicadores['confirmadosSemana'] === 1 ? 'confirmado' : 'confirmados' }}
                 </p>
             </x-card>
 
