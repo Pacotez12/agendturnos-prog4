@@ -39,6 +39,7 @@ class LimitesYAbusoTest extends TestCase
         RateLimiter::clear('registro');
         RateLimiter::clear('recuperar-contrasena');
         RateLimiter::clear('solicitar-turno');
+        RateLimiter::clear('familia');
 
         Carbon::setTestNow(Carbon::parse('2026-10-18 12:00:00', config('app.timezone')));
 
@@ -76,6 +77,7 @@ class LimitesYAbusoTest extends TestCase
 
     protected function tearDown(): void
     {
+        Cache::flush();
         Carbon::setTestNow();
         parent::tearDown();
     }
@@ -343,6 +345,60 @@ class LimitesYAbusoTest extends TestCase
             'fecha' => '2026-10-19',
             'hora' => '09:00',
             'paciente_id' => $this->paciente->id,
+        ])->assertStatus(429);
+    }
+
+    public function test_throttle_mi_familia_bloquea_al_onceavo_intento(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $this->actingAs($this->pacienteUser)->post('/mi-familia', [
+                'nombre' => 'Hijo'.$i,
+                'apellido' => 'Rojas',
+                'tipo_documento' => 'CI',
+                'documento' => '800000'.$i,
+                'fecha_nacimiento' => '2020-01-01',
+            ]);
+        }
+
+        // 11vo intento del mismo usuario
+        $this->actingAs($this->pacienteUser)->post('/mi-familia', [
+            'nombre' => 'Hijo11',
+            'apellido' => 'Rojas',
+            'tipo_documento' => 'CI',
+            'documento' => '8000011',
+            'fecha_nacimiento' => '2020-01-01',
+        ])->assertStatus(429);
+    }
+
+    public function test_throttle_mi_familia_put_bloquea_al_onceavo_intento(): void
+    {
+        $familiar = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $this->pacienteUser->id,
+            'tipo_documento' => 'CI',
+            'documento' => '8999999',
+            'nombre' => 'Lucas',
+            'apellido' => 'Rojas',
+            'fecha_nacimiento' => '2020-01-01',
+        ]);
+
+        for ($i = 0; $i < 10; $i++) {
+            $this->actingAs($this->pacienteUser)->put("/mi-familia/{$familiar->id}", [
+                'nombre' => 'Lucas'.$i,
+                'apellido' => 'Rojas',
+                'tipo_documento' => 'CI',
+                'documento' => '8999999',
+                'fecha_nacimiento' => '2020-01-01',
+            ]);
+        }
+
+        // 11vo intento
+        $this->actingAs($this->pacienteUser)->put("/mi-familia/{$familiar->id}", [
+            'nombre' => 'Lucas11',
+            'apellido' => 'Rojas',
+            'tipo_documento' => 'CI',
+            'documento' => '8999999',
+            'fecha_nacimiento' => '2020-01-01',
         ])->assertStatus(429);
     }
 }

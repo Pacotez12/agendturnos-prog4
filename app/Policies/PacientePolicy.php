@@ -30,4 +30,18 @@ class PacientePolicy
     {
         return $this->view($user, $paciente);
     }
+
+    public function agendarPara(User $user, Paciente $paciente): bool
+    {
+        if ($user->rol === RolUsuario::Funcionario) {
+            return true;
+        }
+
+        if ($user->rol === RolUsuario::Profesional && $user->profesional) {
+            return ! $paciente->turnos()->exists()
+                || $paciente->turnos()->where('profesional_id', $user->profesional->id)->exists();
+        }
+
+        return false;
+    }
 }

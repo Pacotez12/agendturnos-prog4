@@ -95,16 +95,17 @@ flowchart LR
 | `app` | `php:8.4-fpm-alpine` | 9000 | — | Ejecuta Laravel |
 | `queue` | `php:8.4-fpm-alpine` | — | — | Worker de colas (`php artisan queue:work --tries=3`) |
 | `scheduler` | `php:8.4-fpm-alpine` | — | — | Ejecución periódica de tareas (`php artisan schedule:work`) |
-| `haproxy` | `haproxy:3.0-alpine` | 80 / 8404 | **8000** (`HAPROXY_PORT_FORWARD`) / **8404** | Balancea entre `web` (A) y `apache` (B); Stats en el 8404 (ver 4.2) |
+| `haproxy` | `haproxy:3.0-alpine` | 80 / 8404 | **8000** (`HAPROXY_PORT_FORWARD`) / **127.0.0.1:8404** | Balancea entre `web` (A) y `apache` (B); Stats en el 8404 (ver 4.2) |
 | `apache` | `php:8.4-apache` | 80 | **8081** | Arquitectura B: Apache + mod_php con el mismo código, la misma base y el mismo Redis que A |
-| `db` | `postgres:16-alpine` | 5432 | **5436** | Base `agendturnos` |
-| `redis` | `redis:7-alpine` | 6379 | **6379** | Sesiones, caché y colas |
-| `mailpit` | `axllent/mailpit` | 1025 / 8025 | **8025** | Atrapa los correos de desarrollo |
+| `db` | `postgres:16-alpine` | 5432 | **127.0.0.1:5436** | Base `agendturnos` |
+| `redis` | `redis:7-alpine` | 6379 | **127.0.0.1:6379** | Sesiones, caché y colas |
+| `mailpit` | `axllent/mailpit` | 1025 / 8025 | **127.0.0.1:8025** | Atrapa los correos de desarrollo |
 | `node` | `node:24-alpine` | — | — | Compila Tailwind y Alpine.js con Vite (`npm run build -- --watch`) hacia `public/build` |
 
 **Recorrido de una petición:** el navegador llama a `web:80`. Nginx sirve el archivo si existe en `public/`; si no, deriva a `index.php`, que va a `app:9000` por FastCGI. Laravel consulta `db` y lee o escribe la sesión en `redis`.
 
 **Detalles:**
+- Los servicios internos (`db`, `redis`, `mailpit` y las estadísticas de `haproxy` en `:8404`) publican sus puertos exclusivamente en `127.0.0.1` en vez de `0.0.0.0`, impidiendo que queden expuestos a otros dispositivos de la red local.
 - El código se monta con `.:/var/www/html:z`; el sufijo `:z` es para SELinux. En `web` el montaje es de solo lectura.
 - Los datos persisten en los volúmenes `pgdata` y `redisdata`.
 - El usuario `www-data` del contenedor usa el UID 1000, igual que el del host.
@@ -302,6 +303,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-28 | Seguridad y control de acceso (SCRUM-70): enlace de restablecimiento de contraseña generado con el origen configurado en 'app.url'; servicios internos (PostgreSQL, Redis, Mailpit y estadísticas de HAProxy) restringidos a loopback (127.0.0.1); control de acceso en agendamiento del panel para el rol profesional restringido a pacientes propios o sin turnos previos ('agendarPara' en PacientePolicy y validación en request y controlador); rate limiting (limiter 'familia' a 10 req/min por usuario) en creación y actualización de familiares a cargo. |
 | 2026-10-28 | Formulario de reserva (SCRUM-69): al rechazar una solicitud por solapamiento de horario (`PacienteConTurnoEnHorario`) u horario ocupado, la redirección de vuelta a la selección de horario conserva al paciente preseleccionado (familiar o titular) mediante el parámetro `para`. |
 | 2026-10-28 | Correcciones del informe de QA del 28/10 (SCRUM-69): un paciente ya no puede tener dos turnos superpuestos (restricción `turnos_paciente_sin_solapamiento` y validación en reservar y reprogramar; la migración se detiene y lista los pares si encuentra datos en conflicto). `demo:cargar` saltea pacientes ocupados al repartir turnos. Reprogramar a la misma hora se rechaza sin historial ni aviso, y la pantalla muestra ese horario como "Actual" (`<x-slot-picker>` acepta `actual`). Botón principal en modo oscuro: el hover usa el token nuevo `brand-hover` en lugar de `brand-700`, con contraste AA medido por un test. Detalles: singular en los indicadores del panel ("1 ya atendido"); el error de login, recuperar y restablecer contraseña aparece una sola vez, debajo del campo; las páginas de error cargan Open Sans y Quicksand con `@fonts` (sin depender del build); el botón "Solicitar turno" va a la derecha como en el panel. Los tests compilan las vistas en `storage/framework/testing/views` (`VIEW_COMPILED_PATH` en `phpunit.xml`) para no chocar con las de la app, que son de `www-data`. |
 | 2026-10-25 | Plantillas de WhatsApp para turnos propios (SCRUM-43): primer nombre de pila en el saludo para evitar redundancias ("Hola María, confirmamos..."); plantillas específicas de 4 parámetros (`turno_confirmado_propio`, `turno_cancelado_propio`, `turno_reprogramado_propio`, `turno_recordatorio_propio`) cuando el turno pertenece al titular, manteniendo las plantillas de 5 parámetros para familiares o ante ausencia de plantilla propia en configuración. |

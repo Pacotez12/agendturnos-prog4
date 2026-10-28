@@ -44,15 +44,26 @@ class TurnoController extends Controller
     public function crear(Request $request, ReservaService $reserva): View
     {
         $user = $request->user();
+        if ($user->rol === RolUsuario::Profesional && ! $user->profesional) {
+            abort(403);
+        }
+
         $q = trim((string) $request->input('q'));
         $pacientes = collect();
         if (mb_strlen($q) >= 3) {
-            $pacientes = Paciente::buscar($q, 10)->with('responsable.paciente')->get();
+            $pacientes = Paciente::buscar($q, 10)
+                ->with('responsable.paciente')
+                ->get()
+                ->filter(fn (Paciente $paciente) => $user->can('agendarPara', $paciente))
+                ->values();
         }
 
         $pacienteSeleccionado = null;
         if ($request->filled('paciente')) {
             $pacienteSeleccionado = Paciente::with(['responsable.paciente'])->find($request->input('paciente'));
+            if ($pacienteSeleccionado) {
+                Gate::authorize('agendarPara', $pacienteSeleccionado);
+            }
         }
 
         $profesionalId = $user->rol === RolUsuario::Profesional
@@ -77,6 +88,7 @@ class TurnoController extends Controller
     {
         $data = $request->validated();
         $paciente = Paciente::findOrFail($data['paciente_id']);
+        Gate::authorize('agendarPara', $paciente);
         $profesional = Profesional::findOrFail($data['profesional']);
         $servicio = Servicio::findOrFail($data['servicio']);
 

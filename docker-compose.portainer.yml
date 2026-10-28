@@ -78,7 +78,7 @@ services:
     restart: unless-stopped
     ports:
       - "${HAPROXY_PORT_FORWARD:-8000}:80"
-      - "8404:8404"
+      - "127.0.0.1:8404:8404"
     depends_on:
       - web
       - apache
@@ -91,7 +91,7 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-agendturnos}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-agendturnos}
     ports:
-      - "${DB_PORT_FORWARD:-5436}:5432"
+      - "127.0.0.1:${DB_PORT_FORWARD:-5436}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -104,7 +104,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT_FORWARD:-6379}:6379"
+      - "127.0.0.1:${REDIS_PORT_FORWARD:-6379}:6379"
     volumes:
       - redisdata:/data
     healthcheck:
@@ -117,7 +117,7 @@ services:
     image: axllent/mailpit:latest
     restart: unless-stopped
     ports:
-      - "8025:8025"
+      - "127.0.0.1:8025:8025"
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8025/api/v1/info || exit 1"]
       interval: 5s

@@ -29,10 +29,10 @@ class RestablecerContrasena extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $url = url(route('password.reset', [
+        $url = rtrim(config('app.url'), '/').route('password.reset', [
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
-        ], false));
+        ], false);
 
         return (new MailMessage)
             ->subject('Recuperá tu contraseña')

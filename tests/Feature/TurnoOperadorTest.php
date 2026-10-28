@@ -385,4 +385,187 @@ class TurnoOperadorTest extends TestCase
         $resProf->assertOk();
         $resProf->assertSee('Nuevo turno');
     }
+
+    public function test_profesional_no_puede_agendar_para_paciente_ajeno_recibe_403(): void
+    {
+        $pacienteAjeno = Paciente::factory()->create([
+            'nombre' => 'Pedro',
+            'apellido' => 'Pérez',
+            'documento' => '3334445',
+        ]);
+
+        Turno::factory()->create([
+            'paciente_id' => $pacienteAjeno->id,
+            'profesional_id' => $this->profesional2->id,
+            'servicio_id' => $this->servicio->id,
+            'consultorio_id' => $this->consultorio->id,
+            'inicio' => '2026-10-19 09:00:00',
+            'fin' => '2026-10-19 09:30:00',
+            'estado' => EstadoTurno::Confirmado,
+        ]);
+
+        $response = $this->actingAs($this->profesionalUser1)
+            ->post(route('panel.turnos.store'), [
+                'paciente_id' => $pacienteAjeno->id,
+                'profesional' => $this->profesional1->id,
+                'servicio' => $this->servicio->id,
+                'fecha' => '2026-10-23',
+                'hora' => '10:00',
+            ]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_profesional_puede_agendar_para_paciente_propio_y_para_paciente_nuevo(): void
+    {
+        $pacientePropio = Paciente::factory()->create();
+        Turno::factory()->create([
+            'paciente_id' => $pacientePropio->id,
+            'profesional_id' => $this->profesional1->id,
+            'servicio_id' => $this->servicio->id,
+            'consultorio_id' => $this->consultorio->id,
+            'inicio' => '2026-10-19 08:00:00',
+            'fin' => '2026-10-19 08:30:00',
+            'estado' => EstadoTurno::Atendido,
+        ]);
+
+        $responsePropio = $this->actingAs($this->profesionalUser1)
+            ->post(route('panel.turnos.store'), [
+                'paciente_id' => $pacientePropio->id,
+                'profesional' => $this->profesional1->id,
+                'servicio' => $this->servicio->id,
+                'fecha' => '2026-10-23',
+                'hora' => '10:00',
+            ]);
+        $responsePropio->assertRedirect();
+        $responsePropio->assertSessionHas('success');
+
+        $pacienteNuevo = Paciente::factory()->create();
+        $responseNuevo = $this->actingAs($this->profesionalUser1)
+            ->post(route('panel.turnos.store'), [
+                'paciente_id' => $pacienteNuevo->id,
+                'profesional' => $this->profesional1->id,
+                'servicio' => $this->servicio->id,
+                'fecha' => '2026-10-23',
+                'hora' => '10:30',
+            ]);
+        $responseNuevo->assertRedirect();
+        $responseNuevo->assertSessionHas('success');
+    }
+
+    public function test_funcionario_puede_agendar_para_cualquier_paciente(): void
+    {
+        $pacienteConTurno = Paciente::factory()->create();
+        Turno::factory()->create([
+            'paciente_id' => $pacienteConTurno->id,
+            'profesional_id' => $this->profesional2->id,
+            'servicio_id' => $this->servicio->id,
+            'consultorio_id' => $this->consultorio->id,
+            'inicio' => '2026-10-19 09:00:00',
+            'fin' => '2026-10-19 09:30:00',
+            'estado' => EstadoTurno::Confirmado,
+        ]);
+
+        $response = $this->actingAs($this->funcionario)
+            ->post(route('panel.turnos.store'), [
+                'paciente_id' => $pacienteConTurno->id,
+                'profesional' => $this->profesional1->id,
+                'servicio' => $this->servicio->id,
+                'fecha' => '2026-10-23',
+                'hora' => '11:00',
+            ]);
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+    }
+
+    public function test_busqueda_de_crear_no_lista_pacientes_ajenos_al_profesional(): void
+    {
+        $pacienteAjeno = Paciente::factory()->create([
+            'nombre' => 'Ana',
+            'apellido' => 'Méndez Ajena',
+            'documento' => '1111111',
+        ]);
+        Turno::factory()->create([
+            'paciente_id' => $pacienteAjeno->id,
+            'profesional_id' => $this->profesional2->id,
+            'servicio_id' => $this->servicio->id,
+            'consultorio_id' => $this->consultorio->id,
+            'inicio' => '2026-10-19 09:00:00',
+            'fin' => '2026-10-19 09:30:00',
+            'estado' => EstadoTurno::Confirmado,
+        ]);
+
+        $pacientePropio = Paciente::factory()->create([
+            'nombre' => 'Beto',
+            'apellido' => 'Méndez Propio',
+            'documento' => '2222222',
+        ]);
+        Turno::factory()->create([
+            'paciente_id' => $pacientePropio->id,
+            'profesional_id' => $this->profesional1->id,
+            'servicio_id' => $this->servicio->id,
+            'consultorio_id' => $this->consultorio->id,
+            'inicio' => '2026-10-19 08:00:00',
+            'fin' => '2026-10-19 08:30:00',
+            'estado' => EstadoTurno::Atendido,
+        ]);
+
+        $pacienteNuevo = Paciente::factory()->create([
+            'nombre' => 'Celia',
+            'apellido' => 'Méndez Nueva',
+            'documento' => '3333333',
+        ]);
+
+        $resProf = $this->actingAs($this->profesionalUser1)
+            ->get(route('panel.turnos.crear', ['q' => 'Méndez']));
+        $resProf->assertOk();
+        $resProf->assertSee('Méndez Propio');
+        $resProf->assertSee('Méndez Nueva');
+        $resProf->assertDontSee('Méndez Ajena');
+
+        $resFunc = $this->actingAs($this->funcionario)
+            ->get(route('panel.turnos.crear', ['q' => 'Méndez']));
+        $resFunc->assertOk();
+        $resFunc->assertSee('Méndez Propio');
+        $resFunc->assertSee('Méndez Nueva');
+        $resFunc->assertSee('Méndez Ajena');
+    }
+
+    public function test_profesional_con_paciente_preseleccionado_ajeno_recibe_403(): void
+    {
+        $pacienteAjeno = Paciente::factory()->create([
+            'nombre' => 'Pedro',
+            'apellido' => 'Pérez',
+            'documento' => '3334445',
+        ]);
+        Turno::factory()->create([
+            'paciente_id' => $pacienteAjeno->id,
+            'profesional_id' => $this->profesional2->id,
+            'servicio_id' => $this->servicio->id,
+            'consultorio_id' => $this->consultorio->id,
+            'inicio' => '2026-10-19 09:00:00',
+            'fin' => '2026-10-19 09:30:00',
+            'estado' => EstadoTurno::Confirmado,
+        ]);
+
+        $res = $this->actingAs($this->profesionalUser1)
+            ->get(route('panel.turnos.crear', ['paciente' => $pacienteAjeno->id]));
+        $res->assertForbidden();
+    }
+
+    public function test_usuario_profesional_sin_modelo_profesional_recibe_403(): void
+    {
+        $profesionalHuerfano = User::factory()->profesional()->create();
+
+        $response = $this->actingAs($profesionalHuerfano)
+            ->post(route('panel.turnos.store'), [
+                'paciente_id' => $this->paciente->id,
+                'profesional' => $this->profesional1->id,
+                'servicio' => $this->servicio->id,
+                'fecha' => '2026-10-23',
+                'hora' => '09:00',
+            ]);
+
+        $response->assertForbidden();
+    }
 }

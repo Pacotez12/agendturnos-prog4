@@ -49,8 +49,8 @@ Route::middleware(['auth', 'rol:paciente'])->group(function () {
     Route::post('/turnos/{turno}/cancelar', [TurnoController::class, 'cancelar'])->name('paciente.turnos.cancelar');
 
     Route::get('/mi-familia', [FamiliaController::class, 'index'])->name('paciente.familia');
-    Route::post('/mi-familia', [FamiliaController::class, 'store'])->name('paciente.familia.store');
-    Route::put('/mi-familia/{paciente}', [FamiliaController::class, 'update'])->name('paciente.familia.update');
+    Route::post('/mi-familia', [FamiliaController::class, 'store'])->middleware('throttle:familia')->name('paciente.familia.store');
+    Route::put('/mi-familia/{paciente}', [FamiliaController::class, 'update'])->middleware('throttle:familia')->name('paciente.familia.update');
 });
 
 Route::get('/servicios', [CatalogoController::class, 'index'])->name('servicios.catalogo');
