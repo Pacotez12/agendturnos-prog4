@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\EstadoTurno;
 use App\Enums\RolUsuario;
 use App\Exceptions\HorarioNoDisponible;
+use App\Exceptions\PacienteConTurnoEnHorario;
 use App\Exceptions\TransicionInvalida;
 use App\Models\Disponibilidad;
 use App\Models\Notificacion;
@@ -553,10 +554,18 @@ class AgendaService
         $inicioCarbon = Carbon::parse($nuevoInicio)->setTimezone($tz);
         $finCarbon = $inicioCarbon->copy()->addMinutes((int) $turno->servicio->duracion_min);
 
+        if ($inicioCarbon->equalTo($turno->inicio)) {
+            throw new TransicionInvalida('El turno ya está en ese horario. Elegí otro.');
+        }
+
         try {
             return DB::transaction(function () use ($turno, $inicioCarbon, $finCarbon, $usuario, $tz) {
                 if (! $this->disponibilidad->estaLibre($turno->profesional, $turno->servicio, $inicioCarbon, $turno)) {
                     throw new HorarioNoDisponible('El horario seleccionado no está disponible.');
+                }
+
+                if (! $this->disponibilidad->pacienteLibre($turno->paciente, $inicioCarbon, $finCarbon, $turno)) {
+                    throw PacienteConTurnoEnHorario::para($turno->paciente);
                 }
 
                 $consultorioId = $this->disponibilidad->consultorioPara($turno->profesional, $inicioCarbon);
@@ -588,6 +597,10 @@ class AgendaService
                 return $turno;
             });
         } catch (QueryException $e) {
+            if ($choque = PacienteConTurnoEnHorario::siSolapamiento($e, $turno->paciente)) {
+                throw $choque;
+            }
+
             if ($horario = HorarioNoDisponible::siSolapamiento($e)) {
                 throw $horario;
             }

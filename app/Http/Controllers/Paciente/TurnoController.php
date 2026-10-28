@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Paciente;
 
 use App\Exceptions\HorarioNoDisponible;
+use App\Exceptions\PacienteConTurnoEnHorario;
 use App\Exceptions\TransicionInvalida;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SolicitarTurnoRequest;
@@ -56,12 +57,15 @@ class TurnoController extends Controller
             );
 
             return redirect()->route('paciente.turnos.show', $turno);
-        } catch (HorarioNoDisponible) {
+        } catch (HorarioNoDisponible|PacienteConTurnoEnHorario $e) {
             return redirect()->route('paciente.reservar', [
                 'profesional' => $profesional->id,
                 'servicio' => $servicio->id,
                 'fecha' => $request->input('fecha'),
-            ])->with('error', 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
+                'para' => $paciente->id,
+            ])->with('error', $e instanceof PacienteConTurnoEnHorario
+                ? $e->getMessage()
+                : 'Ese horario acaba de ser tomado. Elegí otro, ya actualizamos la lista.');
         }
     }
 

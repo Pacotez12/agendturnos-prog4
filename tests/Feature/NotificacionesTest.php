@@ -569,8 +569,8 @@ class NotificacionesTest extends TestCase
             'profesional_id' => $prof2->id,
             'servicio_id' => $this->servicio->id,
             'consultorio_id' => $this->consultorio->id,
-            'inicio' => '2026-10-23 09:00:00',
-            'fin' => '2026-10-23 09:30:00',
+            'inicio' => '2026-10-23 11:00:00',
+            'fin' => '2026-10-23 11:30:00',
             'estado' => EstadoTurno::Confirmado,
         ]);
         $notifRec = Notificacion::create([
@@ -583,11 +583,11 @@ class NotificacionesTest extends TestCase
         $avisoRec = new AvisoTurno($notifRec);
         $mailRec = $avisoRec->toMail($this->pacienteUser);
 
-        $this->assertSame('Recordatorio: Vie 23 oct a las 09:00 en Glow Dental', $mailRec->subject);
+        $this->assertSame('Recordatorio: Vie 23 oct a las 11:00 en Glow Dental', $mailRec->subject);
         $renderedRec = $mailRec->render();
         $this->assertStringContainsString('Te esperamos Vie 23 oct', $renderedRec);
         $this->assertStringContainsString('te recordamos tu turno.', $renderedRec);
-        $this->assertStringContainsString('Viernes 23 de octubre, 09:00', $renderedRec);
+        $this->assertStringContainsString('Viernes 23 de octubre, 11:00', $renderedRec);
         $this->assertStringContainsString('Ver mi turno', $renderedRec);
         $this->assertStringContainsString('+595 982 774586', $renderedRec);
     }

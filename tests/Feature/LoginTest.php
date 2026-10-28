@@ -101,6 +101,21 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_el_error_de_credenciales_se_muestra_una_sola_vez(): void
+    {
+        $html = $this->from('/login')
+            ->followingRedirects()
+            ->post('/login', [
+                'email' => 'nadie@example.com',
+                'password' => 'incorrecto123',
+            ])
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, substr_count($html, 'El correo o la contraseña no son correctos.'));
+        $this->assertStringContainsString('aria-describedby="email-error"', $html);
+    }
+
     public function test_bloqueo_por_rate_limit_al_sexto_intento_fallido(): void
     {
         User::factory()->paciente()->create([

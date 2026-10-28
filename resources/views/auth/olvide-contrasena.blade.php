@@ -15,11 +15,6 @@
             </x-alert>
         @endif
 
-        @if ($errors->any())
-            <x-alert type="error" class="mb-4">
-                {{ $errors->first('email') ?: 'Revisá los datos ingresados.' }}
-            </x-alert>
-        @endif
 
         <form action="{{ route('password.email') }}" method="POST" class="space-y-4">
             @csrf

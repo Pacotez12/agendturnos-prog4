@@ -10,6 +10,8 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBF7F2">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171311">
+    {{-- Fuentes de la app si el build existe; si no, queda la fuente del sistema --}}
+    {!! rescue(fn () => app(\Illuminate\Foundation\Vite::class)->fonts(), '', false) !!}
     <style>
         :root {
             --bg-surface: #F7F6F4;
@@ -48,7 +50,7 @@
         body {
             background-color: var(--bg-surface);
             color: var(--text-ink-900);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -93,6 +95,7 @@
             margin-bottom: 1rem;
         }
         h1 {
+            font-family: 'Quicksand', 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--text-ink-900);

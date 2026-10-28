@@ -38,7 +38,8 @@ Tokens definidos una sola vez en `resources/css/app.css` (bloque `@theme` de Tai
 
 | Token | Valor | Uso |
 |---|---|---|
-| `brand-700` | `#7A3F22` | Hover del botón principal, texto de acento sobre fondos claros de marca |
+| `brand-700` | `#7A3F22` | Texto de acento sobre fondos claros de marca. En modo oscuro pasa a `#F0CFAE` (claro): no usarlo como fondo con texto blanco |
+| `brand-hover` | `#7A3F22` (oscuro: `#A85C37`) | Hover y estado activo del botón principal. Contraste con blanco 8.2:1 y 4.9:1 |
 | `brand-600` | `#995432` (Saddle Brown) | Botón principal, selección, foco, enlaces. Contraste con blanco 5.7:1 |
 | `brand-300` | `#D8B78A` (Burlywood) | Fondos y acentos decorativos, avatares. **Nunca texto sobre blanco** (1.9:1) |
 | `brand-100` | `#F3E6D3` | Fondo de elementos seleccionados del lado del paciente |

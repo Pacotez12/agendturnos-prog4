@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\EstadoTurno;
 use App\Exceptions\HorarioNoDisponible;
+use App\Exceptions\PacienteConTurnoEnHorario;
 use App\Models\Paciente;
 use App\Models\Profesional;
 use App\Models\Servicio;
@@ -138,6 +139,10 @@ class ReservaService
                     throw new HorarioNoDisponible('El horario seleccionado no está disponible.');
                 }
 
+                if (! $this->disponibilidad->pacienteLibre($paciente, $inicioCarbon, $finCarbon)) {
+                    throw PacienteConTurnoEnHorario::para($paciente);
+                }
+
                 $consultorioId = $this->disponibilidad->consultorioPara($profesional, $inicioCarbon);
 
                 $turno = Turno::create([
@@ -160,6 +165,10 @@ class ReservaService
                 return $turno;
             });
         } catch (QueryException $e) {
+            if ($choque = PacienteConTurnoEnHorario::siSolapamiento($e, $paciente)) {
+                throw $choque;
+            }
+
             if ($horario = HorarioNoDisponible::siSolapamiento($e)) {
                 throw $horario;
             }

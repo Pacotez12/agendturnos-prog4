@@ -8,6 +8,8 @@
 @theme {
     --color-brand-700: #7A3F22;
     --color-brand-600: #995432;
+    /* Hover del botón principal (texto blanco). No usar brand-700: en modo oscuro es un color claro. */
+    --color-brand-hover: #7A3F22;
     --color-brand-300: #D8B78A;
     --color-brand-100: #F3E6D3;
     --color-brand-text: #995432;
@@ -52,6 +54,7 @@
     --color-cream-50: #1A1512;
     --color-brand-100: #3A2A20;
     --color-brand-700: #F0CFAE;
+    --color-brand-hover: #A85C37;
     --color-brand-text: #E0A47C;
     --color-danger-700: #F87171;
 
