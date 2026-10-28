@@ -280,6 +280,44 @@ class EstadosTurnoTest extends TestCase
         ]);
     }
 
+    public function test_reprogramar_a_la_misma_hora_falla_sin_historial_ni_aviso(): void
+    {
+        $turno = $this->crearTurno($this->profesional1, '2026-10-19 09:00:00', '2026-10-19 09:30:00', EstadoTurno::Confirmado);
+        $historialAntes = $turno->historial()->count();
+
+        $response = $this->actingAs($this->profesionalUser1)
+            ->from(route('panel.turnos.reprogramar', $turno))
+            ->put(route('panel.turnos.reprogramar.update', $turno), [
+                'fecha' => '2026-10-19',
+                'hora' => '09:00',
+            ]);
+
+        $response->assertRedirect(route('panel.turnos.reprogramar', $turno));
+        $response->assertSessionHas('error', 'El turno ya está en ese horario. Elegí otro.');
+        $this->assertSame($historialAntes, $turno->historial()->count());
+        $this->assertDatabaseMissing('notificaciones', ['turno_id' => $turno->id, 'tipo' => 'reprogramacion']);
+    }
+
+    public function test_la_pantalla_de_reprogramar_marca_el_horario_actual(): void
+    {
+        $turno = $this->crearTurno($this->profesional1, '2026-10-19 09:00:00', '2026-10-19 09:30:00', EstadoTurno::Confirmado);
+
+        $html = $this->actingAs($this->profesionalUser1)
+            ->get(route('panel.turnos.reprogramar', [$turno, 'fecha' => '2026-10-19']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('/value="09:00"\s+disabled/', $html);
+        $this->assertStringContainsString('09:00, horario actual del turno', $html);
+
+        // Otro día, la misma hora se puede elegir
+        $otroDia = $this->actingAs($this->profesionalUser1)
+            ->get(route('panel.turnos.reprogramar', [$turno, 'fecha' => '2026-10-23']))
+            ->getContent();
+
+        $this->assertDoesNotMatchRegularExpression('/value="09:00"\s+disabled/', $otroDia);
+    }
+
     public function test_reprogramar_permite_correr_turno_15_minutos_sobre_si_mismo(): void
     {
         // Turno de 09:00 a 09:30. Se mueve a 09:15 a 09:45 (se superpone con sus propios 15 min)

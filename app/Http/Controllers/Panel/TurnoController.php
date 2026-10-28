@@ -198,6 +198,17 @@ class TurnoController extends Controller
 
         $horarios = $disponibilidad->franjasLibres($turno->profesional, $turno->servicio, $fecha, $turno);
 
+        // El horario que ya tiene el turno se muestra como "Actual" y no se puede elegir
+        $inicioActual = $turno->inicio->copy()->timezone($tz);
+        if ($inicioActual->isSameDay($fecha)) {
+            $horarios = array_map(
+                fn (array $franja) => $franja['hora'] === $inicioActual->format('H:i')
+                    ? [...$franja, 'libre' => false, 'actual' => true]
+                    : $franja,
+                $horarios
+            );
+        }
+
         return view('panel.turnos.reprogramar', [
             'turno' => $turno,
             'fecha' => $fecha,

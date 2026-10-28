@@ -44,6 +44,23 @@ class ComponentesInteractivosTest extends TestCase
         $view->assertSee('name="horario"', false);
     }
 
+    public function test_slot_picker_marca_el_horario_actual_sin_tacharlo_ni_dejarlo_elegir(): void
+    {
+        $horarios = [
+            ['hora' => '09:00', 'libre' => false, 'actual' => true],
+            ['hora' => '09:30', 'libre' => true],
+        ];
+
+        $html = (string) $this->blade('<x-slot-picker name="hora" :horarios="$horarios" />', [
+            'horarios' => $horarios,
+        ]);
+
+        $this->assertMatchesRegularExpression('/value="09:00"\s+disabled/', $html);
+        $this->assertStringContainsString('Actual', $html);
+        $this->assertStringContainsString('aria-label="09:00, horario actual del turno"', $html);
+        $this->assertSame(0, substr_count($html, 'line-through'));
+    }
+
     public function test_modal(): void
     {
         $view = $this->blade(

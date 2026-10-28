@@ -554,6 +554,10 @@ class AgendaService
         $inicioCarbon = Carbon::parse($nuevoInicio)->setTimezone($tz);
         $finCarbon = $inicioCarbon->copy()->addMinutes((int) $turno->servicio->duracion_min);
 
+        if ($inicioCarbon->equalTo($turno->inicio)) {
+            throw new TransicionInvalida('El turno ya está en ese horario. Elegí otro.');
+        }
+
         try {
             return DB::transaction(function () use ($turno, $inicioCarbon, $finCarbon, $usuario, $tz) {
                 if (! $this->disponibilidad->estaLibre($turno->profesional, $turno->servicio, $inicioCarbon, $turno)) {
