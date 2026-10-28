@@ -142,14 +142,14 @@
                         </x-card>
                     @endif
 
-                    <div x-show="horaSeleccionada" x-cloak style="display: none;">
+                    <div x-show="horaSeleccionada" x-cloak style="display: none;" class="flex justify-end">
                         <x-button type="submit" :pill="true">
                             <span x-text="'Solicitar turno · {{ $fechaFormateada }}, ' + horaSeleccionada">Solicitar turno</span>
                         </x-button>
                     </div>
 
                     <noscript>
-                        <div>
+                        <div class="flex justify-end">
                             <x-button type="submit" :pill="true">
                                 Solicitar turno
                             </x-button>

@@ -403,6 +403,17 @@ class SolicitarTurnoTest extends TestCase
         $response->assertSee('value="'.$this->paciente->id.'"', false);
     }
 
+    public function test_el_boton_de_solicitar_va_alineado_a_la_derecha_como_en_el_panel(): void
+    {
+        $html = $this->actingAs($this->pacienteUser)->get('/turnos/nuevo?'.http_build_query([
+            'profesional' => $this->profesional->id,
+            'servicio' => $this->servicio->id,
+            'fecha' => '2026-10-19',
+        ]))->getContent();
+
+        $this->assertMatchesRegularExpression('/<div x-show="horaSeleccionada"[^>]*class="[^"]*\bjustify-end\b/', $html);
+    }
+
     public function test_tutor_puede_solicitar_para_su_familiar(): void
     {
         $familiar = Paciente::factory()->create([
