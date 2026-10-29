@@ -227,6 +227,35 @@ class TurnoOperadorTest extends TestCase
         $this->assertDatabaseMissing('pacientes', ['documento' => '7654321']);
     }
 
+    public function test_alta_paciente_responsable_documento_ambiguo_falla_validacion(): void
+    {
+        $otroUser = User::factory()->paciente()->create(['email' => 'otro@paciente.test']);
+        Paciente::factory()->create([
+            'user_id' => $otroUser->id,
+            'nombre' => 'Extranjero',
+            'apellido' => 'Gómez',
+            'tipo_documento' => 'pasaporte',
+            'documento' => $this->paciente->documento,
+        ]);
+
+        $response = $this->actingAs($this->funcionario)
+            ->from(route('panel.turnos.crear', ['nuevo_paciente' => 1]))
+            ->post(route('panel.pacientes.store'), [
+                'nombre' => 'Mateo',
+                'apellido' => 'Gómez',
+                'tipo_documento' => 'CI',
+                'documento' => '7654321',
+                'telefono' => '0981111111',
+                'fecha_nacimiento' => '2018-05-15',
+                'responsable_documento' => $this->paciente->documento,
+            ]);
+
+        $response->assertSessionHasErrors([
+            'responsable_documento' => 'Hay más de una persona con ese número de documento. Revisá los datos del responsable.',
+        ]);
+        $this->assertDatabaseMissing('pacientes', ['documento' => '7654321']);
+    }
+
     public function test_alta_paciente_documento_repetido_falla_validacion(): void
     {
         $response = $this->actingAs($this->funcionario)

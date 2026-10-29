@@ -41,7 +41,8 @@ La API utiliza **Laravel Sanctum** con Bearer Tokens personales.
   ```http
   Authorization: Bearer <su_token_sanctum>
   ```
-- Para revocar el token activo, envíe `DELETE /api/v1/token` con la cabecera `Authorization`.
+- **Vencimiento y revocación:** Los tokens tienen una vigencia de 30 días desde su emisión. Asimismo, todos los tokens activos de un usuario se revocan de forma automática cuando este restablece su contraseña.
+- Para revocar el token activo manualmente, envíe `DELETE /api/v1/token` con la cabecera `Authorization`.
 
 ---
 
@@ -218,7 +219,7 @@ curl -X GET "http://localhost:8080/api/v1/disponibilidad?profesional_id=1&servic
 
 ### 6.4 Obtener token de acceso
 
-Autentica al usuario mediante correo y contraseña y emite un token de acceso personal.
+Autentica al usuario mediante correo y contraseña y emite un token de acceso personal (válido por 30 días; revocado automáticamente si el usuario cambia su contraseña).
 
 - **Método:** `POST`
 - **Ruta:** `/api/v1/token`
