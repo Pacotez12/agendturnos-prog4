@@ -30,7 +30,8 @@ class MisTurnosController extends Controller
 
         $historial = $request->boolean('historial');
         $turnos = $this->agendaService->turnosDelPaciente($user, historial: $historial)
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return TurnoResource::collection($turnos);
     }

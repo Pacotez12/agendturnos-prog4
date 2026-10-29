@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\EstadoTurno;
+use App\Exceptions\TransicionInvalida;
 use App\Models\Consultorio;
 use App\Models\Especialidad;
 use App\Models\Paciente;
@@ -10,6 +11,7 @@ use App\Models\Profesional;
 use App\Models\Servicio;
 use App\Models\Turno;
 use App\Models\User;
+use App\Services\AgendaService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -233,5 +235,22 @@ class MisTurnosTest extends TestCase
         $response = $this->actingAs($this->pacienteUser)->get(route('paciente.turnos'));
         $response->assertOk();
         $response->assertSee('Mis turnos');
+    }
+
+    public function test_cancelar_evalua_plazo_de_cancelacion_sobre_inicio_actual_en_base_de_datos(): void
+    {
+        // Turno en memoria con inicio a 48 horas (válido para cancelar)
+        $turno = $this->crearTurno($this->paciente, '2026-10-20 12:00:00', '2026-10-20 12:30:00', EstadoTurno::Confirmado);
+
+        // Simulamos reprogramación concurrente en la base que lo acerca a 2 horas (dentro del plazo de bloqueo de 24h)
+        Turno::whereKey($turno->id)->update([
+            'inicio' => '2026-10-18 14:00:00',
+            'fin' => '2026-10-18 14:30:00',
+        ]);
+
+        $this->expectException(TransicionInvalida::class);
+        $this->expectExceptionMessage('No se puede cancelar el turno con menos de 24 horas de anticipación.');
+
+        app(AgendaService::class)->cancelar($turno, null, $this->pacienteUser);
     }
 }

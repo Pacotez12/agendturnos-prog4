@@ -204,6 +204,69 @@ class PanelPacientesTest extends TestCase
             ->assertOk();
     }
 
+    public function test_ficha_de_paciente_muestra_solo_familiares_que_profesional_puede_ver(): void
+    {
+        $titularUser = User::factory()->paciente()->create(['email' => 'padre@test.com']);
+        $titularPaciente = Paciente::factory()->create([
+            'user_id' => $titularUser->id,
+            'nombre' => 'Rodrigo',
+            'apellido' => 'Sosa',
+        ]);
+
+        // Turno del titular con profesional 1 para que profesional 1 tenga acceso a su ficha
+        Turno::factory()->create([
+            'paciente_id' => $titularPaciente->id,
+            'profesional_id' => $this->profesional1->id,
+            'servicio_id' => $this->servicio->id,
+            'inicio' => now()->subDays(3),
+            'fin' => now()->subDays(3)->addMinutes(30),
+        ]);
+
+        // Hijo 1 tiene turno con profesional 1
+        $hijo1 = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $titularUser->id,
+            'nombre' => 'LucasFamiliarVisible',
+            'apellido' => 'Sosa',
+        ]);
+        Turno::factory()->create([
+            'paciente_id' => $hijo1->id,
+            'profesional_id' => $this->profesional1->id,
+            'servicio_id' => $this->servicio->id,
+            'inicio' => now()->subDays(2),
+            'fin' => now()->subDays(2)->addMinutes(30),
+        ]);
+
+        // Hijo 2 solo tiene turno con profesional 2 (ajeno a profesional 1)
+        $hijo2 = Paciente::factory()->create([
+            'user_id' => null,
+            'responsable_id' => $titularUser->id,
+            'nombre' => 'MartinFamiliarOculto',
+            'apellido' => 'Sosa',
+        ]);
+        Turno::factory()->create([
+            'paciente_id' => $hijo2->id,
+            'profesional_id' => $this->profesional2->id,
+            'servicio_id' => $this->servicio->id,
+            'inicio' => now()->subDays(2),
+            'fin' => now()->subDays(2)->addMinutes(30),
+        ]);
+
+        // Profesional 1 solo debe ver al familiar que atiende
+        $respProf = $this->actingAs($this->profesionalUser1)
+            ->get(route('panel.pacientes.show', $titularPaciente));
+        $respProf->assertOk();
+        $respProf->assertSee('LucasFamiliarVisible');
+        $respProf->assertDontSee('MartinFamiliarOculto');
+
+        // Funcionario ve a todos los familiares
+        $respFunc = $this->actingAs($this->funcionario)
+            ->get(route('panel.pacientes.show', $titularPaciente));
+        $respFunc->assertOk();
+        $respFunc->assertSee('LucasFamiliarVisible');
+        $respFunc->assertSee('MartinFamiliarOculto');
+    }
+
     public function test_editar_contacto_valido_e_invalido_y_no_permite_cambiar_documento(): void
     {
         $paciente = Paciente::factory()->create([

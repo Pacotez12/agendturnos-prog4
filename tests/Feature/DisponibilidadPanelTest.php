@@ -13,6 +13,7 @@ use App\Models\Turno;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class DisponibilidadPanelTest extends TestCase
@@ -374,5 +375,29 @@ class DisponibilidadPanelTest extends TestCase
             ->assertForbidden();
 
         $this->assertDatabaseHas('bloqueos', ['id' => $bloqueoAjeno->id]);
+    }
+
+    public function test_guardar_horario_bloquea_registro_de_profesional_para_actualizacion(): void
+    {
+        $profesionalUser = User::factory()->profesional()->create();
+        Profesional::factory()->create(['user_id' => $profesionalUser->id]);
+        Consultorio::factory()->create(['activo' => true]);
+
+        DB::enableQueryLog();
+
+        $this->actingAs($profesionalUser)->put(route('panel.disponibilidad.horario'), [
+            'franjas' => [
+                ['dia_semana' => 1, 'hora_inicio' => '08:00', 'hora_fin' => '12:00'],
+            ],
+        ])->assertRedirect(route('panel.disponibilidad'));
+
+        $queries = DB::getQueryLog();
+        $hasLockForUpdate = collect($queries)->contains(function ($q) {
+            $sql = strtolower($q['query']);
+
+            return str_contains($sql, 'for update') && str_contains($sql, 'profesionales');
+        });
+
+        $this->assertTrue($hasLockForUpdate, 'Se esperaba un SELECT ... FOR UPDATE sobre la tabla profesionales.');
     }
 }

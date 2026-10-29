@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Paciente;
+use App\Models\Profesional;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -48,10 +49,20 @@ class AccesoPorRolTest extends TestCase
     public function test_profesional_en_panel_recibe_200(): void
     {
         $profesional = User::factory()->profesional()->create();
+        Profesional::factory()->create(['user_id' => $profesional->id]);
 
         $response = $this->actingAs($profesional)->get('/panel');
 
         $response->assertOk();
+    }
+
+    public function test_profesional_sin_perfil_en_panel_recibe_403(): void
+    {
+        $profesionalSinPerfil = User::factory()->profesional()->create();
+
+        $this->actingAs($profesionalSinPerfil)->get('/panel')->assertForbidden();
+        $this->actingAs($profesionalSinPerfil)->get('/panel/agenda')->assertForbidden();
+        $this->actingAs($profesionalSinPerfil)->get('/panel/pacientes')->assertForbidden();
     }
 
     public function test_paciente_en_inicio_recibe_200_con_su_nombre_si_tiene_perfil(): void
