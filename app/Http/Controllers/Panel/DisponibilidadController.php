@@ -141,43 +141,47 @@ class DisponibilidadController extends Controller
         $desde = Carbon::parse($request->validated('desde'));
         $hasta = Carbon::parse($request->validated('hasta'));
 
-        $turnos = $profesional->turnos()
-            ->where('estado', '!=', EstadoTurno::Cancelado)
-            ->where('inicio', '<', $hasta)
-            ->where('fin', '>', $desde)
-            ->get();
+        return DB::transaction(function () use ($profesional, $desde, $hasta, $request) {
+            Profesional::whereKey($profesional->id)->lockForUpdate()->firstOrFail();
 
-        if ($turnos->isNotEmpty() && ! $request->boolean('confirmar')) {
-            $count = $turnos->count();
-            $confirmados = $turnos->where('estado', EstadoTurno::Confirmado)->count();
-            $solicitados = $turnos->where('estado', EstadoTurno::Solicitado)->count();
-            $detalles = [];
-            if ($confirmados > 0) {
-                $detalles[] = "{$confirmados} ".($confirmados === 1 ? 'confirmado' : 'confirmados');
+            $turnos = $profesional->turnos()
+                ->where('estado', '!=', EstadoTurno::Cancelado)
+                ->where('inicio', '<', $hasta)
+                ->where('fin', '>', $desde)
+                ->get();
+
+            if ($turnos->isNotEmpty() && ! $request->boolean('confirmar')) {
+                $count = $turnos->count();
+                $confirmados = $turnos->where('estado', EstadoTurno::Confirmado)->count();
+                $solicitados = $turnos->where('estado', EstadoTurno::Solicitado)->count();
+                $detalles = [];
+                if ($confirmados > 0) {
+                    $detalles[] = "{$confirmados} ".($confirmados === 1 ? 'confirmado' : 'confirmados');
+                }
+                if ($solicitados > 0) {
+                    $detalles[] = "{$solicitados} ".($solicitados === 1 ? 'solicitado' : 'solicitados');
+                }
+                $detalleTexto = ! empty($detalles) ? ' ('.implode(', ', $detalles).')' : '';
+
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'confirmar' => "En ese rango hay {$count} ".($count === 1 ? 'turno' : 'turnos')."{$detalleTexto}. No se cancelan solos: avisá a los pacientes y reprogramalos desde la agenda.",
+                    ]);
             }
-            if ($solicitados > 0) {
-                $detalles[] = "{$solicitados} ".($solicitados === 1 ? 'solicitado' : 'solicitados');
-            }
-            $detalleTexto = ! empty($detalles) ? ' ('.implode(', ', $detalles).')' : '';
 
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'confirmar' => "En ese rango hay {$count} ".($count === 1 ? 'turno' : 'turnos')."{$detalleTexto}. No se cancelan solos: avisá a los pacientes y reprogramalos desde la agenda.",
-                ]);
-        }
+            $profesional->bloqueos()->create([
+                'inicio' => $desde,
+                'fin' => $hasta,
+                'motivo' => $request->validated('motivo'),
+            ]);
 
-        $profesional->bloqueos()->create([
-            'inicio' => $desde,
-            'fin' => $hasta,
-            'motivo' => $request->validated('motivo'),
-        ]);
+            $params = $request->user()->rol === RolUsuario::Funcionario ? ['profesional_id' => $profesional->id] : [];
 
-        $params = $request->user()->rol === RolUsuario::Funcionario ? ['profesional_id' => $profesional->id] : [];
-
-        return redirect()
-            ->route('panel.disponibilidad', $params)
-            ->with('success', 'Bloqueo registrado correctamente.');
+            return redirect()
+                ->route('panel.disponibilidad', $params)
+                ->with('success', 'Bloqueo registrado correctamente.');
+        });
     }
 
     public function eliminarBloqueo(Request $request, Bloqueo $bloqueo): RedirectResponse

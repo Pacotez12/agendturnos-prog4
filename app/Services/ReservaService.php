@@ -145,7 +145,7 @@ class ReservaService
                     throw PacienteConTurnoEnHorario::para($paciente);
                 }
 
-                $consultorioId = $this->disponibilidad->consultorioPara($profesional, $inicioCarbon);
+                $consultorioId = $this->disponibilidad->consultorioPara($profesional, $inicioCarbon, $finCarbon);
 
                 $turno = Turno::create([
                     'paciente_id' => $paciente->id,

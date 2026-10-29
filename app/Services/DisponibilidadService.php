@@ -134,13 +134,7 @@ class DisponibilidadService
 
         $duracion = (int) $servicio->duracion_min;
         $finCarbon = $inicioCarbon->copy()->addMinutes($duracion);
-        $diaSemanaIso = $inicioCarbon->dayOfWeekIso;
-
-        $disp = $profesional->disponibilidades()
-            ->where('dia_semana', $diaSemanaIso)
-            ->whereTime('hora_inicio', '<=', $inicioCarbon->format('H:i:s'))
-            ->whereTime('hora_fin', '>=', $finCarbon->format('H:i:s'))
-            ->first();
+        $disp = $this->franjaPara($profesional, $inicioCarbon, $finCarbon);
 
         if (! $disp) {
             return false;
@@ -193,21 +187,30 @@ class DisponibilidadService
     }
 
     /**
-     * Devuelve el consultorio asignado a un inicio de turno según la disponibilidad del profesional.
+     * Devuelve el consultorio de la franja que contiene el intervalo completo del turno.
      */
-    public function consultorioPara(Profesional $profesional, CarbonInterface $inicio): ?int
+    public function consultorioPara(Profesional $profesional, CarbonInterface $inicio, ?CarbonInterface $fin = null): ?int
+    {
+        return $this->franjaPara($profesional, $inicio, $fin ?? $inicio)?->consultorio_id;
+    }
+
+    private function franjaPara(Profesional $profesional, CarbonInterface $inicio, CarbonInterface $fin): ?Disponibilidad
     {
         $tz = config('app.timezone', 'America/Asuncion');
         $inicioCarbon = Carbon::parse($inicio)->setTimezone($tz);
-        $diaSemanaIso = $inicioCarbon->dayOfWeekIso;
+        $finCarbon = Carbon::parse($fin)->setTimezone($tz);
 
-        $disp = $profesional->disponibilidades()
-            ->where('dia_semana', $diaSemanaIso)
-            ->whereTime('hora_inicio', '<=', $inicioCarbon->format('H:i:s'))
-            ->whereTime('hora_fin', '>=', $inicioCarbon->format('H:i:s'))
-            ->first();
+        return $profesional->disponibilidades()
+            ->where('dia_semana', $inicioCarbon->dayOfWeekIso)
+            ->orderBy('hora_inicio')
+            ->orderBy('id')
+            ->get()
+            ->first(function (Disponibilidad $franja) use ($inicioCarbon, $finCarbon, $tz) {
+                $desde = Carbon::parse($inicioCarbon->toDateString().' '.$franja->hora_inicio, $tz);
+                $hasta = Carbon::parse($inicioCarbon->toDateString().' '.$franja->hora_fin, $tz);
 
-        return $disp?->consultorio_id;
+                return $inicioCarbon->gte($desde) && $finCarbon->lte($hasta);
+            });
     }
 
     private function profesionalOfreceServicio(Profesional $profesional, Servicio $servicio): bool

@@ -70,6 +70,7 @@
                     >
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="guardar_horario" value="1">
 
                         @if(auth()->user()->rol === \App\Enums\RolUsuario::Funcionario)
                             <input type="hidden" name="profesional_id" value="{{ $profesional->id }}">
