@@ -23,22 +23,34 @@ class NotificacionService
             return null;
         }
 
-        $notificacion = Notificacion::updateOrCreate(
-            [
-                'turno_id' => $turno->id,
-                'tipo' => $tipo,
-                'destinatario_id' => $destinatario->id,
-            ],
-            [
-                'canal' => 'correo',
-                'estado' => EstadoNotificacion::Pendiente,
-                'enviado_at' => null,
-            ]
-        );
-
-        $job = EnviarNotificacion::dispatch($notificacion, $datos);
-
         $momento = ! $inmediato ? $this->momentoDeEnvio(Carbon::now(config('app.timezone'))) : null;
+
+        if ($tipo === 'recordatorio' && $momento !== null && $momento->gte($turno->inicio)) {
+            return null;
+        }
+
+        $notificacion = Notificacion::firstOrNew([
+            'turno_id' => $turno->id,
+            'tipo' => $tipo,
+            'destinatario_id' => $destinatario->id,
+        ]);
+
+        $notificacion->fill([
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Pendiente,
+            'enviado_at' => null,
+        ]);
+
+        if ($notificacion->exists) {
+            $notificacion->updated_at = now();
+        }
+
+        $notificacion->save();
+
+        $notificacion->refresh();
+        $version = (string) $notificacion->updated_at?->format('Y-m-d H:i:s.u');
+
+        $job = EnviarNotificacion::dispatch($notificacion, $datos, $version);
 
         if ($momento) {
             $job->delay($momento);

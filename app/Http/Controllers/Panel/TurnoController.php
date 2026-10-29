@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Panel;
 
+use App\Enums\EstadoNotificacion;
 use App\Enums\EstadoTurno;
 use App\Enums\RolUsuario;
 use App\Exceptions\HorarioNoDisponible;
@@ -20,6 +21,7 @@ use App\Services\ReservaService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -264,12 +266,33 @@ class TurnoController extends Controller
             return back()->with('error', 'Solo se puede enviar recordatorio a turnos confirmados que todavía no empezaron.');
         }
 
-        $minutos = $turno->minutosDesdeUltimoRecordatorio();
-        if ($minutos !== null && $minutos < 15) {
-            return back()->with('error', "Ya se envió un recordatorio hace {$minutos} min");
+        $lock = Cache::lock("recordatorio_turno_{$turno->id}", 10);
+
+        if (! $lock->get()) {
+            return back()->with('error', 'Hay un recordatorio en proceso para este turno.');
         }
 
-        $notificaciones->reenviarRecordatorio($turno, auth()->user());
+        try {
+            $turno->refresh();
+
+            $tienePendiente = $turno->notificaciones()
+                ->where('tipo', 'recordatorio')
+                ->where('estado', EstadoNotificacion::Pendiente)
+                ->exists();
+
+            if ($tienePendiente) {
+                return back()->with('error', 'Ya hay un recordatorio pendiente de envío para este turno.');
+            }
+
+            $minutos = $turno->minutosDesdeUltimoRecordatorio();
+            if ($minutos !== null && $minutos < 15) {
+                return back()->with('error', "Ya se envió un recordatorio hace {$minutos} min");
+            }
+
+            $notificaciones->reenviarRecordatorio($turno, auth()->user());
+        } finally {
+            $lock->release();
+        }
 
         $nombre = $turno->paciente?->nombreCompleto() ?? 'el paciente';
 

@@ -101,7 +101,9 @@ Route::middleware(['auth', 'rol:profesional,funcionario'])->group(function () {
     Route::post('/panel/turnos/{turno}/cancelar', [PanelTurnoController::class, 'cancelar'])->name('panel.turnos.cancelar');
     Route::post('/panel/turnos/{turno}/atendido', [PanelTurnoController::class, 'atendido'])->name('panel.turnos.atendido');
     Route::post('/panel/turnos/{turno}/ausente', [PanelTurnoController::class, 'ausente'])->name('panel.turnos.ausente');
-    Route::post('/panel/turnos/{turno}/recordatorio', [PanelTurnoController::class, 'recordatorio'])->name('panel.turnos.recordatorio');
+    Route::post('/panel/turnos/{turno}/recordatorio', [PanelTurnoController::class, 'recordatorio'])
+        ->middleware('throttle:recordatorio')
+        ->name('panel.turnos.recordatorio');
     Route::get('/panel/turnos/{turno}/reprogramar', [PanelTurnoController::class, 'reprogramar'])->name('panel.turnos.reprogramar');
     Route::put('/panel/turnos/{turno}/reprogramar', [PanelTurnoController::class, 'updateReprogramar'])->name('panel.turnos.reprogramar.update');
 });

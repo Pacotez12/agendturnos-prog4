@@ -3,7 +3,7 @@
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect**, Asunción, Paraguay.
 
 > Documento vivo: se actualiza a medida que avanza el desarrollo. Cada sección indica su estado: ✅ hecho · 🚧 en curso · ⏳ pendiente.
-> Última actualización: 2026-10-28.
+> Última actualización: 2026-10-29.
 > Diseño de interfaz (colores, layouts y componentes): [`docs/diseno-ui.md`](diseno-ui.md).
 
 ---
@@ -303,6 +303,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-29 | Robustez en recordatorios y avisos (SCRUM-75): descarte en job `EnviarNotificacion` de recordatorios si el turno ya no está confirmado o su inicio ya pasó (marcando estado `fallida`); supresión de programación de recordatorios en `NotificacionService` si la demora por horario silencioso cae en o después del inicio del turno; reintento de recordatorios en estado `fallida` en comando `turnos:recordatorios` reutilizando la fila existente mientras el turno permanezca en la ventana de 1 a 24 h; configuración de `withoutOverlapping()` y `onOneServer()` en el scheduler; versionado de notificación para evitar que avisos viejos en cola sobreescriban modificaciones posteriores; y bloqueo atómico con `Cache::lock`, control de recordatorio pendiente y rate limiting (`throttle:recordatorio` a 5 req/min) en la acción de reenvío del panel. |
 | 2026-10-29 | Control de acceso y robustez (SCRUM-74): restricción de acceso al panel para cuentas con rol profesional sin perfil en middleware `EnsureRol` (403); filtro en ficha de paciente del panel para que profesionales solo vean familiares que pueden atender (`PacientePolicy::view`); validación atómica del plazo de cancelación en `AgendaService` sobre el inicio bloqueado (`lockForUpdate`); conservación de parámetros en paginación de historial de la API mediante `withQueryString()`; bloqueo pesimista en `Profesional` al guardar horarios para evitar solapamientos concurrentes; y habilitación de `AuthenticateSession` en el middleware web para invalidar sesiones activas tras cambiar la contraseña. |
 | 2026-10-29 | Seguridad en vistas (SCRUM-73): interpolación segura con directiva `@js` para el valor de `old('hora')` en componentes Alpine en vistas de reserva de paciente, creación y reprogramación de turnos en panel, evitando inyección en expresiones de cliente. |
 | 2026-10-28 | Cuentas y credenciales (SCRUM-72): resolución unificada de paciente responsable por documento en `PacienteService` exigiendo coincidencia única con cuenta activa y rechazando resultados ambiguos en validación y persistencia; vencimiento de tokens de acceso personal de Sanctum configurado a 30 días (`SANCTUM_TOKEN_EXPIRATION`) y revocación de todos los tokens del usuario al restablecer la contraseña en `NewPasswordController`. |

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EstadoNotificacion;
 use App\Enums\EstadoTurno;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -95,6 +96,14 @@ class Turno extends Model
     public function puedeReenviarRecordatorio(): bool
     {
         if ($this->estado !== EstadoTurno::Confirmado || $this->inicio->isPast()) {
+            return false;
+        }
+
+        $tienePendiente = $this->relationLoaded('notificaciones')
+            ? $this->notificaciones->where('tipo', 'recordatorio')->where('estado', EstadoNotificacion::Pendiente)->isNotEmpty()
+            : $this->notificaciones()->where('tipo', 'recordatorio')->where('estado', EstadoNotificacion::Pendiente)->exists();
+
+        if ($tienePendiente) {
             return false;
         }
 

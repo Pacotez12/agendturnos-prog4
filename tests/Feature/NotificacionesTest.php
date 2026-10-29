@@ -16,7 +16,9 @@ use App\Models\Turno;
 use App\Models\User;
 use App\Notifications\AvisoTurno;
 use App\Services\AgendaService;
+use App\Services\NotificacionService;
 use App\Services\ReservaService;
+use App\Services\WhatsAppService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -252,6 +254,53 @@ class NotificacionesTest extends TestCase
         $this->assertSame(EstadoNotificacion::Fallida, $notificacion->estado);
     }
 
+    public function test_recordatorio_job_no_envia_y_marca_fallida_si_turno_ya_no_esta_confirmado(): void
+    {
+        Notification::fake();
+
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'tipo' => 'recordatorio',
+            'destinatario_id' => $this->pacienteUser->id,
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        $turno->update(['estado' => EstadoTurno::Atendido]);
+
+        $job = new EnviarNotificacion($notificacion);
+        $job->handle(app(WhatsAppService::class));
+
+        Notification::assertNothingSent();
+        $notificacion->refresh();
+        $this->assertSame(EstadoNotificacion::Fallida, $notificacion->estado);
+    }
+
+    public function test_recordatorio_job_no_envia_y_marca_fallida_si_inicio_ya_paso(): void
+    {
+        Notification::fake();
+
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'tipo' => 'recordatorio',
+            'destinatario_id' => $this->pacienteUser->id,
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        // Simular que el turno ya empezó hace 10 minutos
+        Carbon::setTestNow(Carbon::parse('2026-10-23 09:10:00', config('app.timezone')));
+
+        $job = new EnviarNotificacion($notificacion);
+        $job->handle(app(WhatsAppService::class));
+
+        Notification::assertNothingSent();
+        $notificacion->refresh();
+        $this->assertSame(EstadoNotificacion::Fallida, $notificacion->estado);
+    }
+
     public function test_cancelar_con_motivo_notifica_cancelacion(): void
     {
         Queue::fake();
@@ -433,6 +482,93 @@ class NotificacionesTest extends TestCase
         $this->assertDatabaseMissing('notificaciones', ['turno_id' => $t4->id]);
 
         $this->assertSame(1, Notificacion::where('turno_id', $t5->id)->where('tipo', 'recordatorio')->count());
+    }
+
+    public function test_comando_recordatorios_reintenta_notificacion_fallida_reutilizando_fila(): void
+    {
+        Queue::fake();
+
+        Carbon::setTestNow(Carbon::parse('2026-10-22 10:00:00', config('app.timezone')));
+
+        $turno = $this->crearTurno('2026-10-22 14:00:00', '2026-10-22 14:30:00', EstadoTurno::Confirmado);
+
+        $notificacion = Notificacion::create([
+            'turno_id' => $turno->id,
+            'tipo' => 'recordatorio',
+            'destinatario_id' => $this->pacienteUser->id,
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Fallida,
+        ]);
+
+        $this->artisan('turnos:recordatorios')->assertSuccessful();
+
+        Queue::assertPushed(EnviarNotificacion::class);
+
+        $this->assertSame(1, Notificacion::where('turno_id', $turno->id)->where('tipo', 'recordatorio')->count());
+
+        $notificacion->refresh();
+        $this->assertSame(EstadoNotificacion::Pendiente, $notificacion->estado);
+    }
+
+    public function test_aviso_viejo_no_marca_como_enviado_un_aviso_nuevo_reprogramado(): void
+    {
+        Notification::fake();
+        Queue::fake();
+
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
+        $notificacionService = app(NotificacionService::class);
+
+        $notif1 = $notificacionService->programar($turno, 'reprogramacion', ['anterior' => '2026-10-23 09:00:00'], true);
+
+        // Simulamos que ocurre una segunda reprogramación antes de que el job 1 se procese
+        Carbon::setTestNow(now()->addSeconds(5));
+        $notif2 = $notificacionService->programar($turno, 'reprogramacion', ['anterior' => '2026-10-25 10:00:00'], true);
+
+        $jobs = Queue::pushed(EnviarNotificacion::class);
+        $this->assertCount(2, $jobs);
+        $job1 = $jobs[0];
+        $job2 = $jobs[1];
+
+        // Al ejecutarse el job 1 (viejo), no debe marcar como Enviada la fila nueva de la DB
+        $job1->handle(app(WhatsAppService::class));
+
+        // La notificación en la base de datos debe seguir Pendiente para el job 2
+        $this->assertSame(EstadoNotificacion::Pendiente, $notif2->fresh()->estado);
+
+        // El job 2 sí debe poder ejecutarse y marcarla Enviada
+        $job2->handle(app(WhatsAppService::class));
+        $this->assertSame(EstadoNotificacion::Enviada, $notif2->fresh()->estado);
+    }
+
+    public function test_aviso_viejo_en_vuelo_no_sobreescribe_si_ocurre_reprogramacion_intermedia(): void
+    {
+        Notification::fake();
+        Queue::fake();
+
+        $turno = $this->crearTurno('2026-10-23 09:00:00', '2026-10-23 09:30:00', EstadoTurno::Confirmado);
+        $notificacionService = app(NotificacionService::class);
+
+        $notif = $notificacionService->programar($turno, 'reprogramacion', ['anterior' => '2026-10-23 09:00:00'], true);
+        $versionVieja = (string) $notif->fresh()->updated_at?->format('Y-m-d H:i:s.u');
+
+        // Simulamos que el job arranca con la versión vieja
+        $job = new EnviarNotificacion($notif, ['anterior' => '2026-10-23 09:00:00'], $versionVieja);
+
+        // Pero mientras el job estaba enviando, ocurrió otra reprogramación
+        Carbon::setTestNow(now()->addSeconds(10));
+        $notificacionService->programar($turno, 'reprogramacion', ['anterior' => '2026-10-26 10:00:00'], true);
+
+        // Simulamos la actualización condicional que hace el job al terminar
+        $actualizados = Notificacion::where('id', $notif->id)
+            ->where('updated_at', $versionVieja)
+            ->update([
+                'estado' => EstadoNotificacion::Enviada,
+                'enviado_at' => now(),
+            ]);
+
+        // No debe actualizar ninguna fila porque la versión en la DB ya cambió
+        $this->assertSame(0, $actualizados);
+        $this->assertSame(EstadoNotificacion::Pendiente, $notif->fresh()->estado);
     }
 
     public function test_recordatorio_de_un_turno_del_mismo_dia_dice_hoy(): void
