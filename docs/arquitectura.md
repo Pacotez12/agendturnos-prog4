@@ -24,7 +24,7 @@ Glow Dental Protect es una clínica odontológica unipersonal. Ofrece consultas,
 ### Incluido
 - Portal web con información de la clínica y catálogo de servicios.
 - Registro e inicio de sesión, con roles **paciente**, **profesional** y **funcionario** (recepción/administración).
-- Administración de especialidades, servicios y qué servicios ofrece cada profesional.
+- Administración de especialidades, servicios, alta y edición de profesionales (con invitación por correo para crear su contraseña) y qué servicios ofrece cada una.
 - Consulta de disponibilidad y solicitud de turnos.
 - Agenda de la profesional: ver, confirmar, reprogramar y cancelar turnos; administrar el horario semanal y los bloqueos.
 - Seguimiento del estado del turno por parte del paciente.
@@ -198,7 +198,7 @@ erDiagram
 | Módulo | Historias | Rutas previstas | Estado |
 |---|---|---|---|
 | Autenticación y usuarios | HU-01, HU-02, HU-27, HU-28 | `/registro` (validación de celular y consentimiento), `/login`, `/logout`, `/inicio` (paciente), `/panel`, `/privacidad` | ✅ |
-| Servicios y especialidades | HU-03, SCRUM-39 | `/servicios` (catálogo público) · `/panel/servicios`, `/panel/especialidades`, `/panel/profesionales/{id}/servicios` | ✅ |
+| Servicios, especialidades y profesionales | HU-03, SCRUM-39, SCRUM-76 | `/servicios` (catálogo público) · `/panel/servicios`, `/panel/especialidades`, `/panel/profesionales`, `/panel/profesionales/{id}/servicios` | ✅ |
 | Agendamiento | HU-04, HU-05, HU-26 | `/turnos/nuevo` (horarios libres, solicitud y límite antiabuso), `/turnos/{id}` | ✅ |
 | Agendamiento por operador | HU-13, HU-18, HU-27 | `/panel/turnos/nuevo`, `/panel/pacientes` (directorio, ficha y alta sin cuenta con validación de celular), `/panel/pacientes/{id}` | ✅ |
 | Agenda de la profesional | HU-06, HU-07, HU-11, HU-12 | `/panel/agenda`, `/panel/solicitudes`, `/panel/turnos/{id}` (confirmar, reprogramar, cancelar, atendido, ausente), `/panel/disponibilidad` | ✅ |
@@ -303,6 +303,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-29 | Alta y edición de profesionales desde el panel (SCRUM-76): rutas `POST /panel/profesionales` y `PUT /panel/profesionales/{profesional}` para el rol funcionario con `ProfesionalRequest`; creación en transacción de `User` (`rol = profesional` y contraseña aleatoria) y `Profesional` con `orden` al final, seguida del envío de `InvitacionProfesional` con enlace de 7 días (broker `invitaciones` en `config/auth.php`, aceptado en `NewPasswordController`) y redirección a la asignación de servicios; edición de datos y correo sin reenvío de invitación; columna de estado ("Activa" / "Sin servicios") y modal de alta/edición en `/panel/profesionales`. |
 | 2026-10-29 | Robustez en recordatorios y avisos (SCRUM-75): descarte en job `EnviarNotificacion` de recordatorios si el turno ya no está confirmado o su inicio ya pasó (marcando estado `fallida`); supresión de programación de recordatorios en `NotificacionService` si la demora por horario silencioso cae en o después del inicio del turno; reintento de recordatorios en estado `fallida` en comando `turnos:recordatorios` reutilizando la fila existente mientras el turno permanezca en la ventana de 1 a 24 h; configuración de `withoutOverlapping()` y `onOneServer()` en el scheduler; versionado de notificación para evitar que avisos viejos en cola sobreescriban modificaciones posteriores; y bloqueo atómico con `Cache::lock`, control de recordatorio pendiente y rate limiting (`throttle:recordatorio` a 5 req/min) en la acción de reenvío del panel. |
 | 2026-10-29 | Control de acceso y robustez (SCRUM-74): restricción de acceso al panel para cuentas con rol profesional sin perfil en middleware `EnsureRol` (403); filtro en ficha de paciente del panel para que profesionales solo vean familiares que pueden atender (`PacientePolicy::view`); validación atómica del plazo de cancelación en `AgendaService` sobre el inicio bloqueado (`lockForUpdate`); conservación de parámetros en paginación de historial de la API mediante `withQueryString()`; bloqueo pesimista en `Profesional` al guardar horarios para evitar solapamientos concurrentes; y habilitación de `AuthenticateSession` en el middleware web para invalidar sesiones activas tras cambiar la contraseña. |
 | 2026-10-29 | Seguridad en vistas (SCRUM-73): interpolación segura con directiva `@js` para el valor de `old('hora')` en componentes Alpine en vistas de reserva de paciente, creación y reprogramación de turnos en panel, evitando inyección en expresiones de cliente. |

@@ -36,19 +36,24 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', 'min:8'],
         ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+        $credentials = $request->only('email', 'password', 'password_confirmation', 'token');
 
-                $user->tokens()->delete();
+        $callback = function (User $user, string $password) {
+            $user->forceFill([
+                'password' => Hash::make($password),
+                'remember_token' => Str::random(60),
+            ])->save();
 
-                event(new PasswordReset($user));
-            }
-        );
+            $user->tokens()->delete();
+
+            event(new PasswordReset($user));
+        };
+
+        $status = Password::reset($credentials, $callback);
+
+        if ($status !== Password::PASSWORD_RESET) {
+            $status = Password::broker('invitaciones')->reset($credentials, $callback);
+        }
 
         if ($status === Password::PASSWORD_RESET) {
             return redirect()
