@@ -9,7 +9,12 @@ use App\Models\Servicio;
 use App\Models\User;
 use App\Notifications\InvitacionProfesional;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
+use RuntimeException;
 use Tests\TestCase;
 
 class AdminProfesionalesTest extends TestCase
@@ -311,5 +316,87 @@ class AdminProfesionalesTest extends TestCase
 
         $loginResponse->assertRedirect(route('panel.inicio'));
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_token_de_recuperacion_de_hace_2_horas_es_rechazado_y_invitacion_de_hace_2_dias_funciona(): void
+    {
+        $paciente = User::factory()->paciente()->create([
+            'email' => 'paciente@correo.com',
+            'password' => Hash::make('clave-vieja-123'),
+        ]);
+
+        $tokenRecuperacion = Password::broker('users')->createToken($paciente);
+
+        // 2 horas después, el token común de recuperación (60 min) debe estar vencido
+        $this->travel(2)->hours();
+
+        $resRecuperacion = $this->post(route('password.update'), [
+            'token' => $tokenRecuperacion,
+            'email' => 'paciente@correo.com',
+            'password' => 'clave-nueva-123',
+            'password_confirmation' => 'clave-nueva-123',
+        ]);
+
+        $resRecuperacion->assertSessionHasErrors([
+            'email' => 'El enlace no es válido o ya venció. Pedí uno nuevo.',
+        ]);
+        $this->assertTrue(Hash::check('clave-vieja-123', $paciente->fresh()->password));
+
+        $this->travelBack();
+
+        // En cambio, una invitación de profesional creada hace 2 días sigue funcionando
+        $profesionalUser = User::factory()->profesional()->create([
+            'email' => 'profesional@correo.com',
+            'password' => Hash::make('clave-random-inicial'),
+        ]);
+        Profesional::factory()->create(['user_id' => $profesionalUser->id]);
+
+        $tokenInvitacion = Password::broker('invitaciones')->createToken($profesionalUser);
+
+        $this->travel(2)->days();
+
+        $resInvitacion = $this->post(route('password.update'), [
+            'token' => $tokenInvitacion,
+            'email' => 'profesional@correo.com',
+            'password' => 'clave-profesional-nueva',
+            'password_confirmation' => 'clave-profesional-nueva',
+        ]);
+
+        $resInvitacion->assertRedirect(route('login'));
+        $resInvitacion->assertSessionHas('success', 'Tu contraseña fue actualizada.');
+        $this->assertTrue(Hash::check('clave-profesional-nueva', $profesionalUser->fresh()->password));
+    }
+
+    public function test_si_falla_envio_de_invitacion_el_alta_no_da_500_loguea_y_avisa_en_mensaje(): void
+    {
+        Log::spy();
+
+        $this->app->bind(InvitacionProfesional::class, fn (object $app, array $params) => new class($params['token'] ?? '') extends InvitacionProfesional
+        {
+            public function toMail(object $notifiable): MailMessage
+            {
+                throw new RuntimeException('Servidor SMTP no disponible');
+            }
+        });
+
+        $funcionario = User::factory()->funcionario()->create();
+
+        $response = $this->actingAs($funcionario)->post(route('panel.profesionales.store'), [
+            'nombre' => 'Laura',
+            'apellido' => 'Benítez',
+            'matricula' => 'MP-9012',
+            'email' => 'laura.benitez@correo.com',
+        ]);
+
+        $profesional = Profesional::where('matricula', 'MP-9012')->first();
+        $this->assertNotNull($profesional);
+
+        $response->assertRedirect(route('panel.profesionales.servicios', $profesional));
+        $mensaje = session('success');
+        $this->assertIsString($mensaje);
+        $this->assertStringContainsString('Laura Benítez quedó dada de alta', $mensaje);
+        $this->assertStringContainsString('no se pudo enviar', $mensaje);
+
+        Log::shouldHaveReceived('warning')->once();
     }
 }

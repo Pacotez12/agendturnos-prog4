@@ -13,9 +13,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Throwable;
 
 class ProfesionalController extends Controller
 {
@@ -61,15 +63,28 @@ class ProfesionalController extends Controller
             return [$user, $profesional];
         });
 
-        $token = Password::broker('invitaciones')->createToken($user);
-        $user->notify(new InvitacionProfesional($token));
+        $correoEnviado = true;
+
+        try {
+            $token = Password::broker('invitaciones')->createToken($user);
+            $user->notify(app(InvitacionProfesional::class, ['token' => $token]));
+        } catch (Throwable $e) {
+            $correoEnviado = false;
+
+            Log::warning('Invitación a profesional no enviada', [
+                'profesional_id' => $profesional->id,
+                'email' => $user->email,
+                'mensaje' => $e->getMessage(),
+            ]);
+        }
+
+        $mensaje = $correoEnviado
+            ? "{$profesional->nombreCompleto()} quedó dada de alta. Le enviamos un correo a {$user->email} para que cree su contraseña. Siguiente paso: elegí los servicios que ofrece y cargale el horario."
+            : "{$profesional->nombreCompleto()} quedó dada de alta, pero el correo de invitación a {$user->email} no se pudo enviar. Siguiente paso: elegí los servicios que ofrece y cargale el horario.";
 
         return redirect()
             ->route('panel.profesionales.servicios', $profesional)
-            ->with(
-                'success',
-                "{$profesional->nombreCompleto()} quedó dada de alta. Le enviamos un correo a {$user->email} para que cree su contraseña. Siguiente paso: elegí los servicios que ofrece y cargale el horario."
-            );
+            ->with('success', $mensaje);
     }
 
     /**
