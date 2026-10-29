@@ -85,9 +85,9 @@
                         </thead>
                         <tbody class="divide-y divide-line">
                             @foreach ($profesionales as $prof)
-                                <tr class="hover:bg-surface/50 transition-colors">
+                                <tr @class(['hover:bg-surface/50 transition-colors', 'bg-surface text-ink-500' => ! $prof->activo])>
                                     <td class="px-4 py-3">
-                                        <p class="font-semibold text-ink-900">
+                                        <p @class(['font-semibold', 'text-ink-900' => $prof->activo, 'text-ink-500' => ! $prof->activo])>
                                             {{ $prof->nombre }} {{ $prof->apellido }}
                                         </p>
                                         @if ($prof->user?->email)
@@ -103,7 +103,11 @@
                                         {{ $prof->servicios_count }}
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
-                                        @if ($prof->servicios_count === 0)
+                                        @if (! $prof->activo)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface text-ink-500">
+                                        Dada de baja
+                                    </span>
+                                @elseif ($prof->servicios_count === 0)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold estado-solicitado-bg estado-solicitado-fg">
                                                 Sin servicios
                                             </span>
@@ -115,27 +119,7 @@
                                     </td>
                                     <td class="px-4 py-3 text-right whitespace-nowrap">
                                         <div class="inline-flex items-center justify-end gap-1">
-                                            <a
-                                                href="{{ route('panel.profesionales.servicios', $prof) }}"
-                                                aria-label="Servicios que ofrece {{ $prof->nombre }} {{ $prof->apellido }}"
-                                                class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
-                                            >
-                                                Servicios
-                                            </a>
-                                            <button
-                                                type="button"
-                                                aria-label="Editar a {{ $prof->nombre }} {{ $prof->apellido }}"
-                                                x-on:click="editar({{ \Illuminate\Support\Js::from([
-                                                    'id' => $prof->id,
-                                                    'nombre' => $prof->nombre,
-                                                    'apellido' => $prof->apellido,
-                                                    'matricula' => $prof->matricula,
-                                                    'email' => $prof->user?->email ?? '',
-                                                ]) }}); $dispatch('abrir-modal', 'profesional')"
-                                                class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 cursor-pointer"
-                                            >
-                                                Editar
-                                            </button>
+                                            @include('panel.profesionales.acciones', ['prof' => $prof])
                                         </div>
                                     </td>
                                 </tr>
@@ -147,12 +131,16 @@
                 <!-- Tarjetas para móvil -->
                 <div class="sm:hidden divide-y divide-line">
                     @foreach ($profesionales as $prof)
-                        <div class="p-4 space-y-2">
+                        <div @class(['p-4 space-y-2', 'bg-surface text-ink-500' => ! $prof->activo])>
                             <div class="flex items-center justify-between gap-2 flex-wrap">
-                                <p class="font-bold text-ink-900 text-base">
+                                <p @class(['font-bold text-base', 'text-ink-900' => $prof->activo, 'text-ink-500' => ! $prof->activo])>
                                     {{ $prof->nombre }} {{ $prof->apellido }}
                                 </p>
-                                @if ($prof->servicios_count === 0)
+                                @if (! $prof->activo)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface text-ink-500">
+                                        Dada de baja
+                                    </span>
+                                @elseif ($prof->servicios_count === 0)
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold estado-solicitado-bg estado-solicitado-fg">
                                         Sin servicios
                                     </span>
@@ -170,28 +158,8 @@
                                     {{ $prof->user->email }}
                                 </p>
                             @endif
-                            <div class="flex items-center gap-1 pt-1">
-                                <a
-                                    href="{{ route('panel.profesionales.servicios', $prof) }}"
-                                    aria-label="Servicios que ofrece {{ $prof->nombre }} {{ $prof->apellido }}"
-                                    class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
-                                >
-                                    Servicios
-                                </a>
-                                <button
-                                    type="button"
-                                    aria-label="Editar a {{ $prof->nombre }} {{ $prof->apellido }}"
-                                    x-on:click="editar({{ \Illuminate\Support\Js::from([
-                                        'id' => $prof->id,
-                                        'nombre' => $prof->nombre,
-                                        'apellido' => $prof->apellido,
-                                        'matricula' => $prof->matricula,
-                                        'email' => $prof->user?->email ?? '',
-                                    ]) }}); $dispatch('abrir-modal', 'profesional')"
-                                    class="text-xs font-semibold text-brand-text hover:text-brand-700 p-2 rounded-lg hover:bg-cream-50 inline-flex items-center min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 cursor-pointer"
-                                >
-                                    Editar
-                                </button>
+                            <div class="flex flex-wrap items-center gap-1 pt-1">
+                                @include('panel.profesionales.acciones', ['prof' => $prof])
                             </div>
                         </div>
                     @endforeach
@@ -237,4 +205,36 @@
             </form>
         </x-modal>
     </div>
+    @foreach ($profesionales as $prof)
+        @if ($prof->activo)
+            <x-modal name="baja-{{ $prof->id }}" titulo="¿Dar de baja a {{ $prof->nombreCompleto() }}?">
+                <p>Deja de aparecer para reservar y no va a poder iniciar sesión. Su historial se conserva y podés reactivarla cuando quieras.</p>
+                <form method="POST" action="{{ route('panel.profesionales.baja', $prof) }}" class="mt-6 flex justify-end gap-3">
+                    @csrf
+                    <x-button variant="secondary" x-on:click="cerrar()">Volver</x-button>
+                    <x-button type="submit" variant="danger">Dar de baja</x-button>
+                </form>
+            </x-modal>
+        @else
+            <x-modal name="reactivar-{{ $prof->id }}" titulo="¿Reactivar a {{ $prof->nombreCompleto() }}?">
+                <p>Vuelve a poder iniciar sesión y a aparecer para reservar con los servicios y el horario que tenía.</p>
+                <form method="POST" action="{{ route('panel.profesionales.reactivar', $prof) }}" class="mt-6 flex justify-end gap-3">
+                    @csrf
+                    <x-button variant="secondary" x-on:click="cerrar()">Volver</x-button>
+                    <x-button type="submit">Reactivar</x-button>
+                </form>
+            </x-modal>
+        @endif
+    @endforeach
+    @if ($bloqueada = session('baja_bloqueada'))
+        <x-modal name="baja-bloqueada" titulo="No se puede dar de baja todavía" x-init="$nextTick(() => abrir())">
+            <x-alert type="error">
+                {{ $bloqueada['nombre'] }} tiene {{ $bloqueada['cantidad'] }} turnos a partir de hoy. Reprogramalos o cancelalos desde la Agenda y después volvé a intentar.
+            </x-alert>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button variant="secondary" x-on:click="cerrar()">Volver</x-button>
+                <x-button :href="route('panel.agenda', ['vista' => 'semana', 'profesional' => $bloqueada['profesional_id']])">Ir a la Agenda</x-button>
+            </div>
+        </x-modal>
+    @endif
 </x-layouts.panel>

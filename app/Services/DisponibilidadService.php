@@ -212,7 +212,7 @@ class DisponibilidadService
 
     private function profesionalOfreceServicio(Profesional $profesional, Servicio $servicio): bool
     {
-        return $profesional->servicios()
+        return Profesional::activas()->whereKey($profesional->id)->exists() && $profesional->servicios()
             ->where('servicios.id', $servicio->id)
             ->where('servicios.activo', true)
             ->whereHas('especialidad', fn ($q) => $q->where('activa', true))

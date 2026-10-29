@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\RolUsuario;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
@@ -39,7 +40,9 @@ class LoginController extends Controller
             ]);
         }
 
-        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        if (! Auth::attemptWhen($request->only('email', 'password'),
+            fn (User $user) => $user->rol !== RolUsuario::Profesional || ! $user->profesional()->where('activo', false)->exists(),
+            $request->boolean('remember'))) {
             RateLimiter::hit($throttleKey);
 
             throw ValidationException::withMessages([

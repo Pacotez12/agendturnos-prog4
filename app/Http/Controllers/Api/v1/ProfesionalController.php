@@ -18,7 +18,7 @@ class ProfesionalController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $profesionales = Profesional::with(['servicios.especialidad'])
+        $profesionales = Profesional::activas()->with(['servicios.especialidad'])
             ->ordenados()
             ->get();
 

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Enums\RolUsuario;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\CrearTokenRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -30,7 +32,19 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken($request->input('nombre_dispositivo'))->plainTextToken;
+        $token = DB::transaction(function () use ($user, $request) {
+            $profesional = $user->rol === RolUsuario::Profesional
+                ? $user->profesional()->lockForUpdate()->first()
+                : null;
+
+            if ($profesional && ! $profesional->activo) {
+                throw ValidationException::withMessages([
+                    'email' => ['Las credenciales proporcionadas son incorrectas.'],
+                ]);
+            }
+
+            return $user->createToken($request->input('nombre_dispositivo'))->plainTextToken;
+        });
 
         return response()->json([
             'token' => $token,

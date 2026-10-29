@@ -215,7 +215,10 @@ class AgendaService
 
         $profesionales = $user->rol === RolUsuario::Profesional && $user->profesional
             ? collect([$user->profesional])
-            : Profesional::ordenados()->get();
+            : Profesional::where(fn ($q) => $q->activas()->orWhereHas('turnos', fn ($turnos) => $turnos
+                ->whereBetween('inicio', [$inicioDia, $finDia])
+                ->when($estado, fn ($t) => $t->where('estado', $estado), fn ($t) => $t->where('estado', '!=', EstadoTurno::Cancelado))))
+                ->ordenados()->get();
 
         $profesionalesIds = $profesionales->pluck('id')->all();
 
@@ -269,7 +272,7 @@ class AgendaService
 
         $profesionalSeleccionado = $user->rol === RolUsuario::Profesional && $user->profesional
             ? $user->profesional
-            : ($profesional ?? Profesional::ordenados()->first());
+            : ($profesional ?? Profesional::activas()->ordenados()->first());
 
         $dias = [];
         for ($i = 0; $i < 5; $i++) {
@@ -566,6 +569,8 @@ class AgendaService
 
         try {
             return DB::transaction(function () use ($turno, $inicioCarbon, $finCarbon, $usuario, $tz) {
+                Profesional::whereKey($turno->profesional_id)->lockForUpdate()->firstOrFail();
+
                 if (! $this->disponibilidad->estaLibre($turno->profesional, $turno->servicio, $inicioCarbon, $turno)) {
                     throw new HorarioNoDisponible('El horario seleccionado no está disponible.');
                 }

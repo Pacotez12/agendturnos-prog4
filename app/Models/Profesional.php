@@ -21,12 +21,14 @@ class Profesional extends Model
         'apellido',
         'matricula',
         'orden',
+        'activo',
     ];
 
     protected function casts(): array
     {
         return [
             'orden' => 'integer',
+            'activo' => 'boolean',
         ];
     }
 
@@ -58,6 +60,15 @@ class Profesional extends Model
     public function nombreCompleto(): string
     {
         return trim("{$this->nombre} {$this->apellido}");
+    }
+
+    /**
+     * @param  Builder<Profesional>  $query
+     * @return Builder<Profesional>
+     */
+    public function scopeActivas(Builder $query): Builder
+    {
+        return $query->where('profesionales.activo', true);
     }
 
     /**
