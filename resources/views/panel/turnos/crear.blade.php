@@ -216,7 +216,7 @@
                                 method="POST"
                                 action="{{ route('panel.turnos.store') }}"
                                 class="space-y-6"
-                                x-data="{ horaSeleccionada: '{{ old('hora', '') }}' }"
+                                x-data="{ horaSeleccionada: @js(old('hora', '')) }"
                             >
                                 @csrf
                                 <input type="hidden" name="paciente_id" value="{{ $pacienteSeleccionado->id }}">

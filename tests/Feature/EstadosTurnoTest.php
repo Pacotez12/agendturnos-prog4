@@ -461,4 +461,17 @@ class EstadosTurnoTest extends TestCase
         $resSinReferer->assertSee('href="'.$agendaUrl.'"', false);
         $resSinReferer->assertDontSee('Volver a solicitudes');
     }
+
+    public function test_escapa_correctamente_hora_en_old_input_en_reprogramar_turno(): void
+    {
+        $turno = $this->crearTurno($this->profesional1, '2026-10-19 09:00:00', '2026-10-19 09:30:00', EstadoTurno::Confirmado);
+
+        $response = $this->actingAs($this->profesionalUser1)
+            ->withSession(['_old_input' => ['hora' => "x';PRUEBA=1;'"]])
+            ->get(route('panel.turnos.reprogramar', [$turno, 'fecha' => '2026-10-19']));
+
+        $response->assertOk();
+        $response->assertDontSee("'x&#039;;PRUEBA=1;&#039;'", false);
+        $response->assertSee("'x\\u0027;PRUEBA=1;\\u0027'", false);
+    }
 }

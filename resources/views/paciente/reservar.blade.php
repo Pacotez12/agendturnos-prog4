@@ -72,7 +72,7 @@
                     method="POST"
                     action="{{ route('paciente.turnos.store') }}"
                     class="space-y-6"
-                    x-data="{ horaSeleccionada: '{{ old('hora', '') }}' }"
+                    x-data="{ horaSeleccionada: @js(old('hora', '')) }"
                 >
                     @csrf
                     <input type="hidden" name="profesional" value="{{ $profesional?->id }}">
