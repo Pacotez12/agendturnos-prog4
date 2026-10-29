@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\InvitacionProfesional;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -20,6 +21,13 @@ use Tests\TestCase;
 class AdminProfesionalesTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+    }
 
     public function test_listado_muestra_estado_activa_y_sin_servicios(): void
     {
@@ -398,5 +406,87 @@ class AdminProfesionalesTest extends TestCase
         $this->assertStringContainsString('no se pudo enviar', $mensaje);
 
         Log::shouldHaveReceived('warning')->once();
+    }
+
+    public function test_recuperacion_usada_invalida_invitacion_pendiente(): void
+    {
+        $profesionalUser = User::factory()->profesional()->create([
+            'email' => 'laura.benitez@correo.com',
+            'password' => Hash::make('clave-inicial-random'),
+        ]);
+        Profesional::factory()->create(['user_id' => $profesionalUser->id]);
+
+        $tokenInvitacion = Password::broker('invitaciones')->createToken($profesionalUser);
+        $tokenRecuperacion = Password::broker('users')->createToken($profesionalUser);
+
+        // Usa con éxito el link de recuperación
+        $this->post(route('password.update'), [
+            'token' => $tokenRecuperacion,
+            'email' => 'laura.benitez@correo.com',
+            'password' => 'clave-por-recuperacion',
+            'password_confirmation' => 'clave-por-recuperacion',
+        ])->assertRedirect(route('login'));
+
+        // La invitación vieja ya no debe servir
+        $resInvitacion = $this->post(route('password.update'), [
+            'token' => $tokenInvitacion,
+            'email' => 'laura.benitez@correo.com',
+            'password' => 'clave-por-invitacion',
+            'password_confirmation' => 'clave-por-invitacion',
+        ]);
+
+        $resInvitacion->assertSessionHasErrors([
+            'email' => 'El enlace no es válido o ya venció. Pedí uno nuevo.',
+        ]);
+        $this->assertTrue(Hash::check('clave-por-recuperacion', $profesionalUser->fresh()->password));
+    }
+
+    public function test_invitacion_usada_invalida_recuperacion_pendiente(): void
+    {
+        $profesionalUser = User::factory()->profesional()->create([
+            'email' => 'laura.benitez@correo.com',
+            'password' => Hash::make('clave-inicial-random'),
+        ]);
+        Profesional::factory()->create(['user_id' => $profesionalUser->id]);
+
+        $tokenInvitacion = Password::broker('invitaciones')->createToken($profesionalUser);
+        $tokenRecuperacion = Password::broker('users')->createToken($profesionalUser);
+
+        // Usa con éxito el link de invitación
+        $this->post(route('password.update'), [
+            'token' => $tokenInvitacion,
+            'email' => 'laura.benitez@correo.com',
+            'password' => 'clave-por-invitacion',
+            'password_confirmation' => 'clave-por-invitacion',
+        ])->assertRedirect(route('login'));
+
+        // La recuperación vieja ya no debe servir
+        $resRecuperacion = $this->post(route('password.update'), [
+            'token' => $tokenRecuperacion,
+            'email' => 'laura.benitez@correo.com',
+            'password' => 'clave-por-recuperacion',
+            'password_confirmation' => 'clave-por-recuperacion',
+        ]);
+
+        $resRecuperacion->assertSessionHasErrors([
+            'email' => 'El enlace no es válido o ya venció. Pedí uno nuevo.',
+        ]);
+        $this->assertTrue(Hash::check('clave-por-invitacion', $profesionalUser->fresh()->password));
+    }
+
+    public function test_sexto_post_seguido_a_restablecer_contrasena_devuelve_429(): void
+    {
+        $datos = [
+            'token' => 'token-invalido',
+            'email' => '  LAURA.BENITEZ@correo.com ',
+            'password' => 'clave-segura-123',
+            'password_confirmation' => 'clave-segura-123',
+        ];
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('password.update'), $datos)->assertStatus(302);
+        }
+
+        $this->post(route('password.update'), $datos)->assertStatus(429);
     }
 }

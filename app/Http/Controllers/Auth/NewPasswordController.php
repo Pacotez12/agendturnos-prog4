@@ -46,6 +46,9 @@ class NewPasswordController extends Controller
 
             $user->tokens()->delete();
 
+            Password::broker('users')->deleteToken($user);
+            Password::broker('invitaciones')->deleteToken($user);
+
             event(new PasswordReset($user));
         };
 
