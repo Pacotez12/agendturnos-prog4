@@ -294,4 +294,31 @@ class MisTurnosApiTest extends TestCase
         $this->assertSame(25, $response->json('meta.total'));
         $this->assertSame(20, $response->json('meta.per_page'));
     }
+
+    public function test_paginacion_de_historial_conserva_parametro_historial_en_link_next(): void
+    {
+        for ($i = 0; $i < 25; $i++) {
+            $inicio = Carbon::yesterday('America/Asuncion')->subDays($i)->setTime(9, 0);
+            Turno::factory()->create([
+                'paciente_id' => $this->pacienteTitular->id,
+                'profesional_id' => $this->profesional->id,
+                'servicio_id' => $this->servicio->id,
+                'consultorio_id' => $this->consultorio->id,
+                'inicio' => $inicio,
+                'fin' => $inicio->copy()->addMinutes(30),
+                'estado' => EstadoTurno::Atendido,
+            ]);
+        }
+
+        $token = $this->usuarioPaciente->createToken('iPhone')->plainTextToken;
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/v1/mis-turnos?historial=1');
+
+        $response->assertOk();
+        $this->assertCount(20, $response->json('data'));
+        $nextLink = $response->json('links.next');
+        $this->assertNotNull($nextLink);
+        $this->assertStringContainsString('historial=1', $nextLink);
+    }
 }

@@ -183,4 +183,35 @@ class RestablecerContrasenaTest extends TestCase
         $this->assertStringContainsString('images/glow-logo.png', $html);
         $this->assertStringNotContainsString('Regards', $html);
     }
+
+    public function test_sesion_web_previa_queda_deslogueada_al_restablecer_contrasena(): void
+    {
+        $user = User::factory()->paciente()->create([
+            'email' => 'paciente@ejemplo.com',
+            'password' => Hash::make('clave-anterior-123'),
+        ]);
+
+        // 1. Iniciamos sesión web normalmente
+        $loginRes = $this->post(route('login'), [
+            'email' => 'paciente@ejemplo.com',
+            'password' => 'clave-anterior-123',
+        ]);
+        $loginRes->assertRedirect(route('paciente.inicio'));
+        $this->assertAuthenticatedAs($user);
+
+        // 2. Comprobamos que la sesión puede acceder a una ruta protegida
+        $this->get(route('paciente.inicio'))->assertOk();
+
+        // 3. Se restablece la contraseña del usuario (cambia el hash)
+        $user->forceFill([
+            'password' => Hash::make('nueva-clave-segura'),
+        ])->save();
+
+        $this->app['auth']->forgetGuards();
+
+        // 4. La sesión previa intenta acceder a la ruta protegida y queda deslogueada
+        $response = $this->get(route('paciente.inicio'));
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
 }

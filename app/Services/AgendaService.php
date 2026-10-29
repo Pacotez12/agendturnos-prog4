@@ -514,6 +514,12 @@ class AgendaService
                 throw new TransicionInvalida("No se puede {$accion} un turno en estado {$turnoActual->estado->value}.");
             }
 
+            if ($nuevo === EstadoTurno::Cancelado && $usuario->rol === RolUsuario::Paciente) {
+                if (! $this->puedeCancelarPaciente($turnoActual)) {
+                    throw new TransicionInvalida('No se puede cancelar el turno con menos de '.config('agenda.cancelacion_horas', 24).' horas de anticipación.');
+                }
+            }
+
             if (in_array($nuevo, [EstadoTurno::Atendido, EstadoTurno::Ausente], true)) {
                 $tz = config('app.timezone', 'America/Asuncion');
                 if (Carbon::parse($turnoActual->inicio)->setTimezone($tz)->gt(now($tz))) {

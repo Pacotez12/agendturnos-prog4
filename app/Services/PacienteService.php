@@ -70,6 +70,10 @@ class PacienteService
             $familiares = Paciente::where('responsable_id', $paciente->user_id)
                 ->orderBy('nombre')
                 ->get();
+
+            if ($user->rol === RolUsuario::Profesional) {
+                $familiares = $familiares->filter(fn (Paciente $f) => $user->can('view', $f))->values();
+            }
         }
 
         $responsablePaciente = $paciente->responsable?->paciente;

@@ -108,6 +108,8 @@ class DisponibilidadController extends Controller
         $consultorioId = Consultorio::where('activo', true)->value('id') ?? Consultorio::value('id');
 
         DB::transaction(function () use ($profesional, $request, $consultorioId) {
+            Profesional::whereKey($profesional->id)->lockForUpdate()->first();
+
             $profesional->disponibilidades()->delete();
 
             $franjas = $request->validated('franjas', []);

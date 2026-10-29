@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\RolUsuario;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +19,10 @@ class EnsureRol
         $user = $request->user();
 
         if (! $user || ! in_array($user->rol?->value, $roles, true)) {
+            abort(403);
+        }
+
+        if ($user->rol === RolUsuario::Profesional && ! $user->profesional) {
             abort(403);
         }
 
