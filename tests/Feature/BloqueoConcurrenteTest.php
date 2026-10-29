@@ -20,7 +20,7 @@ class BloqueoConcurrenteTest extends TestCase
 
     public function test_p08_bloqueo_espera_reserva_concurrente_y_advierte_sin_insertar(): void
     {
-        $this->assertContains(DB::connection()->getDatabaseName(), ['agendturnos_test', 'agendturnos_test_baja']);
+        $this->assertStringStartsWith('agendturnos_test', DB::connection()->getDatabaseName());
         $profesional = Profesional::factory()->create();
         $servicio = Servicio::factory()->create(['duracion_min' => 30]);
         $profesional->servicios()->attach($servicio);

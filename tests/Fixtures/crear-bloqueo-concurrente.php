@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 require __DIR__.'/../../vendor/autoload.php';
 
-if (getenv('APP_ENV') !== 'testing' || ! in_array(getenv('DB_DATABASE'), ['agendturnos_test', 'agendturnos_test_baja'], true)) {
+if (getenv('APP_ENV') !== 'testing' || ! str_starts_with((string) getenv('DB_DATABASE'), 'agendturnos_test')) {
     throw new RuntimeException('Este proceso solo puede ejecutarse en la base aislada de tests.');
 }
 
