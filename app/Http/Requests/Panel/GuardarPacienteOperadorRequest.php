@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Panel;
 
-use App\Models\Paciente;
 use App\Rules\CelularParaguay;
+use App\Services\PacienteService;
 use App\Support\Telefono;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -63,8 +63,13 @@ class GuardarPacienteOperadorRequest extends FormRequest
         $validator->after(function ($validator) {
             $docResponsable = $this->input('responsable_documento');
             if ($docResponsable) {
-                $responsable = Paciente::where('documento', $docResponsable)->first();
-                if (! $responsable || ! $responsable->user_id) {
+                $candidatos = app(PacienteService::class)->buscarResponsablesPorDocumento($docResponsable);
+                if ($candidatos->count() > 1) {
+                    $validator->errors()->add(
+                        'responsable_documento',
+                        'Hay más de una persona con ese número de documento. Revisá los datos del responsable.'
+                    );
+                } elseif ($candidatos->isEmpty()) {
                     $validator->errors()->add(
                         'responsable_documento',
                         'El documento del responsable debe pertenecer a un paciente con cuenta activa.'

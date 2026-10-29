@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\Paciente;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class TokenApiTest extends TestCase
@@ -125,5 +127,77 @@ class TokenApiTest extends TestCase
         ]);
 
         $response->assertStatus(429);
+    }
+
+    public function test_token_creado_hace_31_dias_recibe_401(): void
+    {
+        $user = User::factory()->paciente()->create();
+        Paciente::factory()->create(['user_id' => $user->id]);
+        $token = $user->createToken('TestDevice')->plainTextToken;
+
+        // Simulamos que el token fue creado hace 31 días
+        $user->tokens()->update(['created_at' => now()->subDays(31)]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/v1/mis-turnos');
+
+        $response->assertStatus(401);
+    }
+
+    public function test_token_expira_segun_configuracion_personalizada(): void
+    {
+        config(['sanctum.expiration' => 1]);
+
+        $user = User::factory()->paciente()->create();
+        Paciente::factory()->create(['user_id' => $user->id]);
+        $token = $user->createToken('TestDevice')->plainTextToken;
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/v1/mis-turnos')
+            ->assertOk();
+
+        $user->tokens()->update(['created_at' => now()->subMinutes(2)]);
+
+        $this->app['auth']->forgetGuards();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/v1/mis-turnos');
+
+        $response->assertStatus(401);
+    }
+
+    public function test_despues_de_restablecer_contrasena_el_token_anterior_recibe_401(): void
+    {
+        $user = User::factory()->paciente()->create([
+            'email' => 'paciente@test.com',
+            'password' => Hash::make('clave-anterior-123'),
+        ]);
+        Paciente::factory()->create(['user_id' => $user->id]);
+        $token = $user->createToken('AppMovil')->plainTextToken;
+
+        // El token funciona inicialmente
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/v1/mis-turnos')
+            ->assertOk();
+
+        $this->app['auth']->forgetGuards();
+        $this->flushHeaders();
+
+        // Restablecemos la contraseña vía web
+        $resetToken = Password::broker()->createToken($user);
+        $this->post(route('password.update'), [
+            'token' => $resetToken,
+            'email' => 'paciente@test.com',
+            'password' => 'nueva-clave-segura',
+            'password_confirmation' => 'nueva-clave-segura',
+        ])->assertRedirect(route('login'));
+
+        $this->app['auth']->forgetGuards();
+
+        // El token previo debe ser rechazado con 401
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/v1/mis-turnos');
+
+        $response->assertStatus(401);
     }
 }

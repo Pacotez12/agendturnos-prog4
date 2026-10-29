@@ -117,4 +117,28 @@ class PacienteService
 
         $paciente->update($updates);
     }
+
+    /**
+     * Busca los pacientes con cuenta activa asociados a un número de documento.
+     *
+     * @return Collection<int, Paciente>
+     */
+    public function buscarResponsablesPorDocumento(string $documento): Collection
+    {
+        return Paciente::query()
+            ->where('documento', $documento)
+            ->whereNotNull('user_id')
+            ->get();
+    }
+
+    /**
+     * Resuelve el responsable único con cuenta activa por número de documento.
+     * Retorna el paciente si hay exactamente uno; null si no existe o hay ambigüedad.
+     */
+    public function resolverResponsablePorDocumento(string $documento): ?Paciente
+    {
+        $candidatos = $this->buscarResponsablesPorDocumento($documento);
+
+        return $candidatos->count() === 1 ? $candidatos->first() : null;
+    }
 }

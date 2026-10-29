@@ -47,13 +47,13 @@ class PacienteController extends Controller
             ->with('success', 'Datos de contacto actualizados correctamente.');
     }
 
-    public function store(GuardarPacienteOperadorRequest $request): RedirectResponse
+    public function store(GuardarPacienteOperadorRequest $request, PacienteService $pacienteService): RedirectResponse
     {
         $data = $request->validated();
 
         $responsableId = null;
         if (! empty($data['responsable_documento'])) {
-            $responsable = Paciente::where('documento', $data['responsable_documento'])->first();
+            $responsable = $pacienteService->resolverResponsablePorDocumento($data['responsable_documento']);
             $responsableId = $responsable?->user_id;
         }
 
