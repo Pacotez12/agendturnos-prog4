@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\EstadoNotificacion;
 use App\Enums\EstadoTurno;
 use App\Models\Turno;
 use App\Services\NotificacionService;
@@ -22,15 +23,23 @@ class EnviarRecordatorios extends Command
         $turnos = Turno::where('estado', EstadoTurno::Confirmado)
             ->whereBetween('inicio', [$desde, $hasta])
             ->whereDoesntHave('notificaciones', function ($q) {
-                $q->where('tipo', 'recordatorio');
+                $q->where('tipo', 'recordatorio')
+                    ->whereIn('estado', [
+                        EstadoNotificacion::Pendiente,
+                        EstadoNotificacion::Enviada,
+                    ]);
             })
             ->get();
 
+        $programados = 0;
         foreach ($turnos as $turno) {
-            $notificaciones->programar($turno, 'recordatorio');
+            $notif = $notificaciones->programar($turno, 'recordatorio');
+            if ($notif !== null) {
+                $programados++;
+            }
         }
 
-        $this->info("Se programaron {$turnos->count()} recordatorios.");
+        $this->info("Se programaron {$programados} recordatorios.");
 
         return self::SUCCESS;
     }

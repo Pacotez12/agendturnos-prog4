@@ -173,4 +173,32 @@ class HorarioSilenciosoTest extends TestCase
         $this->assertNotNull($momentoMadrugada);
         $this->assertSame('2026-10-22 08:00:00', $momentoMadrugada->format('Y-m-d H:i:s'));
     }
+
+    public function test_recordatorio_en_horario_silencioso_no_se_programa_si_demora_cae_en_o_despues_de_inicio(): void
+    {
+        Queue::fake();
+
+        // Turno a las 07:30 del día siguiente
+        $this->turno->update([
+            'inicio' => '2026-10-21 07:30:00',
+            'fin' => '2026-10-21 08:00:00',
+        ]);
+
+        // A las 22:30 de la noche anterior (horario silencioso: demora hasta las 08:00 de mañana >= 07:30)
+        Carbon::setTestNow(Carbon::parse('2026-10-20 22:30:00', config('app.timezone')));
+
+        $resultado = $this->servicio->programar($this->turno, 'recordatorio');
+
+        $this->assertNull($resultado);
+        Queue::assertNothingPushed();
+        $this->assertDatabaseMissing('notificaciones', [
+            'turno_id' => $this->turno->id,
+            'tipo' => 'recordatorio',
+        ]);
+
+        // En cambio, una confirmación en el mismo escenario SÍ se programa con delay
+        $confirmacion = $this->servicio->programar($this->turno, 'confirmacion');
+        $this->assertNotNull($confirmacion);
+        Queue::assertPushed(EnviarNotificacion::class);
+    }
 }

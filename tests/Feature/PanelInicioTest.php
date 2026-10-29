@@ -15,6 +15,7 @@ use App\Models\Turno;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
@@ -312,5 +313,65 @@ class PanelInicioTest extends TestCase
             ->assertSessionHas('error');
 
         Queue::assertNothingPushed();
+    }
+
+    public function test_reenviar_recordatorio_bloquea_si_ya_hay_un_recordatorio_pendiente(): void
+    {
+        Queue::fake();
+
+        $turno = $this->crearTurno('2026-10-23 15:00:00', '2026-10-23 15:30:00', EstadoTurno::Confirmado);
+
+        Notificacion::create([
+            'turno_id' => $turno->id,
+            'destinatario_id' => $this->pacienteUser->id,
+            'tipo' => 'recordatorio',
+            'canal' => 'correo',
+            'estado' => EstadoNotificacion::Pendiente,
+        ]);
+
+        $response = $this->actingAs($this->funcionario)
+            ->post("/panel/turnos/{$turno->id}/recordatorio");
+
+        $response->assertSessionHas('error');
+        $this->assertStringContainsString('pendiente', session('error'));
+        Queue::assertNothingPushed();
+    }
+
+    public function test_reenviar_recordatorio_bloquea_si_hay_lock_activo_en_proceso(): void
+    {
+        Queue::fake();
+
+        $turno = $this->crearTurno('2026-10-23 15:00:00', '2026-10-23 15:30:00', EstadoTurno::Confirmado);
+
+        $lock = Cache::lock("recordatorio_turno_{$turno->id}", 10);
+        $this->assertTrue($lock->get());
+
+        try {
+            $response = $this->actingAs($this->funcionario)
+                ->post("/panel/turnos/{$turno->id}/recordatorio");
+
+            $response->assertSessionHas('error');
+            $this->assertStringContainsString('proceso', session('error'));
+            Queue::assertNothingPushed();
+        } finally {
+            $lock->release();
+        }
+    }
+
+    public function test_ruta_recordatorio_tiene_throttle(): void
+    {
+        Queue::fake();
+
+        $turno = $this->crearTurno('2026-10-23 15:00:00', '2026-10-23 15:30:00', EstadoTurno::Confirmado);
+
+        $this->actingAs($this->funcionario);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post("/panel/turnos/{$turno->id}/recordatorio");
+        }
+
+        // El 6to intento dentro del mismo minuto debe responder con 429 Too Many Requests
+        $response = $this->post("/panel/turnos/{$turno->id}/recordatorio");
+        $response->assertStatus(429);
     }
 }

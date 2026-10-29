@@ -25,7 +25,8 @@ class EnviarNotificacion implements ShouldQueue
      */
     public function __construct(
         public Notificacion $notificacion,
-        public array $datos = []
+        public array $datos = [],
+        public ?string $version = null,
     ) {}
 
     public function handle(WhatsAppService $whatsApp): void
@@ -36,7 +37,22 @@ class EnviarNotificacion implements ShouldQueue
             return;
         }
 
+        if ($this->version !== null && $this->notificacion->updated_at?->format('Y-m-d H:i:s.u') !== $this->version) {
+            return;
+        }
+
         $turno = $this->notificacion->turno?->fresh();
+
+        if ($this->notificacion->tipo === 'recordatorio') {
+            if (! $turno || $turno->estado !== EstadoTurno::Confirmado || $turno->inicio->isPast()) {
+                $this->notificacion->update([
+                    'estado' => EstadoNotificacion::Fallida,
+                ]);
+
+                return;
+            }
+        }
+
         if ($turno && $turno->estado === EstadoTurno::Cancelado && $this->notificacion->tipo !== 'cancelacion') {
             // El turno se canceló mientras el aviso esperaba en la cola: ya no corresponde enviarlo
             $this->notificacion->delete();
@@ -47,10 +63,23 @@ class EnviarNotificacion implements ShouldQueue
         $destinatario = $this->notificacion->destinatario;
         $destinatario->notify(new AvisoTurno($this->notificacion, $this->datos));
 
-        $this->notificacion->update([
-            'estado' => EstadoNotificacion::Enviada,
-            'enviado_at' => now(),
-        ]);
+        if ($this->version !== null) {
+            $actualizados = Notificacion::where('id', $this->notificacion->id)
+                ->where('updated_at', $this->version)
+                ->update([
+                    'estado' => EstadoNotificacion::Enviada,
+                    'enviado_at' => now(),
+                ]);
+
+            if ($actualizados === 0) {
+                return;
+            }
+        } else {
+            $this->notificacion->update([
+                'estado' => EstadoNotificacion::Enviada,
+                'enviado_at' => now(),
+            ]);
+        }
 
         try {
             $whatsApp->enviarAviso($this->notificacion, $this->datos);
