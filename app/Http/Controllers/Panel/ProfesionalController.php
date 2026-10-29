@@ -9,6 +9,7 @@ use App\Models\Especialidad;
 use App\Models\Profesional;
 use App\Models\User;
 use App\Notifications\InvitacionProfesional;
+use App\Services\ProfesionalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,28 @@ use Throwable;
 
 class ProfesionalController extends Controller
 {
+    public function baja(Profesional $profesional, ProfesionalService $service): RedirectResponse
+    {
+        $cantidad = $service->baja($profesional);
+
+        if ($cantidad > 0) {
+            return redirect()->route('panel.profesionales')->with('baja_bloqueada', [
+                'profesional_id' => $profesional->id,
+                'nombre' => $profesional->nombreCompleto(),
+                'cantidad' => $cantidad,
+            ]);
+        }
+
+        return redirect()->route('panel.profesionales')->with('success', 'Profesional dada de baja.');
+    }
+
+    public function reactivar(Profesional $profesional, ProfesionalService $service): RedirectResponse
+    {
+        $service->reactivar($profesional);
+
+        return redirect()->route('panel.profesionales')->with('success', 'Profesional reactivada.');
+    }
+
     /**
      * Display a listing of professionals.
      */
@@ -28,6 +51,7 @@ class ProfesionalController extends Controller
     {
         $profesionales = Profesional::with('user')
             ->withCount('servicios')
+            ->orderByDesc('activo')
             ->ordenados()
             ->get();
 

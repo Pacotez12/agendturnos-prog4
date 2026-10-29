@@ -36,6 +36,10 @@ class AgendaController extends Controller
             ->get();
         $conteoPendientes = $agenda->solicitudesPendientes($user)->count();
 
+        if ($vista === 'semana' && ! $request->filled('profesional') && ! Profesional::activas()->exists()) {
+            $vista = 'dia';
+        }
+
         if ($vista === 'semana') {
             $profesionalId = $request->input('profesional');
             $profesional = $profesionalId ? Profesional::find($profesionalId) : null;

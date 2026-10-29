@@ -88,6 +88,7 @@ Profesionales que atienden. Cada una tiene su cuenta.
 | `apellido` | VARCHAR(100) | no |  |  | Apellido |
 | `matricula` | VARCHAR(30) | no | UQ |  | Matrícula profesional |
 | `orden` | SMALLINT | no |  | '100' | Posición en las listas (menor primero) |
+| `activo` | BOOLEAN | no | índice | true | Habilita acceso y nuevas reservas; la baja conserva el historial, servicios y horarios |
 
 ### `especialidades`
 

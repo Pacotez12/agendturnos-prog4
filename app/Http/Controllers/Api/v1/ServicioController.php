@@ -18,7 +18,7 @@ class ServicioController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $servicios = Servicio::with(['especialidad', 'profesionales'])
+        $servicios = Servicio::with(['especialidad', 'profesionales' => fn ($q) => $q->activas()])
             ->where('activo', true)
             ->whereHas('especialidad', fn ($q) => $q->where('activa', true))
             ->orderBy('nombre')

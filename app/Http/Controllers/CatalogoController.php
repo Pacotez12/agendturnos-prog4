@@ -23,7 +23,7 @@ class CatalogoController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        $query = Servicio::with(['especialidad', 'profesionales'])
+        $query = Servicio::with(['especialidad', 'profesionales' => fn ($q) => $q->activas()])
             ->where('activo', true)
             ->whereHas('especialidad', fn ($q) => $q->where('activa', true));
 

@@ -39,7 +39,7 @@ class DisponibilidadController extends Controller
                 return Profesional::findOrFail($request->input('profesional_id'));
             }
 
-            return Profesional::ordenados()->firstOrFail();
+            return Profesional::activas()->ordenados()->firstOrFail();
         }
 
         abort(403);
@@ -47,10 +47,15 @@ class DisponibilidadController extends Controller
 
     public function index(Request $request, DisponibilidadService $disponibilidadService): View
     {
+        if ($request->user()->rol === RolUsuario::Funcionario
+            && ! $request->filled('profesional_id') && ! Profesional::activas()->exists()) {
+            return view('panel.profesionales.sin-activas');
+        }
+
         $profesional = $this->resolverProfesional($request);
 
         $profesionales = ($request->user()->rol === RolUsuario::Funcionario)
-            ? Profesional::ordenados()->get()
+            ? Profesional::activas()->ordenados()->get()
             : collect([$profesional]);
 
         $disponibilidades = $profesional->disponibilidades()

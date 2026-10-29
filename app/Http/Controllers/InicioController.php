@@ -9,7 +9,7 @@ class InicioController extends Controller
 {
     public function __invoke(): View
     {
-        $profesionales = Profesional::with(['servicios.especialidad'])
+        $profesionales = Profesional::activas()->with(['servicios.especialidad'])
             ->ordenados()
             ->get();
 

@@ -38,7 +38,7 @@ class ReservaService
      */
     public function opciones(?int $profesionalId, ?int $servicioId, ?string $fecha): array
     {
-        $profesionales = Profesional::ordenados()->get();
+        $profesionales = Profesional::activas()->ordenados()->get();
         $profesional = $profesionalId ? $profesionales->firstWhere('id', $profesionalId) : null;
 
         $servicios = $profesional
@@ -119,6 +119,8 @@ class ReservaService
 
         try {
             return DB::transaction(function () use ($profesional, $servicio, $paciente, $inicioCarbon, $finCarbon, $usuario, $estado, $detalleHistorial, $validarLimiteSolicitudes) {
+                $profesional = Profesional::whereKey($profesional->id)->lockForUpdate()->firstOrFail();
+
                 if ($validarLimiteSolicitudes) {
                     User::where('id', $usuario->id)->lockForUpdate()->first();
 

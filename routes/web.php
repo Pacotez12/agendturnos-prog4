@@ -76,6 +76,8 @@ Route::middleware(['auth', 'rol:funcionario'])->group(function () {
         Route::get('/', [ProfesionalController::class, 'index'])->name('panel.profesionales');
         Route::post('/', [ProfesionalController::class, 'store'])->name('panel.profesionales.store');
         Route::put('/{profesional}', [ProfesionalController::class, 'update'])->name('panel.profesionales.update');
+        Route::post('/{profesional}/baja', [ProfesionalController::class, 'baja'])->name('panel.profesionales.baja');
+        Route::post('/{profesional}/reactivar', [ProfesionalController::class, 'reactivar'])->name('panel.profesionales.reactivar');
         Route::get('/{profesional}/servicios', [ProfesionalController::class, 'servicios'])->name('panel.profesionales.servicios');
         Route::put('/{profesional}/servicios', [ProfesionalController::class, 'updateServicios'])->name('panel.profesionales.servicios.update');
     });

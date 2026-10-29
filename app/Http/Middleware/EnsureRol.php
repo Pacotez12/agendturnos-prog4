@@ -22,7 +22,7 @@ class EnsureRol
             abort(403);
         }
 
-        if ($user->rol === RolUsuario::Profesional && ! $user->profesional) {
+        if ($user->rol === RolUsuario::Profesional && ! $user->profesional()->activas()->exists()) {
             abort(403);
         }
 
