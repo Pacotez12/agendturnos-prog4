@@ -15,6 +15,10 @@ class HorarioSemanalRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if ($this->boolean('guardar_horario') && ! $this->exists('franjas')) {
+            $this->merge(['franjas' => []]);
+        }
+
         if ($this->has('franjas') && is_array($this->franjas)) {
             $this->merge([
                 'franjas' => array_values($this->franjas),
@@ -29,6 +33,7 @@ class HorarioSemanalRequest extends FormRequest
     {
         return [
             'profesional_id' => ['sometimes', 'nullable', 'integer', 'exists:profesionales,id'],
+            'guardar_horario' => ['sometimes', 'boolean'],
             'franjas' => ['present', 'array'],
             'franjas.*.dia_semana' => ['required', 'integer', 'between:1,7'],
             'franjas.*.hora_inicio' => ['required', 'date_format:H:i'],

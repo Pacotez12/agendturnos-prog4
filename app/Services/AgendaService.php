@@ -555,57 +555,61 @@ class AgendaService
 
     public function reprogramar(Turno $turno, CarbonInterface $nuevoInicio, User $usuario): Turno
     {
-        if (! in_array($turno->estado, [EstadoTurno::Solicitado, EstadoTurno::Confirmado], true)) {
-            throw new TransicionInvalida("No se puede reprogramar un turno en estado {$turno->estado->value}.");
-        }
-
         $tz = config('app.timezone', 'America/Asuncion');
         $inicioCarbon = Carbon::parse($nuevoInicio)->setTimezone($tz);
-        $finCarbon = $inicioCarbon->copy()->addMinutes((int) $turno->servicio->duracion_min);
-
-        if ($inicioCarbon->equalTo($turno->inicio)) {
-            throw new TransicionInvalida('El turno ya está en ese horario. Elegí otro.');
-        }
 
         try {
-            return DB::transaction(function () use ($turno, $inicioCarbon, $finCarbon, $usuario, $tz) {
+            return DB::transaction(function () use ($turno, $inicioCarbon, $usuario, $tz) {
                 Profesional::whereKey($turno->profesional_id)->lockForUpdate()->firstOrFail();
+                $turnoActual = Turno::whereKey($turno->id)->lockForUpdate()->firstOrFail();
 
-                if (! $this->disponibilidad->estaLibre($turno->profesional, $turno->servicio, $inicioCarbon, $turno)) {
+                if (! in_array($turnoActual->estado, [EstadoTurno::Solicitado, EstadoTurno::Confirmado], true)) {
+                    throw new TransicionInvalida("No se puede reprogramar un turno en estado {$turnoActual->estado->value}.");
+                }
+
+                if ($inicioCarbon->equalTo($turnoActual->inicio)) {
+                    throw new TransicionInvalida('El turno ya está en ese horario. Elegí otro.');
+                }
+
+                $finCarbon = $inicioCarbon->copy()->addMinutes((int) $turnoActual->servicio->duracion_min);
+
+                if (! $this->disponibilidad->estaLibre($turnoActual->profesional, $turnoActual->servicio, $inicioCarbon, $turnoActual)) {
                     throw new HorarioNoDisponible('El horario seleccionado no está disponible.');
                 }
 
-                if (! $this->disponibilidad->pacienteLibre($turno->paciente, $inicioCarbon, $finCarbon, $turno)) {
-                    throw PacienteConTurnoEnHorario::para($turno->paciente);
+                if (! $this->disponibilidad->pacienteLibre($turnoActual->paciente, $inicioCarbon, $finCarbon, $turnoActual)) {
+                    throw PacienteConTurnoEnHorario::para($turnoActual->paciente);
                 }
 
-                $consultorioId = $this->disponibilidad->consultorioPara($turno->profesional, $inicioCarbon);
+                $consultorioId = $this->disponibilidad->consultorioPara($turnoActual->profesional, $inicioCarbon, $finCarbon);
 
-                $inicioAnterior = Carbon::parse($turno->inicio)->setTimezone($tz);
+                $inicioAnterior = Carbon::parse($turnoActual->inicio)->setTimezone($tz);
                 $detalle = sprintf(
                     'Reprogramado del %s al %s',
                     $inicioAnterior->format('d/m H:i'),
                     $inicioCarbon->format('d/m H:i')
                 );
 
-                $turno->inicio = $inicioCarbon;
-                $turno->fin = $finCarbon;
-                $turno->consultorio_id = $consultorioId;
-                $turno->save();
+                $turnoActual->inicio = $inicioCarbon;
+                $turnoActual->fin = $finCarbon;
+                $turnoActual->consultorio_id = $consultorioId;
+                $turnoActual->save();
 
-                $turno->historial()->create([
-                    'estado_anterior' => $turno->estado,
-                    'estado_nuevo' => $turno->estado,
+                $turnoActual->historial()->create([
+                    'estado_anterior' => $turnoActual->estado,
+                    'estado_nuevo' => $turnoActual->estado,
                     'usuario_id' => $usuario->id,
                     'detalle' => $detalle,
                 ]);
 
-                Notificacion::where('turno_id', $turno->id)->where('tipo', 'recordatorio')->delete();
-                $this->notificaciones->programar($turno, 'reprogramacion', [
+                Notificacion::where('turno_id', $turnoActual->id)->where('tipo', 'recordatorio')->delete();
+                $this->notificaciones->programar($turnoActual, 'reprogramacion', [
                     'anterior' => $inicioAnterior->toIso8601String(),
                 ]);
 
-                return $turno;
+                $turno->setRawAttributes($turnoActual->getAttributes(), true);
+
+                return $turnoActual;
             });
         } catch (QueryException $e) {
             if ($choque = PacienteConTurnoEnHorario::siSolapamiento($e, $turno->paciente)) {

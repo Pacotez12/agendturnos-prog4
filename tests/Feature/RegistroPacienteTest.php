@@ -5,12 +5,20 @@ namespace Tests\Feature;
 use App\Models\Paciente;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class RegistroPacienteTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+    }
 
     public function test_usuario_puede_registrarse_exitosamente(): void
     {
@@ -61,9 +69,12 @@ class RegistroPacienteTest extends TestCase
             'email' => 'existente@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'privacidad' => '1',
         ]);
 
-        $response->assertSessionHasErrors('email');
+        $response->assertSessionHasErrors([
+            'email' => 'No pudimos crear la cuenta con esos datos. Si ya sos paciente de la clínica, escribinos por WhatsApp y lo resolvemos.',
+        ]);
     }
 
     public function test_documento_repetido_falla_y_no_crea_usuario(): void
@@ -87,12 +98,60 @@ class RegistroPacienteTest extends TestCase
             'email' => 'pedro@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'privacidad' => '1',
         ]);
 
-        $response->assertSessionHasErrors('documento');
+        $response->assertSessionHasErrors([
+            'documento' => 'No pudimos crear la cuenta con esos datos. Si ya sos paciente de la clínica, escribinos por WhatsApp y lo resolvemos.',
+        ]);
         $this->assertDatabaseMissing('users', [
             'email' => 'pedro@example.com',
         ]);
+    }
+
+    public function test_documento_repetido_combinado_con_otro_campo_invalido_no_permite_distinguir_si_existe(): void
+    {
+        $userExistente = User::factory()->create();
+        Paciente::create([
+            'user_id' => $userExistente->id,
+            'nombre' => 'Carlos',
+            'apellido' => 'Ruiz',
+            'tipo_documento' => 'CI',
+            'documento' => '11223344',
+            'fecha_nacimiento' => '1985-01-01',
+        ]);
+
+        $conExistente = $this->post('/registro', [
+            'nombre' => 'Pedro',
+            'apellido' => 'Benítez',
+            'tipo_documento' => 'CI',
+            'documento' => '11223344',
+            'fecha_nacimiento' => '1992-03-10',
+            'email' => 'pedro@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'otra-clave',
+            'privacidad' => '1',
+        ]);
+        $conExistente->assertSessionHasErrors('password');
+        $conExistente->assertSessionDoesntHaveErrors('documento');
+        $erroresConExistente = $conExistente->getSession()->get('errors')->toArray();
+
+        $conInexistente = $this->post('/registro', [
+            'nombre' => 'Pedro',
+            'apellido' => 'Benítez',
+            'tipo_documento' => 'CI',
+            'documento' => '99887766',
+            'fecha_nacimiento' => '1992-03-10',
+            'email' => 'pedro@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'otra-clave',
+            'privacidad' => '1',
+        ]);
+        $conInexistente->assertSessionHasErrors('password');
+        $conInexistente->assertSessionDoesntHaveErrors('documento');
+        $erroresConInexistente = $conInexistente->getSession()->get('errors')->toArray();
+
+        $this->assertSame($erroresConInexistente, $erroresConExistente);
     }
 
     public function test_contrasena_queda_hasheada(): void

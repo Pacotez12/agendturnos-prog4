@@ -192,11 +192,36 @@ class MiFamiliaTest extends TestCase
         $this->actingAs($this->tutor)
             ->post(route('paciente.familia.store'), $this->datosValidos(['documento' => '6543210']))
             ->assertSessionHasErrors([
-                'documento' => 'Esa persona ya está registrada en la clínica. Escribinos por WhatsApp y la vinculamos a tu cuenta.',
+                'documento' => 'No pudimos agregar a esa persona con esos datos. Escribinos por WhatsApp y lo resolvemos.',
             ]);
 
         $this->assertSame(1, Paciente::where('documento', '6543210')->count());
         $this->assertNull($existente->fresh()->responsable_id);
+    }
+
+    public function test_documento_repetido_con_otro_campo_invalido_no_revela_si_el_documento_existe(): void
+    {
+        Paciente::factory()->create(['documento' => '6543210', 'tipo_documento' => 'CI']);
+
+        $conExistente = $this->actingAs($this->tutor)
+            ->post(route('paciente.familia.store'), $this->datosValidos([
+                'documento' => '6543210',
+                'fecha_nacimiento' => '2026-12-01',
+            ]));
+        $conExistente->assertSessionHasErrors('fecha_nacimiento');
+        $conExistente->assertSessionDoesntHaveErrors('documento');
+        $erroresConExistente = $conExistente->getSession()->get('errors')->toArray();
+
+        $conInexistente = $this->actingAs($this->tutor)
+            ->post(route('paciente.familia.store'), $this->datosValidos([
+                'documento' => '9999999',
+                'fecha_nacimiento' => '2026-12-01',
+            ]));
+        $conInexistente->assertSessionHasErrors('fecha_nacimiento');
+        $conInexistente->assertSessionDoesntHaveErrors('documento');
+        $erroresConInexistente = $conInexistente->getSession()->get('errors')->toArray();
+
+        $this->assertSame($erroresConInexistente, $erroresConExistente);
     }
 
     public function test_edita_un_familiar_propio(): void

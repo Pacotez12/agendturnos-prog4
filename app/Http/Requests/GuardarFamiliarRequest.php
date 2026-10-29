@@ -5,9 +5,12 @@ namespace App\Http\Requests;
 use App\Models\Paciente;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class GuardarFamiliarRequest extends FormRequest
 {
+    public const MENSAJE_DOCUMENTO_NO_DISPONIBLE = 'No pudimos agregar a esa persona con esos datos. Escribinos por WhatsApp y lo resolvemos.';
+
     /**
      * Al editar, solo el responsable del familiar puede hacerlo.
      */
@@ -31,15 +34,31 @@ class GuardarFamiliarRequest extends FormRequest
             'nombre' => ['required', 'string', 'max:100'],
             'apellido' => ['required', 'string', 'max:100'],
             'tipo_documento' => ['required', 'string', Rule::in(['CI', 'pasaporte'])],
-            'documento' => [
-                'required',
-                'string',
-                'max:30',
-                Rule::unique('pacientes', 'documento')
-                    ->where(fn ($q) => $q->where('tipo_documento', $this->tipo_documento))
-                    ->ignore($this->route('paciente')),
-            ],
+            'documento' => ['required', 'string', 'max:30'],
             'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today'],
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                $familiar = $this->route('paciente');
+
+                $existe = Paciente::query()
+                    ->where('tipo_documento', $this->input('tipo_documento'))
+                    ->where('documento', $this->input('documento'))
+                    ->when($familiar instanceof Paciente, fn ($q) => $q->whereKeyNot($familiar->id))
+                    ->exists();
+
+                if ($existe) {
+                    $validator->errors()->add('documento', self::MENSAJE_DOCUMENTO_NO_DISPONIBLE);
+                }
+            },
         ];
     }
 
@@ -54,7 +73,6 @@ class GuardarFamiliarRequest extends FormRequest
             'tipo_documento.required' => 'Elegí el tipo de documento.',
             'tipo_documento.in' => 'El tipo de documento debe ser CI o pasaporte.',
             'documento.required' => 'Escribí el número de documento.',
-            'documento.unique' => 'Esa persona ya está registrada en la clínica. Escribinos por WhatsApp y la vinculamos a tu cuenta.',
             'fecha_nacimiento.required' => 'Elegí la fecha de nacimiento.',
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
         ];

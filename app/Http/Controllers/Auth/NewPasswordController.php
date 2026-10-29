@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -39,15 +40,19 @@ class NewPasswordController extends Controller
         $credentials = $request->only('email', 'password', 'password_confirmation', 'token');
 
         $callback = function (User $user, string $password) {
-            $user->forceFill([
-                'password' => Hash::make($password),
-                'remember_token' => Str::random(60),
-            ])->save();
+            DB::transaction(function () use ($user, $password) {
+                User::whereKey($user->id)->lockForUpdate()->firstOrFail();
 
-            $user->tokens()->delete();
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
 
-            Password::broker('users')->deleteToken($user);
-            Password::broker('invitaciones')->deleteToken($user);
+                $user->tokens()->delete();
+
+                Password::broker('users')->deleteToken($user);
+                Password::broker('invitaciones')->deleteToken($user);
+            });
 
             event(new PasswordReset($user));
         };
