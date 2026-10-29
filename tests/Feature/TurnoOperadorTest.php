@@ -618,4 +618,20 @@ class TurnoOperadorTest extends TestCase
 
         $response->assertForbidden();
     }
+
+    public function test_escapa_correctamente_hora_en_old_input_en_crear_turno(): void
+    {
+        $response = $this->actingAs($this->funcionario)
+            ->withSession(['_old_input' => ['hora' => "x';PRUEBA=1;'"]])
+            ->get(route('panel.turnos.crear', [
+                'paciente' => $this->paciente->id,
+                'profesional' => $this->profesional2->id,
+                'servicio' => $this->servicio->id,
+                'fecha' => '2026-10-23',
+            ]));
+
+        $response->assertOk();
+        $response->assertDontSee("'x&#039;;PRUEBA=1;&#039;'", false);
+        $response->assertSee("'x\\u0027;PRUEBA=1;\\u0027'", false);
+    }
 }

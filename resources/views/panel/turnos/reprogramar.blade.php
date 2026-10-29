@@ -1,5 +1,5 @@
 <x-layouts.panel :titulo="'Reprogramar turno de ' . $turno->paciente->nombre . ' ' . $turno->paciente->apellido">
-    <div class="max-w-3xl space-y-6" x-data="{ horaSeleccionada: '{{ old('hora', '') }}' }">
+    <div class="max-w-3xl space-y-6" x-data="{ horaSeleccionada: @js(old('hora', '')) }">
         <!-- Encabezado -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>

@@ -248,4 +248,19 @@ class ReservarTurnoTest extends TestCase
             ->assertOk()
             ->assertSee('Agenda completa');
     }
+
+    public function test_escapa_correctamente_hora_en_old_input_evitando_inyeccion_js(): void
+    {
+        $response = $this->actingAs($this->paciente)
+            ->withSession(['_old_input' => ['hora' => "x';PRUEBA=1;'"]])
+            ->get('/turnos/nuevo?'.http_build_query([
+                'profesional' => $this->profesional->id,
+                'servicio' => $this->servicio30->id,
+                'fecha' => '2026-10-19',
+            ]));
+
+        $response->assertOk();
+        $response->assertDontSee("'x&#039;;PRUEBA=1;&#039;'", false);
+        $response->assertSee("'x\\u0027;PRUEBA=1;\\u0027'", false);
+    }
 }
