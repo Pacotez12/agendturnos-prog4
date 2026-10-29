@@ -10,6 +10,7 @@ use App\Support\Navegacion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -17,6 +18,8 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
+    private const HASH_RELLENO = '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
+
     /**
      * Display the login view.
      */
@@ -43,6 +46,10 @@ class LoginController extends Controller
         if (! Auth::attemptWhen($request->only('email', 'password'),
             fn (User $user) => $user->rol !== RolUsuario::Profesional || ! $user->profesional()->where('activo', false)->exists(),
             $request->boolean('remember'))) {
+            if (Auth::getLastAttempted() === null) {
+                Hash::check($request->input('password'), self::HASH_RELLENO);
+            }
+
             RateLimiter::hit($throttleKey);
 
             throw ValidationException::withMessages([

@@ -5,6 +5,8 @@ namespace Tests\Feature\Api;
 use App\Models\Paciente;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
@@ -12,6 +14,13 @@ use Tests\TestCase;
 class TokenApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+    }
 
     public function test_crear_token_con_credenciales_validas(): void
     {
@@ -199,5 +208,79 @@ class TokenApiTest extends TestCase
             ->getJson('/api/v1/mis-turnos');
 
         $response->assertStatus(401);
+    }
+
+    public function test_crear_token_y_restablecer_contrasena_bloquean_fila_de_usuario_y_reverifican_hash(): void
+    {
+        $user = User::factory()->paciente()->create([
+            'email' => 'paciente@test.com',
+            'password' => Hash::make('clave-anterior-123'),
+        ]);
+
+        // Simulamos que entre la lectura inicial por email y el lockForUpdate de la transacción
+        // otro proceso de restablecimiento de contraseña actualiza el hash en la base de datos.
+        $actualizadoEnCarrera = false;
+        User::retrieved(function (User $retrieved) use ($user, &$actualizadoEnCarrera): void {
+            if (! $actualizadoEnCarrera && $retrieved->id === $user->id) {
+                $actualizadoEnCarrera = true;
+                DB::table('users')
+                    ->where('id', $user->id)
+                    ->update(['password' => Hash::make('nueva-clave-segura')]);
+            }
+        });
+
+        DB::enableQueryLog();
+
+        $response = $this->postJson('/api/v1/token', [
+            'email' => 'paciente@test.com',
+            'password' => 'clave-anterior-123',
+            'nombre_dispositivo' => 'AppMovil',
+        ]);
+
+        $queriesToken = array_column(DB::getQueryLog(), 'query');
+        DB::flushQueryLog();
+
+        $response->assertStatus(422);
+        $this->assertDatabaseEmpty('personal_access_tokens');
+        $this->assertTrue(
+            collect($queriesToken)->contains(fn (string $sql) => str_contains(strtolower($sql), 'from "users"') && str_contains(strtolower($sql), 'for update')),
+            'crearToken debe tomar lockForUpdate sobre users.'
+        );
+
+        // Ahora verificamos que el restablecimiento de contraseña también toma lockForUpdate sobre users.
+        $resetToken = Password::broker()->createToken($user);
+
+        $this->post(route('password.update'), [
+            'token' => $resetToken,
+            'email' => 'paciente@test.com',
+            'password' => 'otra-clave-segura-456',
+            'password_confirmation' => 'otra-clave-segura-456',
+        ])->assertRedirect(route('login'));
+
+        $queriesReset = array_column(DB::getQueryLog(), 'query');
+        DB::disableQueryLog();
+
+        $this->assertTrue(
+            collect($queriesReset)->contains(fn (string $sql) => str_contains(strtolower($sql), 'from "users"') && str_contains(strtolower($sql), 'for update')),
+            'NewPasswordController::store debe tomar lockForUpdate sobre users.'
+        );
+    }
+
+    public function test_crear_token_con_correo_inexistente_ejecuta_verificacion_de_hash(): void
+    {
+        Hash::partialMock()
+            ->shouldReceive('check')
+            ->once()
+            ->withArgs(fn (string $plain, string $hashed) => $plain === 'clave-cualquiera' && str_starts_with($hashed, '$2y$'))
+            ->andReturn(false);
+
+        $response = $this->postJson('/api/v1/token', [
+            'email' => 'inexistente@test.com',
+            'password' => 'clave-cualquiera',
+            'nombre_dispositivo' => 'AppMovil',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['email']);
     }
 }

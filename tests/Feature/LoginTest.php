@@ -4,11 +4,20 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+    }
 
     public function test_pantalla_login_muestra_inicia_sesion(): void
     {
@@ -159,5 +168,22 @@ class LoginTest extends TestCase
         $content = file_get_contents(base_path('.env.example'));
 
         $this->assertStringContainsString('SESSION_DRIVER=redis', $content);
+    }
+
+    public function test_login_con_correo_inexistente_ejecuta_verificacion_de_hash(): void
+    {
+        Hash::partialMock()
+            ->shouldReceive('check')
+            ->once()
+            ->withArgs(fn (string $plain, string $hashed) => $plain === 'incorrecto123' && str_starts_with($hashed, '$2y$'))
+            ->andReturn(false);
+
+        $response = $this->post('/login', [
+            'email' => 'inexistente@example.com',
+            'password' => 'incorrecto123',
+        ]);
+
+        $response->assertSessionHasErrors(['email' => 'El correo o la contraseña no son correctos.']);
+        $this->assertGuest();
     }
 }

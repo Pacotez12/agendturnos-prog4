@@ -15,6 +15,8 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    private const HASH_RELLENO = '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
+
     /**
      * Crear token de acceso personal.
      *
@@ -26,13 +28,23 @@ class AuthController extends Controller
     {
         $user = User::where('email', strtolower(trim($request->input('email'))))->first();
 
-        if (! $user || ! Hash::check($request->input('password'), $user->password)) {
+        if (! $user) {
+            Hash::check($request->input('password'), self::HASH_RELLENO);
+
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales proporcionadas son incorrectas.'],
             ]);
         }
 
         $token = DB::transaction(function () use ($user, $request) {
+            $user = User::whereKey($user->id)->lockForUpdate()->first();
+
+            if (! $user || ! Hash::check($request->input('password'), $user->password)) {
+                throw ValidationException::withMessages([
+                    'email' => ['Las credenciales proporcionadas son incorrectas.'],
+                ]);
+            }
+
             $profesional = $user->rol === RolUsuario::Profesional
                 ? $user->profesional()->lockForUpdate()->first()
                 : null;
