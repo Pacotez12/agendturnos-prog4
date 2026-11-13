@@ -162,6 +162,26 @@ class RestablecerContrasenaTest extends TestCase
         $resSinConfirmar->assertSessionHasErrors('password');
     }
 
+    public function test_reset_con_contrasena_corta_muestra_error_de_validacion_traducido_al_espanol(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'maria@ejemplo.com',
+        ]);
+        $token = Password::broker()->createToken($user);
+
+        $response = $this->post(route('password.update'), [
+            'token' => $token,
+            'email' => 'maria@ejemplo.com',
+            'password' => '123456',
+            'password_confirmation' => '123456',
+        ]);
+
+        $response->assertSessionHasErrors('password');
+        $error = session('errors')->first('password');
+        $this->assertStringNotContainsString('validation.', $error);
+        $this->assertSame('El campo contraseña debe tener al menos 8 caracteres.', $error);
+    }
+
     public function test_pantalla_de_login_muestra_link_olvidaste_tu_contrasena(): void
     {
         $response = $this->get(route('login'));
