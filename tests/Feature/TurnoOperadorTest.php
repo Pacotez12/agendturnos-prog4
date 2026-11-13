@@ -634,4 +634,24 @@ class TurnoOperadorTest extends TestCase
         $response->assertDontSee("'x&#039;;PRUEBA=1;&#039;'", false);
         $response->assertSee("'x\\u0027;PRUEBA=1;\\u0027'", false);
     }
+
+    public function test_buscador_de_pacientes_en_nuevo_turno_alinea_con_input_y_tiene_envio_automatico_alpine(): void
+    {
+        Paciente::factory()->create([
+            'nombre' => 'Laura',
+            'apellido' => 'Gómez',
+            'documento' => '5544332',
+        ]);
+
+        $response = $this->actingAs($this->funcionario)->get(route('panel.turnos.crear'));
+        $response->assertOk();
+        $response->assertSee('flex items-end gap-2', false);
+        $response->assertDontSee('self-start pt-6', false);
+        $response->assertSee('@input.debounce.350ms', false);
+        $response->assertSee('setSelectionRange', false);
+
+        $respBusqueda = $this->actingAs($this->funcionario)->get(route('panel.turnos.crear', ['q' => 'Góm']));
+        $respBusqueda->assertOk();
+        $respBusqueda->assertSee('Laura Gómez');
+    }
 }

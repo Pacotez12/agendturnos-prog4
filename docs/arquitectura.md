@@ -305,6 +305,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-13 | Buscador de pacientes en `/panel/pacientes` y `/panel/turnos/crear`: alineación del botón "Buscar" con el campo de entrada y búsqueda automática con Alpine.js (`debounce` 350 ms a partir de 3 caracteres o al vaciar, recuperando foco y cursor al final tras recargar). |
 | 2026-11-13 | Traducciones de validación en español rioplatense neutro (`lang/es/validation.php`) con atributos `password`, `password_confirmation` y `email`, para evitar claves crudas como `validation.min.string` en formularios sin `messages()` propio (p. ej. restablecimiento de contraseña). |
 | 2026-10-29 | Precios de referencia de los servicios en el seeder (`ServicioSeeder`). |
 | 2026-10-29 | SCRUM-78 (agenda): disponibilidad valida el intervalo completo con fecha y hora, rechaza cruces de medianoche y asigna el consultorio de la franja que contiene todo el turno; reprogramación bloquea profesional y luego turno, recarga y valida estado e inicio actuales para actualizar fechas, historial y notificaciones; creación de bloqueos serializa consulta, confirmación e inserción con reservas y reprogramaciones; el formulario semanal envía intención explícita para guardar sin franjas y conserva el rechazo de entradas malformadas. Regresiones verificadas, incluida concurrencia con dos conexiones PostgreSQL. |

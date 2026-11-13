@@ -25,13 +25,22 @@
 
         <!-- Buscador -->
         <div class="bg-card p-4 rounded-lg border border-line shadow-2xs">
-            <form method="GET" action="{{ route('panel.pacientes') }}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <form
+                method="GET"
+                action="{{ route('panel.pacientes') }}"
+                x-data="{ valor: @js($q ?? '') }"
+                x-init="if (valor.length > 0) { $nextTick(() => { $refs.q.focus(); const len = $refs.q.value.length; $refs.q.setSelectionRange(len, len); }); }"
+                class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3"
+            >
                 <div class="relative flex-1">
                     <x-input
                         name="q"
                         label="Buscar paciente"
                         placeholder="Buscar por apellido, nombre o documento (mínimo 3 letras)..."
                         :value="$q"
+                        x-ref="q"
+                        x-model="valor"
+                        @input.debounce.350ms="if (valor.trim().length >= 3 || valor.trim().length === 0) $el.form.submit()"
                         class="w-full"
                     />
                 </div>
