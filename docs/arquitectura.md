@@ -3,7 +3,7 @@
 Sistema web de agendamiento de turnos odontológicos para **Glow Dental Protect**, Asunción, Paraguay.
 
 > Documento vivo: se actualiza a medida que avanza el desarrollo. Cada sección indica su estado: ✅ hecho · 🚧 en curso · ⏳ pendiente.
-> Última actualización: 2026-10-29.
+> Última actualización: 2026-11-13.
 > Diseño de interfaz (colores, layouts y componentes): [`docs/diseno-ui.md`](diseno-ui.md).
 
 ---
@@ -305,6 +305,7 @@ En el Sprint 2 se reasignaron a Marco Brizuela HU-05, HU-07, HU-09 y HU-10 (back
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-13 | Traducciones de validación en español rioplatense neutro (`lang/es/validation.php`) con atributos `password`, `password_confirmation` y `email`, para evitar claves crudas como `validation.min.string` en formularios sin `messages()` propio (p. ej. restablecimiento de contraseña). |
 | 2026-10-29 | Precios de referencia de los servicios en el seeder (`ServicioSeeder`). |
 | 2026-10-29 | SCRUM-78 (agenda): disponibilidad valida el intervalo completo con fecha y hora, rechaza cruces de medianoche y asigna el consultorio de la franja que contiene todo el turno; reprogramación bloquea profesional y luego turno, recarga y valida estado e inicio actuales para actualizar fechas, historial y notificaciones; creación de bloqueos serializa consulta, confirmación e inserción con reservas y reprogramaciones; el formulario semanal envía intención explícita para guardar sin franjas y conserva el rechazo de entradas malformadas. Regresiones verificadas, incluida concurrencia con dos conexiones PostgreSQL. |
 | 2026-10-29 | Endurecimiento de autenticación y registro (SCRUM-78 (autenticación)): validación diferida de unicidad y mensajes neutros en `RegistroRequest` y `GuardarFamiliarRequest` para no revelar existencia de documentos ni correos; serialización con `lockForUpdate` sobre `users` y reverificación de contraseña al emitir tokens de API en `AuthController::crearToken` y al restablecer contraseña en `NewPasswordController::store`; y verificación contra hash bcrypt de relleno ante correos inexistentes en login web y API para igualar tiempos de respuesta. |
