@@ -79,27 +79,36 @@
                 </form>
             @else
                 <div class="space-y-4">
-                    <form method="GET" action="{{ route('panel.turnos.crear') }}">
+                    <form
+                        method="GET"
+                        action="{{ route('panel.turnos.crear') }}"
+                        x-data="{ valor: @js($q ?? '') }"
+                        x-init="if (valor.length > 0) { $nextTick(() => { $refs.q.focus(); const len = $refs.q.value.length; $refs.q.setSelectionRange(len, len); }); }"
+                    >
                         @if (request('profesional')) <input type="hidden" name="profesional" value="{{ request('profesional') }}"> @endif
                         @if (request('servicio')) <input type="hidden" name="servicio" value="{{ request('servicio') }}"> @endif
                         @if (request('fecha')) <input type="hidden" name="fecha" value="{{ request('fecha') }}"> @endif
 
-                        <div class="flex gap-2">
+                        <div class="flex items-end gap-2">
                             <div class="flex-1">
                                 <x-input
                                     name="q"
                                     label="Buscar paciente"
                                     placeholder="Nombre, apellido o cédula..."
                                     :value="$q"
-                                    help="Ingresá al menos 3 caracteres."
+                                    aria-describedby="q-help"
+                                    x-ref="q"
+                                    x-model="valor"
+                                    @input.debounce.350ms="if (valor.trim().length >= 3 || valor.trim().length === 0) $el.form.submit()"
                                 />
                             </div>
-                            <div class="self-start pt-6">
+                            <div>
                                 <x-button type="submit" variant="secondary">
                                     Buscar
                                 </x-button>
                             </div>
                         </div>
+                        <p id="q-help" class="mt-1 text-xs text-ink-500">Ingresá al menos 3 caracteres.</p>
                     </form>
 
                     @if (mb_strlen($q) >= 3)

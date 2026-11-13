@@ -332,4 +332,29 @@ class PanelPacientesTest extends TestCase
         $respCrear->assertSee('Marta Sosa');
         $respCrear->assertSee('3344556');
     }
+
+    public function test_buscador_de_pacientes_alinea_con_input_y_tiene_envio_automatico_alpine(): void
+    {
+        Paciente::factory()->create([
+            'nombre' => 'Ana',
+            'apellido' => 'Álvarez',
+            'documento' => '1111111',
+        ]);
+        Paciente::factory()->create([
+            'nombre' => 'Bernardo',
+            'apellido' => 'Benítez',
+            'documento' => '2222222',
+        ]);
+
+        $response = $this->actingAs($this->funcionario)->get(route('panel.pacientes'));
+        $response->assertOk();
+        $response->assertSee('sm:items-end', false);
+        $response->assertSee('@input.debounce.350ms', false);
+        $response->assertSee('setSelectionRange', false);
+
+        $respBusqueda = $this->actingAs($this->funcionario)->get(route('panel.pacientes', ['q' => 'alv']));
+        $respBusqueda->assertOk();
+        $respBusqueda->assertSee('Álvarez');
+        $respBusqueda->assertDontSee('Benítez');
+    }
 }
